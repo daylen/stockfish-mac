@@ -34,6 +34,7 @@
 		770506D8187CE52D00BA4635 /* square.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506C6187CE52D00BA4635 /* square.cpp */; };
 		770506D9187CE52D00BA4635 /* TAGS in Resources */ = {isa = PBXBuildFile; fileRef = 770506C8187CE52D00BA4635 /* TAGS */; };
 		770506DA187CE52D00BA4635 /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506CA187CE52D00BA4635 /* value.cpp */; };
+		770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +103,8 @@
 		770506C9187CE52D00BA4635 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		770506CA187CE52D00BA4635 /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = value.cpp; sourceTree = "<group>"; };
 		770506CB187CE52D00BA4635 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = value.h; sourceTree = "<group>"; };
+		770506DE187CF2B100BA4635 /* SFMWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMWindowController.h; sourceTree = "<group>"; };
+		770506DF187CF2B100BA4635 /* SFMWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMWindowController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +174,8 @@
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
 				77050686187CE43400BA4635 /* SFMDocument.xib */,
+				770506DE187CF2B100BA4635 /* SFMWindowController.h */,
+				770506DF187CF2B100BA4635 /* SFMWindowController.m */,
 				77050689187CE43400BA4635 /* MainMenu.xib */,
 				7705068C187CE43400BA4635 /* Images.xcassets */,
 				77050678187CE43300BA4635 /* Supporting Files */,
@@ -356,6 +361,7 @@
 				770506D7187CE52D00BA4635 /* san.cpp in Sources */,
 				770506CE187CE52D00BA4635 /* color.cpp in Sources */,
 				770506D2187CE52D00BA4635 /* move.cpp in Sources */,
+				770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */,
 				770506D3187CE52D00BA4635 /* movegen.cpp in Sources */,
 				770506CD187CE52D00BA4635 /* book.cpp in Sources */,
 				770506DA187CE52D00BA4635 /* value.cpp in Sources */,
@@ -585,6 +591,7 @@
 				770506A4187CE43400BA4635 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		770506A5187CE43400BA4635 /* Build configuration list for PBXNativeTarget "StockfishTests" */ = {
 			isa = XCConfigurationList;
@@ -593,6 +600,7 @@
 				770506A7187CE43400BA4635 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

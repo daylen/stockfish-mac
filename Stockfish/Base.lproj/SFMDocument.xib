@@ -4,7 +4,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5037"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="SFMDocument">
+        <customObject id="-2" userLabel="File's Owner" customClass="SFMWindowController">
             <connections>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
@@ -21,118 +21,24 @@
                 <rect key="frame" x="0.0" y="0.0" width="507" height="413"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView dividerStyle="paneSplitter" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hae-Ca-oPa">
-                        <rect key="frame" x="0.0" y="0.0" width="507" height="413"/>
+                    <stackView orientation="vertical" alignment="centerX" horizontalHuggingPriority="249" verticalHuggingPriority="249" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rbf-Rl-CtL">
+                        <rect key="frame" x="117" y="81" width="273" height="251"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <subviews>
-                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="JRK-C7-rVU">
-                                <rect key="frame" x="0.0" y="0.0" width="165" height="413"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <clipView key="contentView" id="gmN-kG-v4E">
-                                    <rect key="frame" x="1" y="17" width="163" height="395"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="RaG-qf-iKP" id="YJa-2N-Wa1">
-                                            <rect key="frame" x="0.0" y="0.0" width="163" height="395"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <size key="intercellSpacing" width="3" height="2"/>
-                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                            <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
-                                            <tableColumns>
-                                                <tableColumn width="116" minWidth="40" maxWidth="1000" id="MHA-ZL-J0n">
-                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
-                                                        <font key="font" metaFont="smallSystem"/>
-                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
-                                                    </tableHeaderCell>
-                                                    <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="Ppe-WP-KgB">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
-                                                </tableColumn>
-                                                <tableColumn width="41" minWidth="40" maxWidth="1000" id="knX-BW-SI9">
-                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left">
-                                                        <font key="font" metaFont="smallSystem"/>
-                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
-                                                    </tableHeaderCell>
-                                                    <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="wuC-k6-Zwh">
-                                                        <font key="font" metaFont="system"/>
-                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                    </textFieldCell>
-                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
-                                                </tableColumn>
-                                            </tableColumns>
-                                        </tableView>
-                                    </subviews>
-                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </clipView>
-                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nKI-vt-nYy">
-                                    <rect key="frame" x="1" y="394" width="161" height="16"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </scroller>
-                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="37" horizontal="NO" id="FWK-vH-Ven">
-                                    <rect key="frame" x="-15" y="17" width="16" height="0.0"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </scroller>
-                                <tableHeaderView key="headerView" id="RaG-qf-iKP">
-                                    <rect key="frame" x="0.0" y="0.0" width="163" height="17"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableHeaderView>
-                            </scrollView>
-                            <customView fixedFrame="YES" id="j8z-qT-aWD">
-                                <rect key="frame" x="175" y="0.0" width="138" height="413"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                            </customView>
-                            <splitView fixedFrame="YES" dividerStyle="paneSplitter" id="6tA-e3-TMA">
-                                <rect key="frame" x="323" y="0.0" width="184" height="413"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <subviews>
-                                    <customView fixedFrame="YES" id="Qfv-Rv-gB4">
-                                        <rect key="frame" x="0.0" y="0.0" width="184" height="197"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                    </customView>
-                                    <customView fixedFrame="YES" id="CfR-a3-3vm">
-                                        <rect key="frame" x="0.0" y="207" width="184" height="206"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                    </customView>
-                                </subviews>
-                                <holdingPriorities>
-                                    <real value="250"/>
-                                    <real value="250"/>
-                                </holdingPriorities>
-                            </splitView>
-                        </subviews>
-                        <holdingPriorities>
-                            <real value="250"/>
-                            <real value="250"/>
-                            <real value="250"/>
-                        </holdingPriorities>
-                    </splitView>
+                    </stackView>
                 </subviews>
-                <constraints>
-                    <constraint firstItem="Hae-Ca-oPa" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" id="5nB-xY-TB5"/>
-                    <constraint firstAttribute="bottom" secondItem="Hae-Ca-oPa" secondAttribute="bottom" id="LL0-BF-clo"/>
-                    <constraint firstAttribute="trailing" secondItem="Hae-Ca-oPa" secondAttribute="trailing" id="Rdn-ug-Sfc"/>
-                    <constraint firstItem="Hae-Ca-oPa" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="olf-E2-Ji2"/>
-                </constraints>
             </view>
             <toolbar key="toolbar" implicitIdentifier="27B8AA21-2840-4AAA-B330-9F3D8217836C" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="Bvb-HD-m1w">
                 <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="NSToolbarShowColorsItem" id="ji7-lF-zAM"/>
-                    <toolbarItem implicitItemIdentifier="NSToolbarShowFontsItem" id="osA-Kx-tRy"/>
-                    <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="ApY-BQ-USd"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="A11-gZ-2uC"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="ipJ-8N-tAF"/>
+                    <toolbarItem implicitItemIdentifier="C46B8810-A992-4E23-9245-C463DBF5C354" label="Sidebar" paletteLabel="Sidebar" tag="-1" id="c54-rA-1hf">
+                        <connections>
+                            <action selector="toggleSidebarVisibility:" target="-2" id="B6J-5I-FAH"/>
+                        </connections>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
-                    <toolbarItem reference="ji7-lF-zAM"/>
-                    <toolbarItem reference="osA-Kx-tRy"/>
-                    <toolbarItem reference="ipJ-8N-tAF"/>
-                    <toolbarItem reference="ApY-BQ-USd"/>
+                    <toolbarItem reference="c54-rA-1hf"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>

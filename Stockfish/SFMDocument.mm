@@ -7,6 +7,11 @@
 //
 
 #import "SFMDocument.h"
+#import "SFMWindowController.h"
+
+@interface SFMDocument()
+
+@end
 
 @implementation SFMDocument
 
@@ -17,6 +22,12 @@
         // Add your subclass-specific initialization here.
     }
     return self;
+}
+
+- (void)makeWindowControllers
+{
+    SFMWindowController *windowController = [[SFMWindowController alloc] initWithWindowNibName:self.windowNibName];
+    [self addWindowController:windowController];
 }
 
 - (NSString *)windowNibName
