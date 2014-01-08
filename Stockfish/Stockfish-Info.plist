@@ -14,13 +14,17 @@
 			<key>CFBundleTypeIconFile</key>
 			<string></string>
 			<key>CFBundleTypeName</key>
-			<string>DocumentType</string>
+			<string>Portable Game Notation</string>
 			<key>CFBundleTypeOSTypes</key>
 			<array>
 				<string>????</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.chess.pgn</string>
+			</array>
 			<key>NSDocumentClass</key>
 			<string>SFMDocument</string>
 		</dict>
@@ -53,5 +57,21 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeDescription</key>
+			<string>Portable Game Notation</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.apple.chess.pgn</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>pgn</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

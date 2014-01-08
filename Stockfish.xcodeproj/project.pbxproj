@@ -34,7 +34,11 @@
 		770506D8187CE52D00BA4635 /* square.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506C6187CE52D00BA4635 /* square.cpp */; };
 		770506D9187CE52D00BA4635 /* TAGS in Resources */ = {isa = PBXBuildFile; fileRef = 770506C8187CE52D00BA4635 /* TAGS */; };
 		770506DA187CE52D00BA4635 /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506CA187CE52D00BA4635 /* value.cpp */; };
-		770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.m */; };
+		770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.mm */; };
+		77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.mm */; };
+		77924AED187DED010019C56E /* SFMChessGame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.mm */; };
+		77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEF187DED6E0019C56E /* SFMChessMove.mm */; };
+		77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AF2187DFA040019C56E /* SFMPlayer.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,7 +108,15 @@
 		770506CA187CE52D00BA4635 /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = value.cpp; sourceTree = "<group>"; };
 		770506CB187CE52D00BA4635 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = value.h; sourceTree = "<group>"; };
 		770506DE187CF2B100BA4635 /* SFMWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMWindowController.h; sourceTree = "<group>"; };
-		770506DF187CF2B100BA4635 /* SFMWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMWindowController.m; sourceTree = "<group>"; };
+		770506DF187CF2B100BA4635 /* SFMWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMWindowController.mm; sourceTree = "<group>"; };
+		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
+		77924AE9187DECEB0019C56E /* SFMPGNFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPGNFile.mm; path = Stockfish/SFMPGNFile.mm; sourceTree = "<group>"; };
+		77924AEB187DED010019C56E /* SFMChessGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMChessGame.h; path = Stockfish/SFMChessGame.h; sourceTree = "<group>"; };
+		77924AEC187DED010019C56E /* SFMChessGame.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMChessGame.mm; path = Stockfish/SFMChessGame.mm; sourceTree = "<group>"; };
+		77924AEE187DED6E0019C56E /* SFMChessMove.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMChessMove.h; path = Stockfish/SFMChessMove.h; sourceTree = "<group>"; };
+		77924AEF187DED6E0019C56E /* SFMChessMove.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMChessMove.mm; path = Stockfish/SFMChessMove.mm; sourceTree = "<group>"; };
+		77924AF1187DFA040019C56E /* SFMPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPlayer.h; path = Stockfish/SFMPlayer.h; sourceTree = "<group>"; };
+		77924AF2187DFA040019C56E /* SFMPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPlayer.mm; path = Stockfish/SFMPlayer.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +143,14 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
+				77924AF1187DFA040019C56E /* SFMPlayer.h */,
+				77924AF2187DFA040019C56E /* SFMPlayer.mm */,
+				77924AEE187DED6E0019C56E /* SFMChessMove.h */,
+				77924AEF187DED6E0019C56E /* SFMChessMove.mm */,
+				77924AE8187DECEB0019C56E /* SFMPGNFile.h */,
+				77924AE9187DECEB0019C56E /* SFMPGNFile.mm */,
+				77924AEB187DED010019C56E /* SFMChessGame.h */,
+				77924AEC187DED010019C56E /* SFMChessGame.mm */,
 				770506A8187CE52D00BA4635 /* Chess */,
 				77050677187CE43300BA4635 /* Stockfish */,
 				77050698187CE43400BA4635 /* StockfishTests */,
@@ -175,7 +195,7 @@
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
 				77050686187CE43400BA4635 /* SFMDocument.xib */,
 				770506DE187CF2B100BA4635 /* SFMWindowController.h */,
-				770506DF187CF2B100BA4635 /* SFMWindowController.m */,
+				770506DF187CF2B100BA4635 /* SFMWindowController.mm */,
 				77050689187CE43400BA4635 /* MainMenu.xib */,
 				7705068C187CE43400BA4635 /* Images.xcassets */,
 				77050678187CE43300BA4635 /* Supporting Files */,
@@ -361,15 +381,19 @@
 				770506D7187CE52D00BA4635 /* san.cpp in Sources */,
 				770506CE187CE52D00BA4635 /* color.cpp in Sources */,
 				770506D2187CE52D00BA4635 /* move.cpp in Sources */,
-				770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */,
+				77924AED187DED010019C56E /* SFMChessGame.mm in Sources */,
+				770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */,
 				770506D3187CE52D00BA4635 /* movegen.cpp in Sources */,
 				770506CD187CE52D00BA4635 /* book.cpp in Sources */,
 				770506DA187CE52D00BA4635 /* value.cpp in Sources */,
 				770506D8187CE52D00BA4635 /* square.cpp in Sources */,
+				77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */,
+				77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */,
 				7705067E187CE43300BA4635 /* main.m in Sources */,
 				770506CF187CE52D00BA4635 /* direction.cpp in Sources */,
 				770506D1187CE52D00BA4635 /* misc.cpp in Sources */,
 				770506D5187CE52D00BA4635 /* piece.cpp in Sources */,
+				77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */,
 				770506D4187CE52D00BA4635 /* movepick.cpp in Sources */,
 				77050685187CE43400BA4635 /* SFMDocument.mm in Sources */,
 				770506CC187CE52D00BA4635 /* bitboard.cpp in Sources */,
