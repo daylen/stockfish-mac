@@ -1,0 +1,748 @@
+
+bitbase.h,34
+#define BITBASE_H_INCLUDED21,776
+
+bitboard.h,1610
+#define BITBOARD_H_INCLUDED21,777
+#define USE_COMPACT_ROOK_ATTACKS28,831
+#define USE_FOLDED_BITSCAN30,892
+#define BITCOUNT_LOOP34,974
+typedef uint64_t Bitboard;53,1147
+inline Bitboard clear_mask_bb(136,3419
+inline Bitboard bit_is_set(141,3519
+inline void set_bit(145,3602
+inline void clear_bit(149,3674
+inline Bitboard rank_bb(158,3920
+inline Bitboard rank_bb(162,3977
+inline Bitboard file_bb(166,4050
+inline Bitboard file_bb(170,4107
+inline Bitboard neighboring_files_bb(178,4320
+inline Bitboard neighboring_files_bb(182,4402
+inline Bitboard this_and_neighboring_files_bb(191,4664
+inline Bitboard this_and_neighboring_files_bb(195,4762
+inline Bitboard relative_rank_bb(206,5204
+inline Bitboard in_front_bb(217,5665
+inline Bitboard in_front_bb(221,5741
+inline Bitboard ray_bb(229,5951
+inline Bitboard file_attacks_bb(241,6367
+inline Bitboard rank_attacks_bb(247,6586
+inline Bitboard rook_attacks_bb(252,6756
+inline Bitboard rook_attacks_bb(258,6926
+inline Bitboard rook_attacks_bb(268,7223
+inline Bitboard bishop_attacks_bb(277,7433
+inline Bitboard bishop_attacks_bb(287,7762
+inline Bitboard queen_attacks_bb(294,7972
+inline Bitboard squares_between(304,8398
+inline Bitboard squares_in_front_of(315,8798
+inline Bitboard squares_behind(323,9033
+inline Bitboard passed_pawn_mask(332,9334
+inline Bitboard outpost_mask(341,9616
+inline Bitboard isolated_pawn_mask(349,9853
+inline int count_1s(358,10031
+inline int count_1s_max_15(364,10123
+inline int count_1s(370,10222
+inline int count_1s_max_15(382,10629
+inline int count_1s(394,10978
+inline int count_1s_max_15(402,11223
+
+book.h,77
+#define BOOK_H_INCLUDED28,989
+struct BookEntry 46,1141
+class Book 54,1245
+
+color.h,140
+#define COLOR_H_INCLUDED21,774
+enum Color 35,885
+  WHITE,36,898
+  BLACK,37,907
+  COLOR_NONE38,916
+inline Color opposite_color(49,1106
+
+depth.h,239
+#define DEPTH_H_INCLUDED21,774
+enum Depth 29,841
+  DEPTH_ZERO 30,854
+  DEPTH_MAX 31,872
+const Depth OnePly 42,1046
+inline Depth operator*operator56,1615
+inline Depth operator*operator57,1685
+inline void operator*operator58,1755
+
+direction.h,700
+#define DIRECTION_H_INCLUDED21,778
+enum Direction 36,914
+  DIR_E 37,931
+  DIR_E = 0, DIR_N 37,931
+  DIR_E = 0, DIR_N = 1, DIR_NE 37,931
+  DIR_E = 0, DIR_N = 1, DIR_NE = 2, DIR_NW 37,931
+  DIR_E = 0, DIR_N = 1, DIR_NE = 2, DIR_NW = 3, DIR_NONE 37,931
+enum SignedDirection 40,996
+  SIGNED_DIR_E 41,1019
+  SIGNED_DIR_E = 0, SIGNED_DIR_W 41,1019
+  SIGNED_DIR_N 42,1057
+  SIGNED_DIR_N = 2, SIGNED_DIR_S 42,1057
+  SIGNED_DIR_NE 43,1095
+  SIGNED_DIR_NE = 4, SIGNED_DIR_SW 43,1095
+  SIGNED_DIR_NW 44,1135
+  SIGNED_DIR_NW = 6, SIGNED_DIR_SE 44,1135
+  SIGNED_DIR_NONE 45,1175
+inline Direction direction_between_squares(67,1511
+inline SignedDirection signed_direction_between_squares(71,1625
+
+lock.h,702
+#define LOCK_H_INCLUDED21,773
+typedef volatile int Lock;36,1040
+static inline void UnlockX86(50,1537
+#  define lock_init(56,1666
+#  define lock_grab(57,1703
+#  define lock_release(58,1737
+#  define lock_destroy(59,1776
+typedef OSSpinLock Lock;67,1867
+#  define lock_init(69,1893
+#  define lock_grab(70,1930
+#  define lock_release(71,1971
+#  define lock_destroy(72,2017
+typedef pthread_mutex_t Lock;79,2095
+#  define lock_init(81,2126
+#  define lock_grab(82,2177
+#  define lock_release(83,2222
+#  define lock_destroy(84,2272
+typedef CRITICAL_SECTION Lock;92,2357
+#  define lock_init(93,2388
+#  define lock_grab(94,2443
+#  define lock_release(95,2490
+#  define lock_destroy(96,2540
+
+mersenne.h,35
+#define MERSENNE_H_INCLUDED21,777
+
+misc.h,73
+#define MISC_H_INCLUDED21,773
+#define Min(47,1070
+#define Max(48,1113
+
+move.h,573
+#define MOVE_H_INCLUDED21,773
+enum Move 41,960
+  MOVE_NONE 42,972
+  MOVE_NULL 43,989
+  MOVE_MAX 44,1007
+  MOVE_MAX = 0xFFFFFFxFFFFFF44,1007
+struct MoveStack 48,1034
+inline Square move_from(58,1117
+inline Square move_to(62,1192
+inline PieceType move_promotion(66,1253
+inline bool move_is_ep(70,1338
+inline bool move_is_castle(74,1409
+inline bool move_is_short_castle(78,1484
+inline bool move_is_long_castle(82,1589
+inline Move make_promotion_move(86,1693
+inline Move make_move(90,1843
+inline Move make_castle_move(94,1937
+inline Move make_ep_move(98,2050
+
+movegen.h,34
+#define MOVEGEN_H_INCLUDED21,776
+
+movepick.h,92
+#define MOVEPICK_H_INCLUDED21,776
+class MovePicker 45,1479
+  int number_of_moves(52,1667
+
+phase.h,99
+#define PHASE_H_INCLUDED21,774
+enum Phase 29,841
+  PHASE_ENDGAME 30,854
+  PHASE_MIDGAME 31,875
+
+piece.h,1469
+#define PIECE_H_INCLUDED21,774
+enum PieceType 37,924
+  NO_PIECE_TYPE 38,941
+  PAWN 39,962
+  PAWN = 1, KNIGHT 39,962
+  PAWN = 1, KNIGHT = 2, BISHOP 39,962
+  PAWN = 1, KNIGHT = 2, BISHOP = 3, ROOK 39,962
+  PAWN = 1, KNIGHT = 2, BISHOP = 3, ROOK = 4, QUEEN 39,962
+  PAWN = 1, KNIGHT = 2, BISHOP = 3, ROOK = 4, QUEEN = 5, KING 39,962
+enum Piece 42,1032
+  NO_PIECE 43,1045
+  NO_PIECE = 0, WP 43,1045
+  NO_PIECE = 0, WP = 1, WN 43,1045
+  NO_PIECE = 0, WP = 1, WN = 2, WB 43,1045
+  NO_PIECE = 0, WP = 1, WN = 2, WB = 3, WR 43,1045
+  NO_PIECE = 0, WP = 1, WN = 2, WB = 3, WR = 4, WQ 43,1045
+  NO_PIECE = 0, WP = 1, WN = 2, WB = 3, WR = 4, WQ = 5, WK 43,1045
+  BP 44,1109
+  BP = 9, BN 44,1109
+  BP = 9, BN = 10, BB 44,1109
+  BP = 9, BN = 10, BB = 11, BR 44,1109
+  BP = 9, BN = 10, BB = 11, BR = 12, BQ 44,1109
+  BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK 44,1109
+  EMPTY 45,1164
+  EMPTY = 16, OUTSIDE 45,1164
+const PieceType PieceTypeMin 53,1236
+const PieceType PieceTypeMax 54,1273
+inline PieceType type_of_piece(74,2045
+inline Color color_of_piece(78,2123
+inline Piece piece_of_color_and_type(82,2194
+inline Piece pawn_of_color(86,2300
+inline Piece knight_of_color(90,2384
+inline Piece bishop_of_color(94,2472
+inline Piece rook_of_color(98,2560
+inline Piece queen_of_color(102,2644
+inline Piece king_of_color(106,2730
+inline int piece_is_slider(110,2814
+inline int piece_type_is_slider(114,2886
+inline SquareDelta pawn_push(118,2969
+
+position.h,5070
+#define POSITION_H_INCLUDED21,777
+enum CastleRights 62,1597
+  NO_CASTLES CastleRights::NO_CASTLES63,1617
+  WHITE_OO CastleRights::WHITE_OO64,1635
+  WHITE_OO = 1, BLACK_OO CastleRights::BLACK_OO64,1635
+  WHITE_OOO CastleRights::WHITE_OOO65,1665
+  WHITE_OOO = 4, BLACK_OOO CastleRights::BLACK_OOO65,1665
+  ALL_CASTLES CastleRights::ALL_CASTLES66,1697
+struct UndoInfo 76,2090
+enum DrawReason 90,2304
+  NOT_DRAW DrawReason::NOT_DRAW91,2322
+  DRAW_MATERIAL DrawReason::DRAW_MATERIAL92,2338
+  DRAW_50_MOVES DrawReason::DRAW_50_MOVES93,2359
+  DRAW_REPETITION DrawReason::DRAW_REPETITION94,2380
+  DRAW_STALEMATE DrawReason::DRAW_STALEMATE95,2403
+class Position 122,3563
+inline Piece Position::piece_on(389,11730
+inline Color Position::color_of_piece_on(393,11802
+inline PieceType Position::type_of_piece_on(397,11908
+inline bool Position::square_is_empty(401,12016
+inline bool Position::square_is_occupied(405,12112
+inline Value Position::midgame_value_of_piece_on(409,12210
+inline Value Position::endgame_value_of_piece_on(413,12329
+inline Color Position::side_to_move(417,12448
+inline Bitboard Position::occupied_squares(421,12518
+inline Bitboard Position::empty_squares(425,12596
+inline Bitboard Position::pieces_of_color(429,12687
+inline Bitboard Position::pieces_of_type(433,12772
+inline Bitboard Position::pieces_of_color_and_type(437,12861
+inline Bitboard Position::pawns(442,13010
+inline Bitboard Position::knights(446,13092
+inline Bitboard Position::bishops(450,13178
+inline Bitboard Position::rooks(454,13264
+inline Bitboard Position::queens(458,13346
+inline Bitboard Position::kings(462,13430
+inline Bitboard Position::rooks_and_queens(466,13512
+inline Bitboard Position::bishops_and_queens(470,13609
+inline Bitboard Position::sliders(474,13710
+inline Bitboard Position::pawns(478,13816
+inline Bitboard Position::knights(482,13918
+inline Bitboard Position::bishops(486,14024
+inline Bitboard Position::rooks(490,14130
+inline Bitboard Position::queens(494,14232
+inline Bitboard Position::kings(498,14336
+inline Bitboard Position::rooks_and_queens(502,14438
+inline Bitboard Position::bishops_and_queens(506,14563
+inline Bitboard Position::sliders_of_color(510,14692
+inline int Position::piece_count(514,14808
+inline int Position::pawn_count(518,14903
+inline int Position::knight_count(522,14992
+inline int Position::bishop_count(526,15085
+inline int Position::rook_count(530,15178
+inline int Position::queen_count(534,15267
+inline Square Position::piece_list(538,15358
+inline Square Position::pawn_list(542,15472
+inline Square Position::knight_list(546,15580
+inline Square Position::bishop_list(550,15692
+inline Square Position::rook_list(554,15804
+inline Square Position::queen_list(558,15912
+inline Square Position::ep_square(562,16022
+inline Square Position::king_square(566,16088
+inline bool Position::can_castle_kingside(570,16168
+inline bool Position::can_castle_queenside(574,16272
+inline bool Position::can_castle(578,16379
+inline Square Position::initial_kr_square(582,16501
+inline Square Position::initial_qr_square(586,16628
+inline Bitboard Position::pawn_attacks(590,16755
+inline Bitboard Position::white_pawn_attacks(594,16868
+inline Bitboard Position::black_pawn_attacks(598,16973
+inline Bitboard Position::knight_attacks(602,17078
+inline Bitboard Position::rook_attacks(606,17174
+inline Bitboard Position::bishop_attacks(610,17289
+inline Bitboard Position::queen_attacks(614,17408
+inline Bitboard Position::king_attacks(618,17527
+inline Bitboard Position::checkers(622,17619
+inline bool Position::is_check(626,17688
+inline bool Position::white_pawn_attacks_square(630,17775
+inline bool Position::black_pawn_attacks_square(634,17907
+inline bool Position::knight_attacks_square(638,18039
+inline bool Position::bishop_attacks_square(642,18163
+inline bool Position::rook_attacks_square(646,18287
+inline bool Position::queen_attacks_square(650,18407
+inline bool Position::king_attacks_square(654,18529
+inline bool Position::pawn_is_passed(658,18649
+inline bool Position::pawn_is_isolated(662,18785
+inline bool Position::pawn_is_doubled(666,18908
+inline bool Position::file_is_open(670,19024
+inline bool Position::file_is_half_open(674,19118
+inline bool Position::square_is_weak(678,19227
+inline Key Position::get_key(682,19359
+inline Key Position::get_pawn_key(686,19415
+inline Key Position::get_material_key(690,19480
+inline Value Position::mg_pst(694,19553
+inline Value Position::eg_pst(698,19691
+inline Value Position::mg_value(702,19829
+inline Value Position::eg_value(706,19892
+inline Value Position::non_pawn_material(710,19955
+inline Phase Position::game_phase(714,20040
+inline bool Position::move_is_pawn_push_to_7th(733,20759
+inline bool Position::move_is_passed_pawn_push(740,20964
+inline bool Position::move_was_passed_pawn_push(747,21170
+inline int Position::rule_50_counter(754,21391
+inline bool Position::opposite_colored_bishops(758,21458
+inline bool Position::has_pawn_on_7th(765,21695
+inline Move Position::last_move(770,21809
+
+psqtab.h,72
+#define PSQTAB_H_INCLUDED21,775
+static const int EgPST[EgPST100,3235
+
+san.h,30
+#define SAN_H_INCLUDED21,772
+
+scale.h,211
+#define SCALE_H_INCLUDED21,774
+enum ScaleFactor 35,886
+  SCALE_FACTOR_ZERO 36,905
+  SCALE_FACTOR_NORMAL 37,930
+  SCALE_FACTOR_MAX 38,958
+  SCALE_FACTOR_NONE 39,984
+inline Value apply_scale_factor(47,1048
+
+square.h,5079
+#define SQUARE_H_INCLUDED21,775
+enum Square 39,944
+  SQ_A1,40,958
+  SQ_A1, SQ_B1,40,958
+  SQ_A1, SQ_B1, SQ_C1,40,958
+  SQ_A1, SQ_B1, SQ_C1, SQ_D1,40,958
+  SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1,40,958
+  SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1,40,958
+  SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1, SQ_G1,40,958
+  SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1, SQ_G1, SQ_H1,40,958
+  SQ_A2,41,1016
+  SQ_A2, SQ_B2,41,1016
+  SQ_A2, SQ_B2, SQ_C2,41,1016
+  SQ_A2, SQ_B2, SQ_C2, SQ_D2,41,1016
+  SQ_A2, SQ_B2, SQ_C2, SQ_D2, SQ_E2,41,1016
+  SQ_A2, SQ_B2, SQ_C2, SQ_D2, SQ_E2, SQ_F2,41,1016
+  SQ_A2, SQ_B2, SQ_C2, SQ_D2, SQ_E2, SQ_F2, SQ_G2,41,1016
+  SQ_A2, SQ_B2, SQ_C2, SQ_D2, SQ_E2, SQ_F2, SQ_G2, SQ_H2,41,1016
+  SQ_A3,42,1074
+  SQ_A3, SQ_B3,42,1074
+  SQ_A3, SQ_B3, SQ_C3,42,1074
+  SQ_A3, SQ_B3, SQ_C3, SQ_D3,42,1074
+  SQ_A3, SQ_B3, SQ_C3, SQ_D3, SQ_E3,42,1074
+  SQ_A3, SQ_B3, SQ_C3, SQ_D3, SQ_E3, SQ_F3,42,1074
+  SQ_A3, SQ_B3, SQ_C3, SQ_D3, SQ_E3, SQ_F3, SQ_G3,42,1074
+  SQ_A3, SQ_B3, SQ_C3, SQ_D3, SQ_E3, SQ_F3, SQ_G3, SQ_H3,42,1074
+  SQ_A4,43,1132
+  SQ_A4, SQ_B4,43,1132
+  SQ_A4, SQ_B4, SQ_C4,43,1132
+  SQ_A4, SQ_B4, SQ_C4, SQ_D4,43,1132
+  SQ_A4, SQ_B4, SQ_C4, SQ_D4, SQ_E4,43,1132
+  SQ_A4, SQ_B4, SQ_C4, SQ_D4, SQ_E4, SQ_F4,43,1132
+  SQ_A4, SQ_B4, SQ_C4, SQ_D4, SQ_E4, SQ_F4, SQ_G4,43,1132
+  SQ_A4, SQ_B4, SQ_C4, SQ_D4, SQ_E4, SQ_F4, SQ_G4, SQ_H4,43,1132
+  SQ_A5,44,1190
+  SQ_A5, SQ_B5,44,1190
+  SQ_A5, SQ_B5, SQ_C5,44,1190
+  SQ_A5, SQ_B5, SQ_C5, SQ_D5,44,1190
+  SQ_A5, SQ_B5, SQ_C5, SQ_D5, SQ_E5,44,1190
+  SQ_A5, SQ_B5, SQ_C5, SQ_D5, SQ_E5, SQ_F5,44,1190
+  SQ_A5, SQ_B5, SQ_C5, SQ_D5, SQ_E5, SQ_F5, SQ_G5,44,1190
+  SQ_A5, SQ_B5, SQ_C5, SQ_D5, SQ_E5, SQ_F5, SQ_G5, SQ_H5,44,1190
+  SQ_A6,45,1248
+  SQ_A6, SQ_B6,45,1248
+  SQ_A6, SQ_B6, SQ_C6,45,1248
+  SQ_A6, SQ_B6, SQ_C6, SQ_D6,45,1248
+  SQ_A6, SQ_B6, SQ_C6, SQ_D6, SQ_E6,45,1248
+  SQ_A6, SQ_B6, SQ_C6, SQ_D6, SQ_E6, SQ_F6,45,1248
+  SQ_A6, SQ_B6, SQ_C6, SQ_D6, SQ_E6, SQ_F6, SQ_G6,45,1248
+  SQ_A6, SQ_B6, SQ_C6, SQ_D6, SQ_E6, SQ_F6, SQ_G6, SQ_H6,45,1248
+  SQ_A7,46,1306
+  SQ_A7, SQ_B7,46,1306
+  SQ_A7, SQ_B7, SQ_C7,46,1306
+  SQ_A7, SQ_B7, SQ_C7, SQ_D7,46,1306
+  SQ_A7, SQ_B7, SQ_C7, SQ_D7, SQ_E7,46,1306
+  SQ_A7, SQ_B7, SQ_C7, SQ_D7, SQ_E7, SQ_F7,46,1306
+  SQ_A7, SQ_B7, SQ_C7, SQ_D7, SQ_E7, SQ_F7, SQ_G7,46,1306
+  SQ_A7, SQ_B7, SQ_C7, SQ_D7, SQ_E7, SQ_F7, SQ_G7, SQ_H7,46,1306
+  SQ_A8,47,1364
+  SQ_A8, SQ_B8,47,1364
+  SQ_A8, SQ_B8, SQ_C8,47,1364
+  SQ_A8, SQ_B8, SQ_C8, SQ_D8,47,1364
+  SQ_A8, SQ_B8, SQ_C8, SQ_D8, SQ_E8,47,1364
+  SQ_A8, SQ_B8, SQ_C8, SQ_D8, SQ_E8, SQ_F8,47,1364
+  SQ_A8, SQ_B8, SQ_C8, SQ_D8, SQ_E8, SQ_F8, SQ_G8,47,1364
+  SQ_A8, SQ_B8, SQ_C8, SQ_D8, SQ_E8, SQ_F8, SQ_G8, SQ_H8,47,1364
+  SQ_NONE48,1422
+enum File 51,1436
+  FILE_A,52,1448
+  FILE_A, FILE_B,52,1448
+  FILE_A, FILE_B, FILE_C,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H,52,1448
+  FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE52,1448
+enum Rank 55,1528
+  RANK_1,56,1540
+  RANK_1, RANK_2,56,1540
+  RANK_1, RANK_2, RANK_3,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8,56,1540
+  RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE56,1540
+enum SquareDelta 59,1620
+  DELTA_SSW 60,1639
+  DELTA_SSW = -021, DELTA_SS 60,1639
+  DELTA_SSW = -021, DELTA_SS = -020, DELTA_SSE 60,1639
+  DELTA_SSW = -021, DELTA_SS = -020, DELTA_SSE = -017, DELTA_SWW 60,1639
+  DELTA_SW 61,1712
+  DELTA_SW = -011, DELTA_S 61,1712
+  DELTA_SW = -011, DELTA_S = -010, DELTA_SE 61,1712
+  DELTA_SW = -011, DELTA_S = -010, DELTA_SE = -07, DELTA_SEE 61,1712
+  DELTA_W 62,1780
+  DELTA_W = -01, DELTA_ZERO 62,1780
+  DELTA_W = -01, DELTA_ZERO = 0, DELTA_E 62,1780
+  DELTA_W = -01, DELTA_ZERO = 0, DELTA_E = 01, DELTA_NWW 62,1780
+  DELTA_W = -01, DELTA_ZERO = 0, DELTA_E = 01, DELTA_NWW = 06, DELTA_NW 62,1780
+  DELTA_N 63,1858
+  DELTA_N = 010, DELTA_NE 63,1858
+  DELTA_N = 010, DELTA_NE = 011, DELTA_NEE 63,1858
+  DELTA_N = 010, DELTA_NE = 011, DELTA_NEE = 012, DELTA_NNW 63,1858
+  DELTA_NN 64,1925
+  DELTA_NN = 020, DELTA_NNE 64,1925
+const int FlipMask 72,1990
+const int FlopMask 73,2016
+inline Square make_square(110,3824
+inline File square_file(114,3912
+inline Rank square_rank(118,3978
+inline Square flip_square(122,4045
+inline Square flop_square(126,4122
+inline Square relative_square(130,4199
+inline Rank pawn_rank(134,4300
+inline Color square_color(138,4391
+inline int file_distance(142,4497
+inline int file_distance(146,4578
+inline int rank_distance(150,4688
+inline int rank_distance(154,4769
+#define Max(158,4879
+inline int square_distance(159,4922
+
+types.h,61
+#define TYPES_H_INCLUDED21,774
+typedef uint64_t Key;28,856
+
+value.h,1327
+#define VALUE_H_INCLUDED21,774
+enum ValueType 35,886
+  VALUE_TYPE_NONE 36,903
+  VALUE_TYPE_UPPER 37,926
+  VALUE_TYPE_LOWER 38,966
+  VALUE_TYPE_EXACT 39,1006
+enum Value 43,1051
+  VALUE_DRAW 44,1064
+  VALUE_KNOWN_WIN 45,1082
+  VALUE_MATE 46,1109
+  VALUE_INFINITE 47,1131
+  VALUE_NONE 48,1157
+const Value PawnValueMidgame 62,1423
+const Value PawnValueEndgame 63,1467
+const Value KnightValueMidgame 64,1512
+const Value KnightValueEndgame 65,1559
+const Value BishopValueMidgame 66,1606
+const Value BishopValueEndgame 67,1653
+const Value RookValueMidgame 68,1700
+const Value RookValueEndgame 69,1745
+const Value QueenValueMidgame 70,1790
+const Value QueenValueEndgame 71,1836
+const Value PieceValueMidgame[PieceValueMidgame73,1883
+const Value PieceValueEndgame[PieceValueEndgame83,2198
+const Value TempoValueMidgame 95,2552
+const Value TempoValueEndgame 96,2595
+inline Value operator*operator114,3199
+inline void operator*operator115,3269
+inline Value operator*operator116,3337
+inline Value value_mate_in(121,3547
+inline Value value_mated_in(125,3629
+inline bool is_upper_bound(129,3713
+inline bool is_lower_bound(133,3808
+inline Value piece_value_midgame(137,3903
+inline Value piece_value_endgame(141,3987
+inline Value piece_value_midgame(145,4071
+inline Value piece_value_endgame(149,4149
+
+bitboard.cpp,2164
+namespace Chess 29,835
+const Bitboard NeighboringFilesBB[NeighboringFilesBB41,1072
+const Bitboard ThisAndNeighboringFilesBB[ThisAndNeighboringFilesBB46,1240
+const Bitboard RankBB[RankBB53,1483
+const Bitboard RelativeRankBB[RelativeRankBB57,1589
+const Bitboard InFrontBB[InFrontBB66,1800
+Bitboard RankAttacks[RankAttacks91,2531
+Bitboard RankAttacks[8][64], FileAttacks[FileAttacks91,2531
+const uint64_t RMult[RMult95,2615
+const int RShift[RShift120,4157
+const uint64_t RMult[RMult129,4489
+const int RShift[RShift154,5957
+Bitboard RMask[RMask164,6326
+int RAttackIndex[RAttackIndex165,6346
+Bitboard RAttacks[RAttacks166,6368
+const uint64_t BMult[BMult171,6436
+const int BShift[BShift196,7984
+const uint64_t BMult[BMult205,8316
+const int BShift[BShift230,9778
+Bitboard BMask[BMask239,10108
+int BAttackIndex[BAttackIndex240,10128
+Bitboard BAttacks[BAttacks241,10150
+Bitboard SetMaskBB[SetMaskBB243,10178
+Bitboard ClearMaskBB[ClearMaskBB244,10202
+Bitboard StepAttackBB[StepAttackBB246,10229
+Bitboard RayBB[RayBB247,10260
+Bitboard BetweenBB[BetweenBB248,10283
+Bitboard PassedPawnMask[PassedPawnMask250,10312
+Bitboard OutpostMask[OutpostMask251,10344
+Bitboard BishopPseudoAttacks[BishopPseudoAttacks253,10374
+Bitboard RookPseudoAttacks[RookPseudoAttacks254,10408
+Bitboard QueenPseudoAttacks[QueenPseudoAttacks255,10440
+void print_bitboard(288,11339
+void init_bitboards(302,11823
+static const int BitTable[BitTable325,12448
+Square first_1(335,12818
+Square pop_1st_bit(345,13059
+static const int BitTable[BitTable354,13249
+Square first_1(364,13619
+Square pop_1st_bit(372,13817
+  void init_masks(::init_masks388,14275
+  void init_ray_bitboards(::init_ray_bitboards402,14691
+  void init_attacks(::init_attacks414,15063
+  Bitboard sliding_attacks(::sliding_attacks437,15741
+  void init_between_bitboards(::init_between_bitboards454,16312
+  Bitboard index_to_bitboard(::index_to_bitboard470,16836
+  void init_sliding_attacks(::init_sliding_attacks481,17101
+  void init_pseudo_attacks(::init_pseudo_attacks510,18047
+  void init_file_and_rank_attacks(::init_file_and_rank_attacks520,18374
+
+book.cpp,575
+namespace Chess 38,1084
+Book::Book(355,20957
+void Book::open(363,21071
+void Book::close(382,21585
+bool Book::is_open(392,21813
+const std::string Book::file_name(400,22009
+Move Book::get_move(408,22208
+int Book::find_key(445,23241
+void Book::read_entry(479,23975
+  uint64_t book_key(::book_key502,24499
+  uint64_t book_piece_key(::book_piece_key527,25037
+  uint64_t book_castle_key(::book_castle_key532,25160
+  uint64_t book_ep_key(::book_ep_key547,25590
+  uint64_t book_color_key(::book_color_key553,25754
+  uint64_t read_integer(::read_integer558,25880
+
+color.cpp,68
+namespace Chess 26,788
+bool color_is_ok(Chess::color_is_ok34,868
+
+direction.cpp,86
+namespace Chess 27,812
+void init_direction_table(Chess::init_direction_table41,955
+
+mersenne.cpp,315
+#define N 47,2014
+#define M 48,2028
+#define MATRIX_A 49,2042
+#define UPPER_MASK 50,2098
+#define LOWER_MASK 51,2162
+namespace Chess 53,2226
+void init_genrand(Chess::init_genrand59,2414
+void init_by_array(78,3106
+uint32_t genrand_int32(104,3963
+uint64_t genrand_int64(140,4867
+void init_mersenne(147,4983
+
+misc.cpp,251
+namespace Chess 35,933
+namespace Chess 48,1137
+const std::string engine_name(Chess::engine_name59,1473
+int get_system_time(86,2194
+int cpu_count(98,2427
+int cpu_count(102,2503
+int cpu_count(109,2552
+int Bioskey(123,2738
+int Bioskey(142,3103
+
+move.cpp,196
+namespace Chess 30,848
+Move move_from_string(Chess::move_from_string44,1290
+const std::string move_to_string(108,3543
+std::ostream &operator << operator <<140,4436
+bool move_is_ok(147,4563
+
+movegen.cpp,921
+namespace Chess 28,810
+int generate_captures(63,2047
+int generate_noncaptures(88,2850
+int generate_checks(115,3728
+int generate_evasions(341,9723
+int generate_legal_moves(579,18379
+Move generate_move_if_legal(609,19282
+  int generate_white_pawn_captures(::generate_white_pawn_captures864,26338
+  int generate_black_pawn_captures(::generate_black_pawn_captures927,27943
+  int generate_white_pawn_noncaptures(::generate_white_pawn_noncaptures990,29548
+  int generate_black_pawn_noncaptures(::generate_black_pawn_noncaptures1042,31268
+  int generate_knight_moves(::generate_knight_moves1094,32988
+  int generate_bishop_moves(::generate_bishop_moves1112,33432
+  int generate_rook_moves(::generate_rook_moves1130,33876
+  int generate_queen_moves(::generate_queen_moves1148,34310
+  int generate_king_moves(::generate_king_moves1166,34749
+  int generate_castle_moves(::generate_castle_moves1181,35074
+
+movepick.cpp,1148
+namespace Chess 31,874
+  enum MovegenPhase Chess::MovegenPhase41,953
+    PH_TT_MOVE,Chess::MovegenPhase::PH_TT_MOVE42,975
+    PH_MATE_KILLER,Chess::MovegenPhase::PH_MATE_KILLER43,1026
+    PH_GOOD_CAPTURES,Chess::MovegenPhase::PH_GOOD_CAPTURES44,1085
+    PH_BAD_CAPTURES,Chess::MovegenPhase::PH_BAD_CAPTURES45,1162
+    PH_KILLER_1,Chess::MovegenPhase::PH_KILLER_146,1239
+    PH_KILLER_2,Chess::MovegenPhase::PH_KILLER_247,1316
+    PH_NONCAPTURES,Chess::MovegenPhase::PH_NONCAPTURES48,1393
+    PH_EVASIONS,Chess::MovegenPhase::PH_EVASIONS49,1452
+    PH_QCAPTURES,Chess::MovegenPhase::PH_QCAPTURES50,1493
+    PH_QCHECKS,Chess::MovegenPhase::PH_QCHECKS51,1549
+    PH_STOPChess::MovegenPhase::PH_STOP52,1603
+MovePicker::MovePicker(79,2254
+Move MovePicker::get_next_move(112,3179
+Move MovePicker::get_next_move(205,5371
+int MovePicker::number_of_moves(227,5891
+void MovePicker::score_captures(238,6263
+void MovePicker::score_noncaptures(264,7341
+void MovePicker::score_evasions(269,7445
+void MovePicker::score_qcaptures(274,7546
+Move MovePicker::pick_move_from_list(296,8394
+void MovePicker::init_phase_table(457,13254
+
+piece.cpp,296
+namespace Chess 28,808
+const SquareDelta Directions[Directions38,957
+const SquareDelta PawnPush[PawnPush62,1932
+static const char PieceChars[PieceChars73,2076
+char piece_type_to_char(75,2121
+PieceType piece_type_from_char(79,2244
+bool piece_is_ok(87,2455
+bool piece_type_is_ok(93,2576
+
+position.cpp,2381
+namespace Chess 37,997
+Position::Position(Chess::Position::Position61,1367
+Position::Position(Chess::Position::Position63,1425
+Position::Position(67,1489
+void Position::from_fen(76,1782
+const std::string Position::to_fen(223,6329
+void Position::print(264,7504
+void Position::copy(290,8320
+Bitboard Position::pinned_pieces(298,8521
+Bitboard Position::discovered_check_candidates(335,9683
+bool Position::square_is_attacked(369,10638
+Bitboard Position::attacks_to(384,11247
+Bitboard Position::attacks_to(394,11660
+bool Position::piece_attacks_square(402,11874
+void Position::find_checkers(427,12829
+bool Position::move_is_legal(439,13348
+bool Position::move_is_legal(444,13474
+bool Position::move_is_check(508,15795
+bool Position::move_is_check(514,15954
+bool Position::move_is_capture(649,19661
+bool Position::move_attacks_square(660,20033
+void Position::backup(691,21120
+void Position::restore(709,21591
+void Position::do_move(732,22481
+void Position::do_move(736,22610
+void Position::do_castle_move(947,29059
+void Position::do_promotion_move(1044,32014
+void Position::do_ep_move(1168,35685
+void Position::undo_move(1254,38336
+void Position::undo_castle_move(1339,40765
+void Position::undo_promotion_move(1406,42995
+void Position::undo_ep_move(1486,45559
+void Position::do_null_move(1542,47218
+void Position::undo_null_move(1574,48159
+int Position::see(1603,49080
+int Position::see(1695,52376
+void Position::clear(1704,52620
+void Position::reset_game_ply(1743,53567
+void Position::put_piece(1751,53753
+void Position::allow_oo(1773,54306
+void Position::allow_ooo(1781,54525
+Key Position::compute_key(1791,54901
+Key Position::compute_pawn_key(1814,55649
+Key Position::compute_material_key(1836,56251
+Value Position::compute_mg_value(1854,56927
+Value Position::compute_eg_value(1873,57454
+Value Position::compute_non_pawn_material(1898,58243
+bool Position::is_mate(1918,58838
+bool Position::is_draw(1933,59279
+DrawReason Position::is_immediate_draw(1959,60050
+bool Position::has_mate_threat(1993,61005
+void Position::init_zobrist(2036,62316
+void Position::init_piece_square_tables(2068,63421
+void Position::flipped_copy(2087,64105
+int Position::moves_from(2148,66164
+int Position::moves_to(2167,66757
+int Position::destination_squares_from(2186,67352
+int Position::all_legal_moves(2203,67821
+bool Position::is_ok(2217,68151
+
+san.cpp,737
+namespace Chess 38,938
+  enum Ambiguity Chess::Ambiguity44,983
+    AMBIGUITY_NONE,Chess::Ambiguity::AMBIGUITY_NONE45,1002
+    AMBIGUITY_FILE,Chess::Ambiguity::AMBIGUITY_FILE46,1022
+    AMBIGUITY_RANK,Chess::Ambiguity::AMBIGUITY_RANK47,1042
+    AMBIGUITY_BOTHChess::Ambiguity::AMBIGUITY_BOTH48,1062
+const std::string move_to_san(68,1493
+const std::string move_to_html(166,3730
+Move move_from_san(181,4289
+const std::string line_to_san(301,7458
+void san_move_list(339,8517
+const std::string pretty_pv(353,8976
+  Ambiguity move_ambiguity(::move_ambiguity383,9724
+  const std::string time_string(::time_string427,10813
+  const std::string score_string(::score_string443,11267
+const std::string line_to_html(464,11699
+
+square.cpp,313
+namespace Chess 30,845
+File file_from_char(Chess::file_from_char39,965
+char file_to_char(44,1032
+Rank rank_from_char(49,1097
+char rank_to_char(54,1164
+Square square_from_string(59,1229
+const std::string square_to_string(64,1355
+bool file_is_ok(74,1584
+bool rank_is_ok(79,1651
+bool square_is_ok(84,1718
+
+value.cpp,212
+namespace Chess 29,826
+Value value_to_tt(Chess::value_to_tt39,1101
+Value value_from_tt(53,1439
+int value_to_centipawns(66,1748
+Value value_from_centipawns(75,2051
+const std::string value_to_string(83,2223
