@@ -29,18 +29,33 @@
     return self;
 }
 
-- (id)initWithTags:(NSArray *)tags andMoves:(NSArray *)moves
+- (id)initWithTags:(NSMutableDictionary *)tags andMoves:(NSString *)moves
 {
     self = [super init];
     if (self) {
         self.tags = [tags mutableCopy];
-        self.moves = [moves mutableCopy];
+        NSLog(@"Creating a Game object with moves:");
+        NSLog(moves);
     }
     return self;
 }
 - (NSString *)pgnString
 {
-    return [self.tags description];
+    NSMutableString *str = [NSMutableString new];
+    for (NSString *tagName in [self.tags allKeys]) {
+        [str appendString:@"["];
+        [str appendString:tagName];
+        [str appendString:@" \""];
+        [str appendString:self.tags[tagName]];
+        [str appendString:@"\"]\n"];
+    }
+    return str;
+}
+
+- (NSString *)description
+{
+    NSString *s = [NSString stringWithFormat:@"%@ vs. %@, Result %@, %ld tags", self.tags[@"White"], self.tags[@"Black"], self.tags[@"Result"], [self.tags count]];
+    return s;
 }
 
 @end

@@ -54,17 +54,17 @@
     return [self.pgnFile data];
 }
 
-- (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
+- (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
-    @try {
-        self.pgnFile = [self.pgnFile initWithData:data];
+    BOOL readSuccess = NO;
+    NSString *fileContents = [NSString stringWithContentsOfURL:url usedEncoding:nil error:outError];
+    
+    if (fileContents) {
+        readSuccess = YES;
+        self.pgnFile = [[SFMPGNFile alloc] initWithString:fileContents];
     }
-    @catch (NSException *exception) {
-        NSLog(@"Problem reading file.");
-        return NO;
-    }
-    NSLog(@"File successfully read.");
-    return YES;
+    return readSuccess;
+    
 }
 
 @end

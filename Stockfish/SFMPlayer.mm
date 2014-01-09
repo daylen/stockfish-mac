@@ -10,4 +10,9 @@
 
 @implementation SFMPlayer
 
+- (NSString *)description
+{
+    return @"SFMPlayer Object";
+}
+
 @end

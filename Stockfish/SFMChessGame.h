@@ -12,12 +12,12 @@
 @interface SFMChessGame : NSObject
 
 #pragma mark - Properties
-@property NSMutableArray *tags;
+@property NSMutableDictionary *tags;
 @property NSMutableArray *moves;
 
 #pragma mark - Init
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;
-- (id)initWithTags:(NSArray *)tags andMoves:(NSArray *)moves; // Load a game
+- (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Load a game
 
 #pragma mark - Export
 - (NSString *)pgnString; // PGN string for this game

@@ -15,7 +15,7 @@
 
 #pragma mark - Init
 - (id)init; // Init a blank PGN
-- (id)initWithData:(NSData *)data; // Init with given PGN data
+- (id)initWithString:(NSString *)str; // Init with given PGN
 
 #pragma mark - Export
 - (NSData *)data; // Returns the PGN
