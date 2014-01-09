@@ -32,10 +32,6 @@
                                       @"Result": @"*"};
         self.tags = [defaultTags mutableCopy];
         self.moves = [NSMutableArray new];
-        startingPosition = new Position;
-        currentPosition = new Position;
-        startingPosition->from_fen([FEN_START_POSITION UTF8String]);
-        currentPosition->copy(*startingPosition);
     }
     return self;
 }
@@ -45,9 +41,8 @@
     self = [super init];
     if (self) {
         self.tags = [tags mutableCopy];
-        self.moves = [NSMutableArray new];
-        NSArray *tokenizedMoves = [SFMParser parseMoves:moves];
-        [self convertToChessMoveObjects:tokenizedMoves];
+        self.moveText = moves;
+        
         
     }
     return self;
@@ -55,38 +50,33 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
-    NSLog(@"Processing Game: %@", [self description]);
     
     // Convert standard algebraic notation
-    startingPosition = new Position;
-    currentPosition = new Position;
+    Position startingPosition;
+    Position currentPosition;
     
     // Some games start with custom FEN
     if ([self.tags objectForKey:@"FEN"] != nil) {
-        startingPosition->from_fen([self.tags[@"FEN"] UTF8String]);
+        startingPosition.from_fen([self.tags[@"FEN"] UTF8String]);
     } else {
-        startingPosition->from_fen([FEN_START_POSITION UTF8String]);
+        startingPosition.from_fen([FEN_START_POSITION UTF8String]);
     }
-    currentPosition->copy(*startingPosition);
+    currentPosition.copy(startingPosition);
     
     for (NSString *moveToken in movesAsText) {
-        Move m = move_from_san(*currentPosition, [moveToken UTF8String]);
+        Move m = move_from_san(currentPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
             NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
             @throw e;
         } else {
             UndoInfo u;
-            currentPosition->do_move(m, u);
+            currentPosition.do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
             [self.moves addObject:cm];
         }
     }
-    NSLog(@"Finished processing game.");
-    NSLog(@"%lu moves", (unsigned long)[self.moves count]);
     
 }
-
-
 
 #pragma mark - Export
 

@@ -2220,17 +2220,17 @@ int Position::all_legal_moves(Move mlist[]) const {
 bool Position::is_ok(bool slow) const {
     
     // What features of the position should be verified?
-    static const bool debugBitboards = true;
-    static const bool debugKingCount = true;
-    static const bool debugKingCapture = true;
-    static const bool debugCheckerCount = true;
-    static const bool debugKey = true;
-    static const bool debugMaterialKey = true;
-    static const bool debugPawnKey = true;
-    static const bool debugIncrementalEval = true;
-    static const bool debugNonPawnMaterial = true;
-    static const bool debugPieceCounts = true;
-    static const bool debugPieceList = true;
+    static const bool debugBitboards = false;
+    static const bool debugKingCount = false;
+    static const bool debugKingCapture = false;
+    static const bool debugCheckerCount = false;
+    static const bool debugKey = false;
+    static const bool debugMaterialKey = false;
+    static const bool debugPawnKey = false;
+    static const bool debugIncrementalEval = false;
+    static const bool debugNonPawnMaterial = false;
+    static const bool debugPieceCounts = false;
+    static const bool debugPieceList = false;
 
   // Side to move OK?
   if(!color_is_ok(this->side_to_move()))

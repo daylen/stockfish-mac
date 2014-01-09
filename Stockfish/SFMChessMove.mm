@@ -8,6 +8,8 @@
 
 #import "SFMChessMove.h"
 
+#include "../Chess/move.h"
+
 @implementation SFMChessMove
 
 - (id)initWithMove:(Move)move undoInfo:(UndoInfo)undoInfo
@@ -22,7 +24,7 @@
 
 - (NSString *)description
 {
-    return @"SFMChessMove";
+    return [NSString stringWithCString:move_to_string(self.move).c_str() encoding:NSUTF8StringEncoding];
 }
 
 @end

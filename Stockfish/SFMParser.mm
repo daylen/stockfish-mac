@@ -9,7 +9,6 @@
 #import "SFMParser.h"
 #import "SFMChessGame.h"
 
-#include "../Chess/position.h"
 
 using namespace Chess;
 

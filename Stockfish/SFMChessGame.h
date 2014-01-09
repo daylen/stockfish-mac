@@ -13,14 +13,12 @@
 
 using namespace Chess;
 
-@interface SFMChessGame : NSObject {
-    Position *startingPosition;
-    Position *currentPosition;
-}
+@interface SFMChessGame : NSObject
 
 #pragma mark - Properties
 @property NSMutableDictionary *tags;
-@property NSMutableArray *moves;
+@property NSMutableArray *moves; // Lazy
+@property NSString *moveText;
 
 #pragma mark - Init
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;

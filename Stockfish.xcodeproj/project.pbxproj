@@ -116,8 +116,6 @@
 		77924AEF187DED6E0019C56E /* SFMChessMove.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMChessMove.mm; path = Stockfish/SFMChessMove.mm; sourceTree = "<group>"; };
 		77924AF1187DFA040019C56E /* SFMPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPlayer.h; path = Stockfish/SFMPlayer.h; sourceTree = "<group>"; };
 		77924AF2187DFA040019C56E /* SFMPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPlayer.mm; path = Stockfish/SFMPlayer.mm; sourceTree = "<group>"; };
-		77924AF4187E3F320019C56E /* ParseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParseKit.framework; path = "../parsekit-master/build/Debug/ParseKit.framework"; sourceTree = "<group>"; };
-		77924AF6187E3F720019C56E /* ParseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParseKit.framework; path = "../parsekit-master/build/Debug/ParseKit.framework"; sourceTree = "<group>"; };
 		77924AF8187E57740019C56E /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = Stockfish/Constants.h; sourceTree = "<group>"; };
 		77924AFB187E72940019C56E /* SFMParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMParser.h; path = Stockfish/SFMParser.h; sourceTree = "<group>"; };
 		77924AFC187E72940019C56E /* SFMParser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMParser.mm; path = Stockfish/SFMParser.mm; sourceTree = "<group>"; };
@@ -149,17 +147,9 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
-				77924AFB187E72940019C56E /* SFMParser.h */,
-				77924AFC187E72940019C56E /* SFMParser.mm */,
-				77924AF1187DFA040019C56E /* SFMPlayer.h */,
-				77924AF2187DFA040019C56E /* SFMPlayer.mm */,
-				77924AEE187DED6E0019C56E /* SFMChessMove.h */,
-				77924AEF187DED6E0019C56E /* SFMChessMove.mm */,
-				77924AE8187DECEB0019C56E /* SFMPGNFile.h */,
-				77924AE9187DECEB0019C56E /* SFMPGNFile.mm */,
-				77924AEB187DED010019C56E /* SFMChessGame.h */,
-				77924AEC187DED010019C56E /* SFMChessGame.mm */,
+				7715B8AD187E8981006F2366 /* Model */,
 				77924AF8187E57740019C56E /* Constants.h */,
+				7715B8AE187E89A8006F2366 /* UI */,
 				770506A8187CE52D00BA4635 /* Chess */,
 				77050677187CE43300BA4635 /* Stockfish */,
 				77050698187CE43400BA4635 /* StockfishTests */,
@@ -180,8 +170,6 @@
 		77050670187CE43300BA4635 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				77924AF6187E3F720019C56E /* ParseKit.framework */,
-				77924AF4187E3F320019C56E /* ParseKit.framework */,
 				77050671187CE43300BA4635 /* Cocoa.framework */,
 				77050693187CE43400BA4635 /* XCTest.framework */,
 				77050673187CE43300BA4635 /* Other Frameworks */,
@@ -204,11 +192,8 @@
 			children = (
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
-				77050686187CE43400BA4635 /* SFMDocument.xib */,
 				770506DE187CF2B100BA4635 /* SFMWindowController.h */,
 				770506DF187CF2B100BA4635 /* SFMWindowController.mm */,
-				77050689187CE43400BA4635 /* MainMenu.xib */,
-				7705068C187CE43400BA4635 /* Images.xcassets */,
 				77050678187CE43300BA4635 /* Supporting Files */,
 			);
 			path = Stockfish;
@@ -284,6 +269,34 @@
 				770506CB187CE52D00BA4635 /* value.h */,
 			);
 			path = Chess;
+			sourceTree = "<group>";
+		};
+		7715B8AD187E8981006F2366 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				77924AFB187E72940019C56E /* SFMParser.h */,
+				77924AFC187E72940019C56E /* SFMParser.mm */,
+				77924AF1187DFA040019C56E /* SFMPlayer.h */,
+				77924AF2187DFA040019C56E /* SFMPlayer.mm */,
+				77924AEE187DED6E0019C56E /* SFMChessMove.h */,
+				77924AEF187DED6E0019C56E /* SFMChessMove.mm */,
+				77924AE8187DECEB0019C56E /* SFMPGNFile.h */,
+				77924AE9187DECEB0019C56E /* SFMPGNFile.mm */,
+				77924AEB187DED010019C56E /* SFMChessGame.h */,
+				77924AEC187DED010019C56E /* SFMChessGame.mm */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		7715B8AE187E89A8006F2366 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				77050686187CE43400BA4635 /* SFMDocument.xib */,
+				77050689187CE43400BA4635 /* MainMenu.xib */,
+				7705068C187CE43400BA4635 /* Images.xcassets */,
+			);
+			name = UI;
+			path = Stockfish;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
