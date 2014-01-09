@@ -20,4 +20,9 @@
     return self;
 }
 
+- (NSString *)description
+{
+    return @"SFMChessMove";
+}
+
 @end

@@ -9,6 +9,7 @@
 #import "SFMPGNFile.h"
 #import "SFMChessGame.h"
 #import "SFMPlayer.h"
+#import "SFMParser.h"
 
 @implementation SFMPGNFile
 
@@ -31,10 +32,7 @@
 {
     self = [super init];
     if (self) {
-        self.games = [NSMutableArray new];
-        
-        // Parse the games
-# warning parse the game
+        self.games = [SFMParser parseGamesFromString:str];
     }
     return self;
 }

@@ -10,6 +10,14 @@
 #import "SFMWindowController.h"
 #import "SFMPGNFile.h"
 
+#include "../Chess/position.h"
+#include "../Chess/bitboard.h"
+#include "../Chess/direction.h"
+#include "../Chess/mersenne.h"
+#include "../Chess/movepick.h"
+
+using namespace Chess;
+
 @interface SFMDocument()
 
 @property SFMPGNFile *pgnFile;
@@ -22,7 +30,12 @@
 {
     self = [super init];
     if (self) {
-        // Add your subclass-specific initialization here.
+        init_mersenne();
+        init_direction_table();
+        init_bitboards();
+        Position::init_zobrist();
+        Position::init_piece_square_tables();
+        MovePicker::init_phase_table();
     }
     return self;
 }

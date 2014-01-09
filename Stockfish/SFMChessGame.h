@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "SFMPlayer.h"
-#import "../Chess/position.h"
+
+#include "../Chess/position.h"
 
 using namespace Chess;
 

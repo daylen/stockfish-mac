@@ -9,8 +9,10 @@
 #import "SFMChessGame.h"
 #import "Constants.h"
 #import "SFMChessMove.h"
-#import "../Chess/move.h"
-#import "../Chess/san.h"
+#import "SFMParser.h"
+
+#include "../Chess/move.h"
+#include "../Chess/san.h"
 
 @implementation SFMChessGame
 
@@ -43,8 +45,9 @@
     self = [super init];
     if (self) {
         self.tags = [tags mutableCopy];
-#warning parse moves and stuff
-        
+        self.moves = [NSMutableArray new];
+        NSArray *tokenizedMoves = [SFMParser parseMoves:moves];
+        [self convertToChessMoveObjects:tokenizedMoves];
         
     }
     return self;
@@ -52,7 +55,7 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
-    NSLog(@"Coverting SAN to SFMChessMove");
+    NSLog(@"Processing Game: %@", [self description]);
     
     // Convert standard algebraic notation
     startingPosition = new Position;
@@ -60,33 +63,27 @@
     
     // Some games start with custom FEN
     if ([self.tags objectForKey:@"FEN"] != nil) {
-        NSLog(@"Custom FEN found: %@", self.tags[@"FEN"]);
         startingPosition->from_fen([self.tags[@"FEN"] UTF8String]);
     } else {
         startingPosition->from_fen([FEN_START_POSITION UTF8String]);
     }
     currentPosition->copy(*startingPosition);
     
-    NSLog(@"Printing current position");
-    currentPosition->print();
-    
-    
     for (NSString *moveToken in movesAsText) {
-        NSLog(@"Processing %@", moveToken);
         Move m = move_from_san(*currentPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
             NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
             @throw e;
         } else {
-            NSLog(@"Yay, move was not none");
             UndoInfo u;
             currentPosition->do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
             [self.moves addObject:cm];
         }
     }
+    NSLog(@"Finished processing game.");
+    NSLog(@"%lu moves", (unsigned long)[self.moves count]);
     
-    NSLog(@"Finished with that game.");
 }
 
 

@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "../Chess/position.h"
+
+#include "../Chess/position.h"
 
 using namespace Chess;
 
