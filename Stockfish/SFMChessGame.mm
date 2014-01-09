@@ -32,6 +32,7 @@
                                       @"Result": @"*"};
         self.tags = [defaultTags mutableCopy];
         self.moves = [NSMutableArray new];
+        self.moveText = nil;
     }
     return self;
 }
@@ -42,8 +43,6 @@
     if (self) {
         self.tags = [tags mutableCopy];
         self.moveText = moves;
-        
-        
     }
     return self;
 }
@@ -52,6 +51,7 @@
 - (void)populateMovesFromMoveText
 {
     [self convertToChessMoveObjects:[SFMParser parseMoves:self.moveText]];
+    self.moveText = nil;
 }
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
@@ -96,12 +96,19 @@
         [str appendString:self.tags[tagName]];
         [str appendString:@"\"]\n"];
     }
+
+    if (self.moveText) {
+        [str appendString:self.moveText];
+    } else {
+        [str appendString:@"Need to serialize array"];
+    }
+    
     return str;
 }
 
 - (NSString *)description
 {
-    NSString *s = [NSString stringWithFormat:@"%@ vs. %@, Result %@, %ld tags", self.tags[@"White"], self.tags[@"Black"], self.tags[@"Result"], [self.tags count]];
+    NSString *s = [NSString stringWithFormat:@"%@ v. %@, %@, %ld tags", self.tags[@"White"], self.tags[@"Black"], self.tags[@"Result"], [self.tags count]];
     return s;
 }
 

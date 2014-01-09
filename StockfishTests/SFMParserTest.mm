@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "SFMParser.h"
+#import "SFMChessGame.h"
 
 @interface SFMParserTest : XCTestCase
 
@@ -25,6 +26,17 @@
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
+}
+
+- (void)testParseGamesFromString
+{
+    NSString *fakepgn = @"[tag \"whoa\"]\n[another \"yay\"]\n\n1. e4 e5 2. Nf3\n\n[tag \"whoa\"]\n\n1. e4\n";
+    NSMutableArray *games = [SFMParser parseGamesFromString:fakepgn];
+    XCTAssertEqual([games count], 2, @"Wrong count");
+    SFMChessGame *first = games[0];
+    SFMChessGame *second = games[1];
+    XCTAssertEqual([first.tags count], 2, @"Wrong count for game 1");
+    XCTAssertEqual([second.tags count], 1, @"Wrong count for game 2");
 }
 
 - (void)testIsLetter
