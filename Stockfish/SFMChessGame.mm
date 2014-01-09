@@ -48,6 +48,12 @@
     return self;
 }
 
+#pragma mark - Interaction
+- (void)populateMovesFromMoveText
+{
+    [self convertToChessMoveObjects:[SFMParser parseMoves:self.moveText]];
+}
+
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
     

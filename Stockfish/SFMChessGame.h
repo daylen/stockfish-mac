@@ -22,7 +22,10 @@ using namespace Chess;
 
 #pragma mark - Init
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;
-- (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Load a game
+- (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Saves the tags and move text
+
+#pragma mark - Interaction
+- (void)populateMovesFromMoveText; // Actually load the game
 
 #pragma mark - Export
 - (NSString *)pgnString; // PGN string for this game
