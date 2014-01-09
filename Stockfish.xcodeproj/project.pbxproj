@@ -18,7 +18,6 @@
 		77050694187CE43400BA4635 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050693187CE43400BA4635 /* XCTest.framework */; };
 		77050695187CE43400BA4635 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050671187CE43300BA4635 /* Cocoa.framework */; };
 		7705069D187CE43400BA4635 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7705069B187CE43400BA4635 /* InfoPlist.strings */; };
-		7705069F187CE43400BA4635 /* StockfishTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7705069E187CE43400BA4635 /* StockfishTests.m */; };
 		770506CC187CE52D00BA4635 /* bitboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506A9187CE52D00BA4635 /* bitboard.cpp */; };
 		770506CD187CE52D00BA4635 /* book.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506AB187CE52D00BA4635 /* book.cpp */; };
 		770506CE187CE52D00BA4635 /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506AD187CE52D00BA4635 /* color.cpp */; };
@@ -32,13 +31,14 @@
 		770506D6187CE52D00BA4635 /* position.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506C0187CE52D00BA4635 /* position.cpp */; };
 		770506D7187CE52D00BA4635 /* san.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506C3187CE52D00BA4635 /* san.cpp */; };
 		770506D8187CE52D00BA4635 /* square.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506C6187CE52D00BA4635 /* square.cpp */; };
-		770506D9187CE52D00BA4635 /* TAGS in Resources */ = {isa = PBXBuildFile; fileRef = 770506C8187CE52D00BA4635 /* TAGS */; };
 		770506DA187CE52D00BA4635 /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506CA187CE52D00BA4635 /* value.cpp */; };
 		770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.mm */; };
 		77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.mm */; };
 		77924AED187DED010019C56E /* SFMChessGame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.mm */; };
 		77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEF187DED6E0019C56E /* SFMChessMove.mm */; };
 		77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AF2187DFA040019C56E /* SFMPlayer.mm */; };
+		77924AFD187E72940019C56E /* SFMParser.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.mm */; };
+		77924AFF187E77770019C56E /* SFMParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFE187E77770019C56E /* SFMParserTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,7 +71,6 @@
 		77050693187CE43400BA4635 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		7705069A187CE43400BA4635 /* StockfishTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StockfishTests-Info.plist"; sourceTree = "<group>"; };
 		7705069C187CE43400BA4635 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		7705069E187CE43400BA4635 /* StockfishTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StockfishTests.m; sourceTree = "<group>"; };
 		770506A9187CE52D00BA4635 /* bitboard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitboard.cpp; sourceTree = "<group>"; };
 		770506AA187CE52D00BA4635 /* bitboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitboard.h; sourceTree = "<group>"; };
 		770506AB187CE52D00BA4635 /* book.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = book.cpp; sourceTree = "<group>"; };
@@ -103,7 +102,6 @@
 		770506C5187CE52D00BA4635 /* scale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scale.h; sourceTree = "<group>"; };
 		770506C6187CE52D00BA4635 /* square.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = square.cpp; sourceTree = "<group>"; };
 		770506C7187CE52D00BA4635 /* square.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = square.h; sourceTree = "<group>"; };
-		770506C8187CE52D00BA4635 /* TAGS */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TAGS; sourceTree = "<group>"; };
 		770506C9187CE52D00BA4635 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		770506CA187CE52D00BA4635 /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = value.cpp; sourceTree = "<group>"; };
 		770506CB187CE52D00BA4635 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = value.h; sourceTree = "<group>"; };
@@ -117,6 +115,12 @@
 		77924AEF187DED6E0019C56E /* SFMChessMove.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMChessMove.mm; path = Stockfish/SFMChessMove.mm; sourceTree = "<group>"; };
 		77924AF1187DFA040019C56E /* SFMPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPlayer.h; path = Stockfish/SFMPlayer.h; sourceTree = "<group>"; };
 		77924AF2187DFA040019C56E /* SFMPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPlayer.mm; path = Stockfish/SFMPlayer.mm; sourceTree = "<group>"; };
+		77924AF4187E3F320019C56E /* ParseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParseKit.framework; path = "../parsekit-master/build/Debug/ParseKit.framework"; sourceTree = "<group>"; };
+		77924AF6187E3F720019C56E /* ParseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParseKit.framework; path = "../parsekit-master/build/Debug/ParseKit.framework"; sourceTree = "<group>"; };
+		77924AF8187E57740019C56E /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = Stockfish/Constants.h; sourceTree = "<group>"; };
+		77924AFB187E72940019C56E /* SFMParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMParser.h; path = Stockfish/SFMParser.h; sourceTree = "<group>"; };
+		77924AFC187E72940019C56E /* SFMParser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMParser.mm; path = Stockfish/SFMParser.mm; sourceTree = "<group>"; };
+		77924AFE187E77770019C56E /* SFMParserTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMParserTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +147,8 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
+				77924AFB187E72940019C56E /* SFMParser.h */,
+				77924AFC187E72940019C56E /* SFMParser.mm */,
 				77924AF1187DFA040019C56E /* SFMPlayer.h */,
 				77924AF2187DFA040019C56E /* SFMPlayer.mm */,
 				77924AEE187DED6E0019C56E /* SFMChessMove.h */,
@@ -151,6 +157,7 @@
 				77924AE9187DECEB0019C56E /* SFMPGNFile.mm */,
 				77924AEB187DED010019C56E /* SFMChessGame.h */,
 				77924AEC187DED010019C56E /* SFMChessGame.mm */,
+				77924AF8187E57740019C56E /* Constants.h */,
 				770506A8187CE52D00BA4635 /* Chess */,
 				77050677187CE43300BA4635 /* Stockfish */,
 				77050698187CE43400BA4635 /* StockfishTests */,
@@ -171,6 +178,8 @@
 		77050670187CE43300BA4635 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				77924AF6187E3F720019C56E /* ParseKit.framework */,
+				77924AF4187E3F320019C56E /* ParseKit.framework */,
 				77050671187CE43300BA4635 /* Cocoa.framework */,
 				77050693187CE43400BA4635 /* XCTest.framework */,
 				77050673187CE43300BA4635 /* Other Frameworks */,
@@ -218,8 +227,8 @@
 		77050698187CE43400BA4635 /* StockfishTests */ = {
 			isa = PBXGroup;
 			children = (
-				7705069E187CE43400BA4635 /* StockfishTests.m */,
 				77050699187CE43400BA4635 /* Supporting Files */,
+				77924AFE187E77770019C56E /* SFMParserTest.m */,
 			);
 			path = StockfishTests;
 			sourceTree = "<group>";
@@ -267,7 +276,6 @@
 				770506C5187CE52D00BA4635 /* scale.h */,
 				770506C6187CE52D00BA4635 /* square.cpp */,
 				770506C7187CE52D00BA4635 /* square.h */,
-				770506C8187CE52D00BA4635 /* TAGS */,
 				770506C9187CE52D00BA4635 /* types.h */,
 				770506CA187CE52D00BA4635 /* value.cpp */,
 				770506CB187CE52D00BA4635 /* value.h */,
@@ -353,7 +361,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
-				770506D9187CE52D00BA4635 /* TAGS in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
@@ -385,6 +392,7 @@
 				770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */,
 				770506D3187CE52D00BA4635 /* movegen.cpp in Sources */,
 				770506CD187CE52D00BA4635 /* book.cpp in Sources */,
+				77924AFD187E72940019C56E /* SFMParser.mm in Sources */,
 				770506DA187CE52D00BA4635 /* value.cpp in Sources */,
 				770506D8187CE52D00BA4635 /* square.cpp in Sources */,
 				77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */,
@@ -404,7 +412,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7705069F187CE43400BA4635 /* StockfishTests.m in Sources */,
+				77924AFF187E77770019C56E /* SFMParserTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -535,6 +543,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
@@ -548,6 +557,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";

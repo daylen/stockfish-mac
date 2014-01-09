@@ -10,4 +10,14 @@
 
 @implementation SFMChessMove
 
+- (id)initWithMove:(Move)move undoInfo:(UndoInfo)undoInfo
+{
+    self = [super init];
+    if (self) {
+        self.move = move;
+        self.undoInfo = undoInfo;
+    }
+    return self;
+}
+
 @end

@@ -8,8 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "SFMPlayer.h"
+#import "../Chess/position.h"
 
-@interface SFMChessGame : NSObject
+using namespace Chess;
+
+@interface SFMChessGame : NSObject {
+    Position *startingPosition;
+    Position *currentPosition;
+}
 
 #pragma mark - Properties
 @property NSMutableDictionary *tags;

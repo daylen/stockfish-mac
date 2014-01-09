@@ -7,7 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "../Chess/position.h"
+
+using namespace Chess;
 
 @interface SFMChessMove : NSObject
+
+@property Move move;
+@property UndoInfo undoInfo;
+
+- (id)initWithMove:(Move)move undoInfo:(UndoInfo)undoInfo;
 
 @end
