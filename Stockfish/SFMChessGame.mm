@@ -33,6 +33,7 @@
         self.tags = [defaultTags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = nil;
+        // TODO init Position?
     }
     return self;
 }
@@ -42,7 +43,9 @@
     self = [super init];
     if (self) {
         self.tags = [tags mutableCopy];
+        self.moves = [NSMutableArray new];
         self.moveText = moves;
+        [self populateMovesFromMoveText];
     }
     return self;
 }
@@ -58,29 +61,34 @@
 {
     
     // Convert standard algebraic notation
-    Position startingPosition;
-    Position currentPosition;
+    startPosition = new Position;
+    currPosition = new Position;
     
     // Some games start with custom FEN
     if ([self.tags objectForKey:@"FEN"] != nil) {
-        startingPosition.from_fen([self.tags[@"FEN"] UTF8String]);
+        startPosition->from_fen([self.tags[@"FEN"] UTF8String]);
     } else {
-        startingPosition.from_fen([FEN_START_POSITION UTF8String]);
+        startPosition->from_fen([FEN_START_POSITION UTF8String]);
     }
-    currentPosition.copy(startingPosition);
+    currPosition->copy(*startPosition);
     
     for (NSString *moveToken in movesAsText) {
-        Move m = move_from_san(currentPosition, [moveToken UTF8String]);
+        NSLog(@"Processing %@", moveToken);
+        Move m = move_from_san(*currPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
             NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
             @throw e;
         } else {
             UndoInfo u;
-            currentPosition.do_move(m, u);
+            currPosition->do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
+            NSLog(@"%@", cm);
             [self.moves addObject:cm];
         }
     }
+    
+    NSLog(@"Converted this game from SAN to move objects");
+    NSLog(@"%ld moves", [self.moves count]);
     
 }
 
@@ -96,20 +104,43 @@
         [str appendString:self.tags[tagName]];
         [str appendString:@"\"]\n"];
     }
-
+    
     if (self.moveText) {
+        // Original move text was not modified
         [str appendString:self.moveText];
     } else {
-        [str appendString:@"Need to serialize array"];
+        [str appendString:@"\n"];
+        [str appendString:[self movesArrayAsString]];
+        [str appendFormat:@" %@\n\n", self.tags[@"Result"]];
     }
     
     return str;
+}
+
+- (NSString *)movesArrayAsString
+{
+    Move line[800];
+    int i = 0;
+    
+    for (SFMChessMove *move in self.moves) {
+        line[i++] = move.move;
+    }
+    line[i] = MOVE_NONE;
+    
+    return [NSString stringWithUTF8String:line_to_san(*startPosition, line, 0, true, 1).c_str()];
 }
 
 - (NSString *)description
 {
     NSString *s = [NSString stringWithFormat:@"%@ v. %@, %@, %ld tags", self.tags[@"White"], self.tags[@"Black"], self.tags[@"Result"], [self.tags count]];
     return s;
+}
+
+#pragma mark - Teardown
+- (void)dealloc
+{
+    delete startPosition;
+    delete currPosition;
 }
 
 @end

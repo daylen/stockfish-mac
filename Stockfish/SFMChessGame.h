@@ -13,7 +13,10 @@
 
 using namespace Chess;
 
-@interface SFMChessGame : NSObject
+@interface SFMChessGame : NSObject {
+    Position *startPosition;
+    Position *currPosition;
+}
 
 #pragma mark - Properties
 @property NSMutableDictionary *tags;

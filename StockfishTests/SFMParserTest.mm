@@ -47,6 +47,8 @@
     XCTAssertTrue([SFMParser isLetter:'A'], @"Epic fail");
     XCTAssertTrue([SFMParser isLetter:'Q'], @"Epic fail");
     XCTAssertTrue([SFMParser isLetter:'Z'], @"Epic fail");
+    XCTAssertFalse([SFMParser isLetter:'1'], @"Epic fail");
+    XCTAssertFalse([SFMParser isLetter:'0'], @"Epic fail");
 }
 
 - (void)testParseMoves

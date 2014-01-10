@@ -35,8 +35,7 @@ using namespace Chess;
 {
     Position *p = new Position;
     p->from_fen([FEN_START_POSITION UTF8String]);
-    p->print();
-    assert(p->is_ok());
+    XCTAssertTrue(p->is_ok(), @"You probably didn't do chess init");
 }
 
 @end
