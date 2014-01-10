@@ -10,6 +10,12 @@
 #import "SFMParser.h"
 #import "SFMChessGame.h"
 
+#include "../Chess/position.h"
+#include "../Chess/bitboard.h"
+#include "../Chess/direction.h"
+#include "../Chess/mersenne.h"
+#include "../Chess/movepick.h"
+
 @interface SFMParserTest : XCTestCase
 
 @end
@@ -19,7 +25,12 @@
 - (void)setUp
 {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    init_mersenne();
+    init_direction_table();
+    init_bitboards();
+    Position::init_zobrist();
+    Position::init_piece_square_tables();
+    MovePicker::init_phase_table();
 }
 
 - (void)tearDown

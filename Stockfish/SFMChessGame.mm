@@ -45,7 +45,7 @@
         self.tags = [tags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = moves;
-        [self populateMovesFromMoveText];
+        [self populateMovesFromMoveText]; // TODO remove
     }
     return self;
 }
@@ -59,6 +59,10 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
+    if (!movesAsText) {
+        NSLog(@"Called convert but no moves to convert!");
+        return;
+    }
     
     // Convert standard algebraic notation
     startPosition = new Position;
@@ -73,7 +77,6 @@
     currPosition->copy(*startPosition);
     
     for (NSString *moveToken in movesAsText) {
-        NSLog(@"Processing %@", moveToken);
         Move m = move_from_san(*currPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
             NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
@@ -82,13 +85,10 @@
             UndoInfo u;
             currPosition->do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
-            NSLog(@"%@", cm);
             [self.moves addObject:cm];
         }
     }
     
-    NSLog(@"Converted this game from SAN to move objects");
-    NSLog(@"%ld moves", [self.moves count]);
     
 }
 
@@ -111,7 +111,7 @@
     } else {
         [str appendString:@"\n"];
         [str appendString:[self movesArrayAsString]];
-        [str appendFormat:@" %@\n\n", self.tags[@"Result"]];
+        [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
     }
     
     return str;
