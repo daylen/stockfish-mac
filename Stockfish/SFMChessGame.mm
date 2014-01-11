@@ -45,7 +45,7 @@
         self.tags = [tags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = moves;
-        [self populateMovesFromMoveText]; // TODO remove
+        //[self populateMovesFromMoveText]; // TODO remove
     }
     return self;
 }
