@@ -14,6 +14,7 @@
 @property NSColor *boardColor;
 @property NSColor *lightSquareColor;
 @property NSColor *darkSquareColor;
+@property NSColor *fontColor;
 @property NSShadow *boardShadow;
 
 @end
@@ -23,6 +24,7 @@
 #define EXTERIOR_BOARD_MARGIN 40
 #define INTERIOR_BOARD_MARGIN 20
 #define SHADOW_BLUR_RADIUS 30
+#define FONT_SIZE 12
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -30,11 +32,14 @@
     if (self) {
         [self setWantsLayer:YES];
         
+        self.boardIsFlipped = NO;
+        
         self.feltBackground = [NSColor colorWithPatternImage:[NSImage imageNamed:@"Felt"]];
         
         self.boardColor = [NSColor blackColor];
         self.lightSquareColor = [NSColor whiteColor];
         self.darkSquareColor = [NSColor brownColor];
+        self.fontColor = [NSColor whiteColor];
         
         self.boardShadow = [NSShadow new];
         [self.boardShadow setShadowBlurRadius:SHADOW_BLUR_RADIUS];
@@ -81,6 +86,20 @@
             }
             NSRectFill(NSMakeRect(leftInset + i * squareSideLength, topInset + j * squareSideLength, squareSideLength, squareSideLength));
         }
+    }
+    
+    // Draw coordinates
+    for (int i = 0; i < 8; i++) {
+        // Centered style
+        NSMutableParagraphStyle *pStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+        [pStyle setAlignment:NSCenterTextAlignment];
+        
+        // Down
+        NSString *str = [NSString stringWithFormat:@"%d", self.boardIsFlipped ? (i + 1) : (8 - i)];
+        [str drawInRect:NSMakeRect(left, topInset + squareSideLength / 2 - FONT_SIZE / 2 + i * squareSideLength, INTERIOR_BOARD_MARGIN, squareSideLength) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
+        // Across
+        NSString *str2 = [NSString stringWithFormat:@"%c", self.boardIsFlipped ? ('h' - i) : ('a' + i)];
+        [str2 drawInRect:NSMakeRect(leftInset + i * squareSideLength, topInset + 8 * squareSideLength, squareSideLength, INTERIOR_BOARD_MARGIN) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
     }
 }
 

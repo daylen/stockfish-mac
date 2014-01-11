@@ -10,5 +10,6 @@
 
 @interface SFMBoardView : NSView
 
+@property BOOL boardIsFlipped;
 
 @end
