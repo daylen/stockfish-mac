@@ -33,7 +33,8 @@
         self.tags = [defaultTags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = nil;
-        // TODO init Position?
+        startPosition = new Position([FEN_START_POSITION UTF8String]);
+        currPosition = new Position([FEN_START_POSITION UTF8String]);
     }
     return self;
 }
@@ -45,7 +46,6 @@
         self.tags = [tags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = moves;
-        //[self populateMovesFromMoveText]; // TODO remove
     }
     return self;
 }
