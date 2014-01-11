@@ -72,8 +72,6 @@
     CGFloat squareSideLength = (boardSideLength - 2 * INTERIOR_BOARD_MARGIN) / 8;
     
     // Draw 64 squares
-    BOOL lightColor = YES;
-    
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             if ((i + j) % 2 == 0) {
@@ -81,10 +79,7 @@
             } else {
                 [self.darkSquareColor set];
             }
-            
             NSRectFill(NSMakeRect(leftInset + i * squareSideLength, topInset + j * squareSideLength, squareSideLength, squareSideLength));
-            
-            lightColor = !lightColor;
         }
     }
 }
