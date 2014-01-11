@@ -6,6 +6,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMWindowController">
             <connections>
+                <outlet property="boardView" destination="3BJ-fD-MBC" id="u0b-8O-lE9"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
         </customObject>
@@ -14,7 +15,7 @@
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="xOd-HO-29H" userLabel="Window">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <rect key="contentRect" x="133" y="235" width="960" height="640"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1028"/>
             <value key="minSize" type="size" width="640" height="360"/>
             <view key="contentView" id="gIp-Ho-8D9">
                 <rect key="frame" x="0.0" y="0.0" width="960" height="640"/>
@@ -36,14 +37,14 @@
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="A11-gZ-2uC"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="ipJ-8N-tAF"/>
-                    <toolbarItem implicitItemIdentifier="C46B8810-A992-4E23-9245-C463DBF5C354" label="Sidebar" paletteLabel="Sidebar" tag="-1" id="c54-rA-1hf">
+                    <toolbarItem implicitItemIdentifier="A1EFB345-4482-4893-A510-6B3244D55524" label="Flip Board" paletteLabel="Flip Board" tag="-1" id="fPs-Da-evy">
                         <connections>
-                            <action selector="toggleSidebarVisibility:" target="-2" id="B6J-5I-FAH"/>
+                            <action selector="flipBoard:" target="-2" id="dYJ-pX-0Le"/>
                         </connections>
                     </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
-                    <toolbarItem reference="c54-rA-1hf"/>
+                    <toolbarItem reference="fPs-Da-evy"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>

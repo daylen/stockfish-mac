@@ -7,16 +7,17 @@
 //
 
 #import "SFMWindowController.h"
+#import "SFMBoardView.h"
 
 @interface SFMWindowController ()
+@property (weak) IBOutlet SFMBoardView *boardView;
 
 @end
 
 @implementation SFMWindowController
 
-- (IBAction)toggleSidebarVisibility:(id)sender {
-    NSLog(@"Toggling sidebar visibility");
-    
+- (IBAction)flipBoard:(id)sender {
+    self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
 
 - (id)initWithWindow:(NSWindow *)window
@@ -31,8 +32,7 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
-        
+    
 
 }
 

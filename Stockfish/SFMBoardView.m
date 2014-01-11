@@ -26,6 +26,12 @@
 #define SHADOW_BLUR_RADIUS 30
 #define FONT_SIZE 12
 
+- (void)setBoardIsFlipped:(BOOL)boardIsFlipped
+{
+    _boardIsFlipped = boardIsFlipped;
+    [self setNeedsDisplay:YES];
+}
+
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
