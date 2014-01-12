@@ -10,7 +10,6 @@
 
 @interface SFMPieceView()
 
-@property BOOL selected;
 @property SFMBoardView* boardView;
 
 @end
@@ -28,7 +27,6 @@
         NSString *name = [SFMPieceView fileNameForPieceType:pieceType];
         [self setImage:[NSImage imageNamed:name]];
         
-        self.selected = NO;
         self.square = square;
         self.boardView = boardView;
         
@@ -59,12 +57,7 @@
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    if (self.selected) {
-        [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:SQ_NONE];
-    } else {
-        [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:self.square];
-    }
-    self.selected = !self.selected;
+    [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:self.square];
 }
 
 @end

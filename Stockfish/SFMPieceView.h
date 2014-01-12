@@ -18,7 +18,6 @@ using namespace Chess;
 
 @property Square square;
 
-
 - (id)initWithPieceType:(Piece)pieceType
                onSquare:(Square)square
               boardView:(SFMBoardView *)boardView;
