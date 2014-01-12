@@ -14,9 +14,15 @@
 #include "../Chess/move.h"
 #include "../Chess/san.h"
 
+@interface SFMChessGame()
+
+@property int currentMoveIndex;
+
+@end
+
 @implementation SFMChessGame
 
-#pragma mark - Init
+#pragma mark - Init and Set Up
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2
 {
     self = [super init];
@@ -34,8 +40,11 @@
         self.moves = [NSMutableArray new];
         self.moveText = nil;
         self.currentMoveIndex = 0;
+        
         self.startPosition = new Position([FEN_START_POSITION UTF8String]);
         self.currPosition = new Position([FEN_START_POSITION UTF8String]);
+        assert(self.startPosition->is_ok());
+        assert(self.currPosition->is_ok());
     }
     return self;
 }
@@ -52,7 +61,6 @@
     return self;
 }
 
-#pragma mark - Preparation
 - (void)populateMovesFromMoveText
 {
     [self convertToChessMoveObjects:[SFMParser parseMoves:self.moveText]];
@@ -97,13 +105,12 @@
     
 }
 
-#pragma mark - Moves
-- (void)doMove:(Move)move
-{
-    
-}
+#pragma mark - Doing Moves
+
 - (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType
 {
+    assert(self.currPosition->is_ok());
+    self.currPosition->print();
     assert(square_is_ok(fromSquare));
     assert(square_is_ok(toSquare));
     assert(desiredPieceType == NO_PIECE_TYPE ||
@@ -143,8 +150,55 @@
 {
     [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
 }
-- (BOOL)atEnd {
+
+#pragma mark - Navigation
+
+- (BOOL)atBeginning
+{
+    return self.currentMoveIndex == 0;
+}
+- (BOOL)atEnd
+{
     return self.currentMoveIndex == [self.moves count];
+}
+- (void)goBackOneMove
+{
+    if (![self atBeginning]) {
+        self.currentMoveIndex--;
+        SFMChessMove *chessMove = self.moves[self.currentMoveIndex];
+        Move move = chessMove.move;
+        UndoInfo undoInfo = chessMove.undoInfo;
+        self.currPosition->undo_move(move, undoInfo);
+    }
+}
+- (void)goForwardOneMove
+{
+    if (![self atEnd]) {
+        SFMChessMove *chessMove = self.moves[self.currentMoveIndex];
+        Move move = chessMove.move;
+        UndoInfo undoInfo = chessMove.undoInfo;
+        self.currPosition->do_move(move, undoInfo);
+        self.currentMoveIndex++;
+    }
+}
+- (void)goToBeginning
+{
+    while (![self atBeginning]) {
+        [self goBackOneMove];
+    }
+}
+- (void)goToEnd
+{
+    while (![self atEnd]) {
+        [self goForwardOneMove];
+    }
+}
+- (void)goToPly:(int)ply
+{
+    [self goToBeginning];
+    for (int i = 0; i < ply && ![self atEnd]; i++) {
+        [self goForwardOneMove];
+    }
 }
 
 #pragma mark - Export

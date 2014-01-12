@@ -21,5 +21,6 @@ using namespace Chess;
 - (id)initWithPieceType:(Piece)pieceType
                onSquare:(Square)square
               boardView:(SFMBoardView *)boardView;
+- (void)moveTo:(NSPoint)point;
 
 @end

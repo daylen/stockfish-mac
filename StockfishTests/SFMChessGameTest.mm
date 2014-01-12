@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "SFMChessGame.h"
+#import "SFMChessMove.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -44,23 +45,29 @@ using namespace Chess;
 {
     SFMChessGame *game = [[SFMChessGame alloc] initWithWhite:[SFMPlayer new] andBlack:[SFMPlayer new]];
     XCTAssertEqual([game.moves count], 0);
-    XCTAssertEqual(game.currentMoveIndex, 0);
+    XCTAssertTrue([game atBeginning]);
+    XCTAssertTrue([game atEnd]);
     [game doMoveFrom:SQ_E2 to:SQ_E4];
     [game doMoveFrom:SQ_E7 to:SQ_E5];
     XCTAssertEqual([game.moves count], 2);
-    XCTAssertEqual(game.currentMoveIndex, 2);
+    XCTAssertTrue([game atEnd]);
 }
 - (void)testLoadedGame
 {
     SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{} andMoves:@"1. e4 e5 2. Nf3 Nc6"];
     [game populateMovesFromMoveText];
     XCTAssertEqual([game.moves count], 4);
-    XCTAssertEqual(game.currentMoveIndex, 0);
-    game.currentMoveIndex = 4;
+    XCTAssertTrue([game atBeginning]);
+    [game goToEnd];
+    XCTAssertTrue([game atEnd]);
+    for (SFMChessMove *chessMove in game.moves) {
+        NSLog(@"%@", [NSString stringWithUTF8String:move_to_string(chessMove.move).c_str()]);
+    }
+    
     [game doMoveFrom:SQ_F1 to:SQ_B5];
     [game doMoveFrom:SQ_A7 to:SQ_A6];
     XCTAssertEqual([game.moves count], 6);
-    XCTAssertEqual(game.currentMoveIndex, 6);
+    XCTAssertTrue([game atEnd]);
 }
 
 @end

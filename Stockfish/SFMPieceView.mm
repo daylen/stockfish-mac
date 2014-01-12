@@ -7,6 +7,7 @@
 //
 
 #import "SFMPieceView.h"
+#import <QuartzCore/CAMediaTimingFunction.h>
 
 @interface SFMPieceView()
 
@@ -53,6 +54,15 @@
                                    [NSNumber numberWithInt:BQ]: @"queen_b",
                                    [NSNumber numberWithInt:BK]: @"king_b"};
     return names[[NSNumber numberWithInt:pieceType]];
+}
+
+- (void)moveTo:(NSPoint)point
+{
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.5];
+    [[NSAnimationContext currentContext] setTimingFunction:[CAMediaTimingFunction functionWithControlPoints:0.23 :1 :0.32 :1]];
+    [[self animator] setFrameOrigin:point];
+    [NSAnimationContext endGrouping];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent

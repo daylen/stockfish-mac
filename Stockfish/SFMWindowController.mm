@@ -25,10 +25,7 @@
 {
     self = [super initWithWindow:window];
     if (self) {
-        // Load the first game from the PGN file for now
-        SFMChessGame *firstGame = self.pgnFile.games[0];
-        
-        self.boardView.position = firstGame.startPosition;
+        // Nothing
     }
     return self;
 }
@@ -37,7 +34,24 @@
 {
     [super windowDidLoad];
     
+    SFMChessGame *firstGame = self.pgnFile.games[0];
+    
+    self.boardView.position = firstGame.startPosition;
+    [self.boardView setDelegate:self];
 
+}
+
+#pragma mark - Delegate methods
+
+- (Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare
+{
+    return [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
+}
+
+- (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
+{
+    // TODO just the first game
+    return [self.pgnFile.games[0] doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
 }
 
 @end

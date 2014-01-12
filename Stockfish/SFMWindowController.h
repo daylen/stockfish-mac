@@ -8,8 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SFMPGNFile.h"
+#import "SFMBoardViewDelegate.h"
 
-@interface SFMWindowController : NSWindowController
+@interface SFMWindowController : NSWindowController <SFMBoardViewDelegate>
 
 @property SFMPGNFile *pgnFile;
 

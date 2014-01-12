@@ -42,9 +42,13 @@ CGFloat topInset;
 CGFloat squareSideLength;
 
 #pragma mark - Setters
+
 - (void)setPosition:(Chess::Position *)position
 {
     _position = position;
+    NSLog(@"setting position");
+    
+    assert(position->is_ok());
     
     // Invalidate pieces array
     self.pieces = [NSMutableArray new];
@@ -90,12 +94,6 @@ CGFloat squareSideLength;
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
         [self.boardShadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.75]]; // Gray
         
-        // Chess init
-        init_direction_table();
-        init_bitboards();
-        Position::init_zobrist();
-        Position::init_piece_square_tables();
-        
         self.position = new Position([FEN_START_POSITION UTF8String]);
         
     }
@@ -105,6 +103,7 @@ CGFloat squareSideLength;
 #pragma mark - Draw
 - (void)drawRect:(NSRect)dirtyRect
 {
+    NSLog(@"Draw rect");
     // Draw a felt background
     NSGraphicsContext *context = [NSGraphicsContext currentContext];
     [context saveGraphicsState];
@@ -158,9 +157,12 @@ CGFloat squareSideLength;
     
     // Draw pieces
     for (SFMPieceView *pieceView in self.pieces) {
-        CGPoint coordinate = [self coordinatesForSquare:pieceView.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
-        [pieceView setFrame:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
-        [pieceView setNeedsDisplay:YES];
+        // Only redraw if resizing or if we haven't drawn yet or if the board has been flipped
+        if (pieceView.frame.size.width == 0 || [self inLiveResize]) {
+            CGPoint coordinate = [self coordinatesForSquare:pieceView.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
+            [pieceView setFrame:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
+            [pieceView setNeedsDisplay:YES];
+        }
     }
     
     // Draw highlights
@@ -206,7 +208,9 @@ CGFloat squareSideLength;
         number = (int) (point.y - top) / (int) sideLength;
         number = 7 - number;
     }
-    assert(letter >= 0 && letter <= 7 && number >= 0 && number <= 7);
+    if (!(letter >= 0 && letter <= 7 && number >= 0 && number <= 7)) {
+        return SQ_NONE;
+    }
     return static_cast<Square>(8 * number + letter);
 }
 
@@ -214,20 +218,57 @@ CGFloat squareSideLength;
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    if (YES) { // numHighlightedSquares > 0
-        NSPoint event_location = [theEvent locationInWindow];
-        NSPoint local_point = [self convertPoint:event_location fromView:nil];
-        Square clickedSquare = [self squareForCoordinates:local_point leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
-        int letter = clickedSquare % 8;
-        int number = clickedSquare / 8;
-        NSLog(@"YOU CLICKED: %c%d", 'a'+letter, number+1);
+    if (numHighlightedSquares > 0) {
+        NSPoint clickLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        Square clickedSquare = [self squareForCoordinates:clickLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
         
-        // Get the clicked square
-        // See if clicked square was in the highlighted squares
-        // Handle promotion
+        if (clickedSquare == SQ_NONE) {
+            NSLog(@"Did not actually click a square!");
+        }
+        
+        for (int i = 0; i < numHighlightedSquares; i++) {
+            if (highlightedSquares[i] == clickedSquare) {
+                assert(self.delegate != nil);
+                Move theMove = [self.delegate doMoveFrom:selectedSquare
+                                                      to:clickedSquare]; // Update the model
+                UndoInfo u;
+                self.position->do_move(theMove, u); // Update view
+                [self animatePieceOnSquare:selectedSquare to:clickedSquare];
+            }
+        }
+        
+        // TODO Handle promotion
     }
     numHighlightedSquares = 0;
     [self setNeedsDisplay:YES];
+}
+
+- (void)animatePieceOnSquare:(Square)fromSquare to:(Square)toSquare
+{
+    [self animatePieceOnSquare:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
+}
+
+- (void)animatePieceOnSquare:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPromotionPiece
+{
+    // TODO handle promotion
+    SFMPieceView *thePiece;
+    SFMPieceView *capturedPiece;
+    for (SFMPieceView *pieceView in self.pieces) {
+        if (pieceView.square == fromSquare) {
+            thePiece = pieceView;
+        }
+        if (pieceView.square == toSquare) {
+            capturedPiece = pieceView;
+        }
+    }
+    
+    if (capturedPiece) {
+        
+    } else {
+        [thePiece moveTo:[self coordinatesForSquare:toSquare leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
+    }
+    
+    // TODO update internal data structure
 }
 
 - (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq

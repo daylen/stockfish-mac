@@ -30,6 +30,9 @@ using namespace Chess;
 {
     self = [super init];
     if (self) {
+        // We have to call all these init methods, or else Chess::Position
+        // might crash
+        
         init_mersenne();
         init_direction_table();
         init_bitboards();
@@ -42,7 +45,7 @@ using namespace Chess;
 
 - (id)initWithType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
-    self = [super init];
+    self = [self init];
     if (self) {
         self.pgnFile = [SFMPGNFile new];
     }

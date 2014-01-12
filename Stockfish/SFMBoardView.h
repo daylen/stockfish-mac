@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SFMBoardViewDelegate.h"
 
 #include "../Chess/position.h"
 
@@ -16,6 +17,7 @@ using namespace Chess;
 
 @property (nonatomic) BOOL boardIsFlipped;
 @property (nonatomic) Position *position;
+@property (nonatomic) id <SFMBoardViewDelegate> delegate;
 
 - (void)displayPossibleMoveHighlightsForPieceOnSquare:(Square)sq;
 

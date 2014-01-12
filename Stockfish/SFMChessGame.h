@@ -19,21 +19,26 @@ using namespace Chess;
 @property NSMutableDictionary *tags;
 @property NSMutableArray *moves; // Lazy
 @property NSString *moveText;
-@property int currentMoveIndex;
 @property Position *startPosition;
 @property Position *currPosition;
 
-#pragma mark - Init
+#pragma mark - Init and Set Up
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;
 - (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Saves the tags and move text
-
-#pragma mark - Preparation
 - (void)populateMovesFromMoveText; // Actually load the game
 
-#pragma mark - Moves
-- (void)doMove:(Move)move;
+#pragma mark - Doing Moves
 - (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType;
 - (void)doMoveFrom:(Square)fromSquare to:(Square)toSquare;
+
+#pragma mark - Navigation
+- (BOOL)atBeginning;
+- (BOOL)atEnd;
+- (void)goBackOneMove;
+- (void)goForwardOneMove;
+- (void)goToBeginning;
+- (void)goToEnd;
+- (void)goToPly:(int)ply;
 
 #pragma mark - Export
 - (NSString *)pgnString; // PGN string for this game

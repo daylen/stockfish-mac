@@ -54,6 +54,7 @@
 		77924AFD187E72940019C56E /* SFMParser.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.mm */; };
 		77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFE187E77770019C56E /* SFMParserTest.mm */; };
 		779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.mm */; };
+		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
 /* End PBXBuildFile section */
 
@@ -152,6 +153,8 @@
 		77924AFC187E72940019C56E /* SFMParser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMParser.mm; path = Stockfish/SFMParser.mm; sourceTree = "<group>"; };
 		77924AFE187E77770019C56E /* SFMParserTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMParserTest.mm; sourceTree = "<group>"; };
 		779925D8188273C800EAAEDD /* SFMChessGameTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMChessGameTest.mm; sourceTree = "<group>"; };
+		779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardViewDelegate.h; path = Stockfish/SFMBoardViewDelegate.h; sourceTree = "<group>"; };
+		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PositionTest.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -160,6 +163,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */,
 				77050672187CE43300BA4635 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -179,6 +183,7 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
+				779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */,
 				773DE97018822DF8009156C3 /* Piece PDFs */,
 				7752FF4818810B34003E82B3 /* View */,
 				7715B8AD187E8981006F2366 /* Model */,
@@ -204,6 +209,7 @@
 		77050670187CE43300BA4635 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				779925DB1882914B00EAAEDD /* QuartzCore.framework */,
 				77050671187CE43300BA4635 /* Cocoa.framework */,
 				77050693187CE43400BA4635 /* XCTest.framework */,
 				77050673187CE43300BA4635 /* Other Frameworks */,
