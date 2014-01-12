@@ -8,8 +8,13 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include "../Chess/position.h"
+
+using namespace Chess;
+
 @interface SFMBoardView : NSView
 
 @property (nonatomic) BOOL boardIsFlipped;
+@property (nonatomic) Position *position;
 
 @end
