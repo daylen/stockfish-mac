@@ -19,7 +19,9 @@
 @property NSColor *lightSquareColor;
 @property NSColor *darkSquareColor;
 @property NSColor *fontColor;
+@property NSColor *highlightColor;
 @property NSShadow *boardShadow;
+@property NSMutableArray *pieces;
 
 @end
 
@@ -30,10 +32,26 @@
 #define BOARD_SHADOW_BLUR_RADIUS 30
 #define FONT_SIZE 12
 
+Square highlightedSquares[32];
+int numHighlightedSquares;
+
 - (void)setPosition:(Chess::Position *)position
 {
     _position = position;
     
+    // Invalidate pieces array
+    self.pieces = [NSMutableArray new];
+    // Remove subviews
+    [self setSubviews:[NSArray new]];
+    
+    for (Square sq = SQ_A1; sq < SQ_H8; sq++) {
+        Piece piece = _position->piece_on(sq);
+        if (piece != EMPTY) {
+            SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece onSquare:sq boardView:self];
+            [self addSubview:pieceView];
+            [self.pieces addObject:pieceView];
+        }
+    }
     
     [self setNeedsDisplay:YES];
 }
@@ -58,53 +76,30 @@
         self.lightSquareColor = [NSColor whiteColor];
         self.darkSquareColor = [NSColor brownColor];
         self.fontColor = [NSColor whiteColor];
+        self.highlightColor = [NSColor colorWithRed:1 green:1 blue:0 alpha:0.7];
         
         self.boardShadow = [NSShadow new];
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
         [self.boardShadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.75]]; // Gray
         
-        // TODO REMOVE:
-        self.position = new Position([FEN_START_POSITION UTF8String]);
+        // CHESS INIT
+        init_direction_table();
+        init_bitboards();
+        Position::init_zobrist();
+        Position::init_piece_square_tables();
+        
+        // TODO REMOVE: (ONLY FOR TESTING)
+        self.position = new Position([@"r1r5/5pbk/2Np2p1/2nPp1Pp/p1q1B2P/4QP2/1PP3R1/1K2R3 b - - 0 32" UTF8String]);
+        assert(self.position->is_ok());
+        
     }
     return self;
 }
 
 
-
-- (void)drawPiecesWithLeft:(CGFloat)left top:(CGFloat)top side:(CGFloat)sideLength
-{
-    if (self.position) {
-        for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
-            //Square s = self.boardIsFlipped ? Square(SQ_H8 - sq) : sq;
-            Piece p = self.position->piece_on(sq);
-            if (p != EMPTY) {
-                int letter = sq % 8;
-                int number = sq / 8;
-                CGFloat l, t;
-                if (self.boardIsFlipped) {
-                    l = left + (7 - letter) * sideLength;
-                    t = top + number * sideLength;
-                } else {
-                    l = left + letter * sideLength;
-                    t = top + (7 - number) * sideLength;
-                }
-                
-                
-                
-                SFMPieceView *pieceView = [[SFMPieceView alloc] initWithFrame:NSMakeRect(l, t, sideLength, sideLength) pieceType:p];
-                pieceView.square = sq;
-                
-                [self addSubview:pieceView];
-            }
-        }
-    }
-}
-
-
 - (void)drawRect:(NSRect)dirtyRect
 {
-    // Remove subviews
-    [self setSubviews:[NSArray new]];
+    
     
     // Draw a felt background
     NSGraphicsContext *context = [NSGraphicsContext currentContext];
@@ -157,12 +152,86 @@
         [str drawInRect:NSMakeRect(leftInset + i * squareSideLength, topInset + 8 * squareSideLength, squareSideLength, INTERIOR_BOARD_MARGIN) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
     }
     
-    [self drawPiecesWithLeft:leftInset top:topInset side:squareSideLength];
+    // Draw pieces
+    for (SFMPieceView *pieceView in self.pieces) {
+        CGPoint coordinate = [self coordinatesForSquare:pieceView.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
+        [pieceView setFrame:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
+        [pieceView setNeedsDisplay:YES];
+    }
     
+    // Draw highlights
+    for (int i = 0; i < numHighlightedSquares; i++) {
+        [self.highlightColor set];
+        CGPoint coordinate = [self coordinatesForSquare:highlightedSquares[i] leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
+        [NSBezierPath fillRect:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
+    }
+    
+}
+
+- (CGPoint)coordinatesForSquare:(Square)sq leftOffset:(CGFloat)left topOffset:(CGFloat)top sideLength:(CGFloat)sideLength
+{
+    int letter = sq % 8;
+    int number = sq / 8;
+    CGFloat l, t;
+    if (self.boardIsFlipped) {
+        l = left + (7 - letter) * sideLength;
+        t = top + number * sideLength;
+    } else {
+        l = left + letter * sideLength;
+        t = top + (7 - number) * sideLength;
+    }
+    return CGPointMake(l, t);
+}
+
+- (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq
+{
+    numHighlightedSquares = (sq == SQ_NONE) ? 0 : [self destinationSquaresFrom:sq saveInArray:highlightedSquares];
+    [self setNeedsDisplay:YES];
+}
+
+/// destinationSquaresFrom:saveInArray takes a square and a C array of squares
+/// as input, finds all squares the piece on the given square can move to,
+/// and stores these possible destination squares in the array. This is used
+/// in the GUI in order to highlight the squares a piece can move to.
+
+- (int)destinationSquaresFrom:(Square)sq saveInArray:(Square *)sqs {
+    int i, j, n;
+    Move mlist[32];
+    
+    assert(square_is_ok(sq));
+    assert(sqs != NULL);
+    
+    
+    n = [self movesFrom: sq saveInArray: mlist];
+    for (i = 0, j = 0; i < n; i++)
+        // Only include non-promotions and queen promotions, in order to avoid
+        // having the same destination squares multiple times in the array.
+        if (!move_promotion(mlist[i]) || move_promotion(mlist[i]) == QUEEN) {
+            // For castling moves, adjust the destination square so that it displays
+            // correctly when squares are highlighted in the GUI.
+            if (move_is_long_castle(mlist[i]))
+                sqs[j] = move_to(mlist[i]) + 2;
+            else if (move_is_short_castle(mlist[i]))
+                sqs[j] = move_to(mlist[i]) - 1;
+            else
+                sqs[j] = move_to(mlist[i]);
+            j++;
+        }
+    sqs[j] = SQ_NONE;
+    return j;
+}
+- (int)movesFrom:(Square)sq saveInArray:(Move *)mlist {
+    assert(square_is_ok(sq));
+    assert(mlist != NULL);
+    
+    int numPossible = self.position->moves_from(sq, mlist);
+    return numPossible;
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
+    numHighlightedSquares = 0;
+    [self setNeedsDisplay:YES];
     NSLog(@"Clicked the board");
 }
 

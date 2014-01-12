@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SFMBoardView.h"
 
 #include "../Chess/position.h"
 #include "../Chess/square.h"
@@ -17,6 +18,9 @@ using namespace Chess;
 
 @property Square square;
 
-- (id)initWithFrame:(NSRect)frameRect pieceType:(Piece)pieceType;
+
+- (id)initWithPieceType:(Piece)pieceType
+               onSquare:(Square)square
+              boardView:(SFMBoardView *)boardView;
 
 @end

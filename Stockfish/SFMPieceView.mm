@@ -8,21 +8,34 @@
 
 #import "SFMPieceView.h"
 
+@interface SFMPieceView()
+
+@property BOOL selected;
+@property SFMBoardView* boardView;
+
+@end
+
 #define PIECE_SHADOW_BLUR_RADIUS 5
 
 @implementation SFMPieceView
 
-- (id)initWithFrame:(NSRect)frameRect pieceType:(Chess::Piece)pieceType
+- (id)initWithPieceType:(Chess::Piece)pieceType
+               onSquare:(Chess::Square)square
+              boardView:(SFMBoardView *)boardView
 {
-    self = [super initWithFrame:frameRect];
+    self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)];
     if (self) {
+        NSString *name = [SFMPieceView fileNameForPieceType:pieceType];
+        [self setImage:[NSImage imageNamed:name]];
+        
+        self.selected = NO;
+        self.square = square;
+        self.boardView = boardView;
+        
         NSShadow *shadow = [NSShadow new];
         [shadow setShadowBlurRadius:PIECE_SHADOW_BLUR_RADIUS];
         [shadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.5]]; // Gray
         [self setShadow:shadow];
-
-        NSString *name = [SFMPieceView fileNameForPieceType:pieceType];
-        [self setImage:[NSImage imageNamed:name]];
     }
     return self;
 }
@@ -46,9 +59,12 @@
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    int letter = self.square % 8;
-    int number = self.square / 8;
-    NSLog(@"Clicked a piece on square: %c%d", 'a'+letter, number+1);
+    if (self.selected) {
+        [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:SQ_NONE];
+    } else {
+        [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:self.square];
+    }
+    self.selected = !self.selected;
 }
 
 @end

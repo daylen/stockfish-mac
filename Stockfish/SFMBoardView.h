@@ -17,4 +17,6 @@ using namespace Chess;
 @property (nonatomic) BOOL boardIsFlipped;
 @property (nonatomic) Position *position;
 
+- (void)displayPossibleMoveHighlightsForPieceOnSquare:(Square)sq;
+
 @end
