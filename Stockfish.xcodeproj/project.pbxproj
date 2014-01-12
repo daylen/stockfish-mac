@@ -53,6 +53,7 @@
 		77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AF2187DFA040019C56E /* SFMPlayer.mm */; };
 		77924AFD187E72940019C56E /* SFMParser.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.mm */; };
 		77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFE187E77770019C56E /* SFMParserTest.mm */; };
+		779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.mm */; };
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
 /* End PBXBuildFile section */
 
@@ -150,6 +151,7 @@
 		77924AFB187E72940019C56E /* SFMParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMParser.h; path = Stockfish/SFMParser.h; sourceTree = "<group>"; };
 		77924AFC187E72940019C56E /* SFMParser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMParser.mm; path = Stockfish/SFMParser.mm; sourceTree = "<group>"; };
 		77924AFE187E77770019C56E /* SFMParserTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMParserTest.mm; sourceTree = "<group>"; };
+		779925D8188273C800EAAEDD /* SFMChessGameTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMChessGameTest.mm; sourceTree = "<group>"; };
 		77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PositionTest.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -248,6 +250,7 @@
 			children = (
 				77050699187CE43400BA4635 /* Supporting Files */,
 				77924AFE187E77770019C56E /* SFMParserTest.mm */,
+				779925D8188273C800EAAEDD /* SFMChessGameTest.mm */,
 				77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */,
 			);
 			path = StockfishTests;
@@ -505,6 +508,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */,
 				77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */,
 				77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */,
 			);

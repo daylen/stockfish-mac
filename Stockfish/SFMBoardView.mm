@@ -27,14 +27,21 @@
 
 @implementation SFMBoardView
 
+#pragma mark - Constants
 #define EXTERIOR_BOARD_MARGIN 40
 #define INTERIOR_BOARD_MARGIN 20
 #define BOARD_SHADOW_BLUR_RADIUS 30
 #define FONT_SIZE 12
 
+#pragma mark - Instance Variables
 Square highlightedSquares[32];
 int numHighlightedSquares;
+Square selectedSquare;
+CGFloat leftInset;
+CGFloat topInset;
+CGFloat squareSideLength;
 
+#pragma mark - Setters
 - (void)setPosition:(Chess::Position *)position
 {
     _position = position;
@@ -44,7 +51,7 @@ int numHighlightedSquares;
     // Remove subviews
     [self setSubviews:[NSArray new]];
     
-    for (Square sq = SQ_A1; sq < SQ_H8; sq++) {
+    for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
         Piece piece = _position->piece_on(sq);
         if (piece != EMPTY) {
             SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece onSquare:sq boardView:self];
@@ -62,6 +69,7 @@ int numHighlightedSquares;
     [self setNeedsDisplay:YES];
 }
 
+#pragma mark - Init
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
@@ -82,25 +90,21 @@ int numHighlightedSquares;
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
         [self.boardShadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.75]]; // Gray
         
-        // CHESS INIT
+        // Chess init
         init_direction_table();
         init_bitboards();
         Position::init_zobrist();
         Position::init_piece_square_tables();
         
-        // TODO REMOVE: (ONLY FOR TESTING)
-        self.position = new Position([@"r1r5/5pbk/2Np2p1/2nPp1Pp/p1q1B2P/4QP2/1PP3R1/1K2R3 b - - 0 32" UTF8String]);
-        assert(self.position->is_ok());
+        self.position = new Position([FEN_START_POSITION UTF8String]);
         
     }
     return self;
 }
 
-
+#pragma mark - Draw
 - (void)drawRect:(NSRect)dirtyRect
 {
-    
-    
     // Draw a felt background
     NSGraphicsContext *context = [NSGraphicsContext currentContext];
     [context saveGraphicsState];
@@ -122,9 +126,9 @@ int numHighlightedSquares;
     NSRectFill(NSMakeRect(left, top, boardSideLength, boardSideLength));
     [[NSShadow new] set];
     
-    CGFloat leftInset = left + INTERIOR_BOARD_MARGIN;
-    CGFloat topInset = top + INTERIOR_BOARD_MARGIN;
-    CGFloat squareSideLength = (boardSideLength - 2 * INTERIOR_BOARD_MARGIN) / 8;
+    leftInset = left + INTERIOR_BOARD_MARGIN;
+    topInset = top + INTERIOR_BOARD_MARGIN;
+    squareSideLength = (boardSideLength - 2 * INTERIOR_BOARD_MARGIN) / 8;
     
     // Draw 64 squares
     for (int i = 0; i < 8; i++) {
@@ -168,7 +172,12 @@ int numHighlightedSquares;
     
 }
 
-- (CGPoint)coordinatesForSquare:(Square)sq leftOffset:(CGFloat)left topOffset:(CGFloat)top sideLength:(CGFloat)sideLength
+#pragma mark - Helper methods
+
+- (CGPoint)coordinatesForSquare:(Square)sq
+                     leftOffset:(CGFloat)left
+                      topOffset:(CGFloat)top
+                     sideLength:(CGFloat)sideLength
 {
     int letter = sq % 8;
     int number = sq / 8;
@@ -182,13 +191,53 @@ int numHighlightedSquares;
     }
     return CGPointMake(l, t);
 }
-
-- (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq
+- (Square)squareForCoordinates:(NSPoint)point
+                    leftOffset:(CGFloat)left
+                     topOffset:(CGFloat)top
+                    sideLength:(CGFloat)sideLength
 {
-    numHighlightedSquares = (sq == SQ_NONE) ? 0 : [self destinationSquaresFrom:sq saveInArray:highlightedSquares];
+    int letter, number;
+    if (self.boardIsFlipped) {
+        letter = (int) (point.x - left) / (int) sideLength;
+        letter = 7 - letter;
+        number = (int) (point.y - top) / (int) sideLength;
+    } else {
+        letter = (int) (point.x - left) / (int) sideLength;
+        number = (int) (point.y - top) / (int) sideLength;
+        number = 7 - number;
+    }
+    assert(letter >= 0 && letter <= 7 && number >= 0 && number <= 7);
+    return static_cast<Square>(8 * number + letter);
+}
+
+#pragma mark - Interaction
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+    if (YES) { // numHighlightedSquares > 0
+        NSPoint event_location = [theEvent locationInWindow];
+        NSPoint local_point = [self convertPoint:event_location fromView:nil];
+        Square clickedSquare = [self squareForCoordinates:local_point leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
+        int letter = clickedSquare % 8;
+        int number = clickedSquare / 8;
+        NSLog(@"YOU CLICKED: %c%d", 'a'+letter, number+1);
+        
+        // Get the clicked square
+        // See if clicked square was in the highlighted squares
+        // Handle promotion
+    }
+    numHighlightedSquares = 0;
     [self setNeedsDisplay:YES];
 }
 
+- (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq
+{
+    selectedSquare = sq;
+    numHighlightedSquares = [self destinationSquaresFrom:sq saveInArray:highlightedSquares];
+    [self setNeedsDisplay:YES];
+}
+
+#pragma mark - Logic
 /// destinationSquaresFrom:saveInArray takes a square and a C array of squares
 /// as input, finds all squares the piece on the given square can move to,
 /// and stores these possible destination squares in the array. This is used
@@ -228,12 +277,7 @@ int numHighlightedSquares;
     return numPossible;
 }
 
-- (void)mouseUp:(NSEvent *)theEvent
-{
-    numHighlightedSquares = 0;
-    [self setNeedsDisplay:YES];
-    NSLog(@"Clicked the board");
-}
+#pragma mark - Misc
 
 - (void)dealloc
 {

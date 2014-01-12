@@ -33,8 +33,9 @@
         self.tags = [defaultTags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = nil;
-        startPosition = new Position([FEN_START_POSITION UTF8String]);
-        currPosition = new Position([FEN_START_POSITION UTF8String]);
+        self.currentMoveIndex = 0;
+        self.startPosition = new Position([FEN_START_POSITION UTF8String]);
+        self.currPosition = new Position([FEN_START_POSITION UTF8String]);
     }
     return self;
 }
@@ -46,11 +47,12 @@
         self.tags = [tags mutableCopy];
         self.moves = [NSMutableArray new];
         self.moveText = moves;
+        self.currentMoveIndex = 0;
     }
     return self;
 }
 
-#pragma mark - Interaction
+#pragma mark - Preparation
 - (void)populateMovesFromMoveText
 {
     [self convertToChessMoveObjects:[SFMParser parseMoves:self.moveText]];
@@ -65,31 +67,84 @@
     }
     
     // Convert standard algebraic notation
-    startPosition = new Position;
-    currPosition = new Position;
+    self.startPosition = new Position;
+    self.currPosition = new Position;
     
     // Some games start with custom FEN
     if ([self.tags objectForKey:@"FEN"] != nil) {
-        startPosition->from_fen([self.tags[@"FEN"] UTF8String]);
+        self.startPosition->from_fen([self.tags[@"FEN"] UTF8String]);
     } else {
-        startPosition->from_fen([FEN_START_POSITION UTF8String]);
+        self.startPosition->from_fen([FEN_START_POSITION UTF8String]);
     }
-    currPosition->copy(*startPosition);
+    self.currPosition->copy(*self.startPosition);
     
     for (NSString *moveToken in movesAsText) {
-        Move m = move_from_san(*currPosition, [moveToken UTF8String]);
+        Move m = move_from_san(*self.currPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
             NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
             @throw e;
         } else {
             UndoInfo u;
-            currPosition->do_move(m, u);
+            self.currPosition->do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
             [self.moves addObject:cm];
         }
     }
     
+    // Set current position back to starting position
+    self.currPosition->copy(*self.startPosition);
     
+    
+}
+
+#pragma mark - Moves
+- (void)doMove:(Move)move
+{
+    
+}
+- (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType
+{
+    assert(square_is_ok(fromSquare));
+    assert(square_is_ok(toSquare));
+    assert(desiredPieceType == NO_PIECE_TYPE ||
+           (desiredPieceType >= KNIGHT && desiredPieceType <= QUEEN));
+    
+    // Find the matching move
+    Move mlist[32], move = MOVE_NONE;
+    int n, i, matches;
+    n = self.currPosition->moves_from(fromSquare, mlist);
+    for (i = 0, matches = 0; i < n; i++)
+        if (move_to(mlist[i]) == toSquare && move_promotion(mlist[i]) == desiredPieceType) {
+            move = mlist[i];
+            matches++;
+        }
+    assert(matches == 1);
+    
+    // Update position
+    UndoInfo u;
+    self.currPosition->do_move(move, u);
+    
+    // Update move list
+    SFMChessMove *chessMove = [[SFMChessMove alloc] initWithMove:move undoInfo:u];
+    if (![self atEnd]) {
+        // We are not at the end of the game. We don't want to mess with
+        // multiple variations, so we just remove all moves at the end of the move list.
+        [self.moves removeObjectsInRange:
+         NSMakeRange(self.currentMoveIndex, [self.moves count] - self.currentMoveIndex)];
+    }
+    [self.moves addObject:chessMove];
+    self.currentMoveIndex++;
+    
+    assert([self atEnd]);
+    return move;
+    
+}
+- (void)doMoveFrom:(Square)fromSquare to:(Square)toSquare
+{
+    [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
+}
+- (BOOL)atEnd {
+    return self.currentMoveIndex == [self.moves count];
 }
 
 #pragma mark - Export
@@ -127,7 +182,7 @@
     }
     line[i] = MOVE_NONE;
     
-    return [NSString stringWithUTF8String:line_to_san(*startPosition, line, 0, true, 1).c_str()];
+    return [NSString stringWithUTF8String:line_to_san(*self.startPosition, line, 0, true, 1).c_str()];
 }
 
 - (NSString *)description
@@ -139,8 +194,8 @@
 #pragma mark - Teardown
 - (void)dealloc
 {
-    delete startPosition;
-    delete currPosition;
+    delete self.startPosition;
+    delete self.currPosition;
 }
 
 @end

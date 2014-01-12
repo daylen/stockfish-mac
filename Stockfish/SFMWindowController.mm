@@ -8,6 +8,7 @@
 
 #import "SFMWindowController.h"
 #import "SFMBoardView.h"
+#import "SFMChessGame.h"
 
 @interface SFMWindowController ()
 @property (weak) IBOutlet SFMBoardView *boardView;
@@ -24,7 +25,10 @@
 {
     self = [super initWithWindow:window];
     if (self) {
+        // Load the first game from the PGN file for now
+        SFMChessGame *firstGame = self.pgnFile.games[0];
         
+        self.boardView.position = firstGame.startPosition;
     }
     return self;
 }

@@ -44,7 +44,6 @@ using namespace Chess;
 {
     self = [super init];
     if (self) {
-        NSLog(@"Creating new file");
         self.pgnFile = [SFMPGNFile new];
     }
     return self;
@@ -53,6 +52,7 @@ using namespace Chess;
 - (void)makeWindowControllers
 {
     SFMWindowController *windowController = [[SFMWindowController alloc] initWithWindowNibName:@"SFMDocument"];
+    windowController.pgnFile = self.pgnFile;
     [self addWindowController:windowController];
 }
 

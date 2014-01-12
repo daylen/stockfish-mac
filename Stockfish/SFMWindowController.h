@@ -7,7 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SFMPGNFile.h"
 
 @interface SFMWindowController : NSWindowController
+
+@property SFMPGNFile *pgnFile;
 
 @end
