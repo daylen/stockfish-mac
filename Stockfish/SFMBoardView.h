@@ -19,6 +19,6 @@ using namespace Chess;
 @property (nonatomic) Position *position;
 @property (nonatomic) id <SFMBoardViewDelegate> delegate;
 
-- (void)displayPossibleMoveHighlightsForPieceOnSquare:(Square)sq;
+- (void)updatePieceViews; // If you change the position, you must call this
 
 @end

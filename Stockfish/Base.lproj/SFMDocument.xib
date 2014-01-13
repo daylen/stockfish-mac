@@ -7,6 +7,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="SFMWindowController">
             <connections>
                 <outlet property="boardView" destination="3BJ-fD-MBC" id="u0b-8O-lE9"/>
+                <outlet property="toolbar" destination="Bvb-HD-m1w" id="nEL-KY-5N1"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
         </customObject>
@@ -43,9 +44,35 @@
                             <action selector="flipBoard:" target="-2" id="dYJ-pX-0Le"/>
                         </connections>
                     </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="CFD726E1-0DB5-4F91-886B-8649F553AFE2" label="Previous Move" paletteLabel="Previous Move" tag="-1" id="8Kq-UT-Rac">
+                        <connections>
+                            <action selector="previousMove:" target="-2" id="2nr-tK-LoX"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="8BA48BC7-AAC9-46BA-8AA4-7EE325770B3A" label="Next Move" paletteLabel="Next Move" tag="-1" id="3v0-NX-5qO">
+                        <connections>
+                            <action selector="nextMove:" target="-2" id="5EU-Pa-JJX"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="21EF0339-C05D-43CD-BF23-BAC040FC0595" label="Previous Game" paletteLabel="Previous Game" tag="-1" id="ujD-q8-e4o">
+                        <connections>
+                            <action selector="previousGame:" target="-2" id="URa-9j-efS"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="CD5D1A78-F604-49EA-BFD0-EB521CA83BE5" label="Next Game" paletteLabel="Next Game" tag="-1" id="xuB-bt-llf">
+                        <connections>
+                            <action selector="nextGame:" target="-2" id="Ksq-Nc-blI"/>
+                        </connections>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="fPs-Da-evy"/>
+                    <toolbarItem reference="A11-gZ-2uC"/>
+                    <toolbarItem reference="8Kq-UT-Rac"/>
+                    <toolbarItem reference="3v0-NX-5qO"/>
+                    <toolbarItem reference="A11-gZ-2uC"/>
+                    <toolbarItem reference="ujD-q8-e4o"/>
+                    <toolbarItem reference="xuB-bt-llf"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>

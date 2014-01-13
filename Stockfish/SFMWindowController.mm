@@ -12,15 +12,37 @@
 
 @interface SFMWindowController ()
 @property (weak) IBOutlet SFMBoardView *boardView;
+@property int currentGameIndex;
+@property SFMChessGame *currentGame;
 
 @end
 
 @implementation SFMWindowController
 
+#pragma mark - Interactions
 - (IBAction)flipBoard:(id)sender {
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
+- (IBAction)previousMove:(id)sender {
+    [self.currentGame goBackOneMove];
+    self.boardView.position->copy(*self.currentGame.currPosition);
+    [self.boardView updatePieceViews];
+}
+- (IBAction)nextMove:(id)sender {
+    [self.currentGame goForwardOneMove];
+    self.boardView.position->copy(*self.currentGame.currPosition);
+    [self.boardView updatePieceViews];
+}
+- (IBAction)previousGame:(id)sender {
+    int smallerIndex = MAX(0, self.currentGameIndex - 1);
+    [self loadGameAtIndex:smallerIndex];
+}
+- (IBAction)nextGame:(id)sender {
+    int biggerIndex = MIN(self.currentGameIndex + 1, (int) [self.pgnFile.games count] - 1);
+    [self loadGameAtIndex:biggerIndex];
+}
 
+#pragma mark - Init
 - (id)initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
@@ -33,16 +55,18 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    
-    SFMChessGame *firstGame = self.pgnFile.games[0];
-    [firstGame populateMovesFromMoveText];
-    
-    self.boardView.position->copy(*firstGame.startPosition);
     [self.boardView setDelegate:self];
-    
-    assert(firstGame.startPosition->is_ok());
-    assert(firstGame.currPosition->is_ok());
+    [self loadGameAtIndex:0];
+}
 
+- (void)loadGameAtIndex:(int)index
+{
+    self.currentGameIndex = index;
+    self.currentGame = self.pgnFile.games[index];
+    [self.currentGame populateMovesFromMoveText];
+    
+    self.boardView.position->copy(*self.currentGame.startPosition);
+    [self.boardView updatePieceViews];
 }
 
 #pragma mark - Delegate methods

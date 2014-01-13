@@ -43,11 +43,10 @@ CGFloat squareSideLength;
 
 #pragma mark - Setters
 
-- (void)setPosition:(Chess::Position *)position
+- (void)updatePieceViews
 {
-    _position = position;
     
-    assert(position->is_ok());
+    assert(self.position->is_ok());
     
     // Invalidate pieces array
     self.pieces = [NSMutableArray new];
@@ -55,7 +54,7 @@ CGFloat squareSideLength;
     [self setSubviews:[NSArray new]];
     
     for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
-        Piece piece = _position->piece_on(sq);
+        Piece piece = self.position->piece_on(sq);
         if (piece != EMPTY) {
             SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece onSquare:sq boardView:self];
             [self addSubview:pieceView];
