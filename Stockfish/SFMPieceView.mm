@@ -65,9 +65,4 @@
     [NSAnimationContext endGrouping];
 }
 
-- (void)mouseUp:(NSEvent *)theEvent
-{
-    [self.boardView displayPossibleMoveHighlightsForPieceOnSquare:self.square];
-}
-
 @end

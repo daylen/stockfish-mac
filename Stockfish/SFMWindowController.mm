@@ -35,9 +35,13 @@
     [super windowDidLoad];
     
     SFMChessGame *firstGame = self.pgnFile.games[0];
+    [firstGame populateMovesFromMoveText];
     
-    self.boardView.position = firstGame.startPosition;
+    self.boardView.position->copy(*firstGame.startPosition);
     [self.boardView setDelegate:self];
+    
+    assert(firstGame.startPosition->is_ok());
+    assert(firstGame.currPosition->is_ok());
 
 }
 

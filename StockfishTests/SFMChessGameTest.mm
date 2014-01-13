@@ -51,6 +51,7 @@ using namespace Chess;
     [game doMoveFrom:SQ_E7 to:SQ_E5];
     XCTAssertEqual([game.moves count], 2);
     XCTAssertTrue([game atEnd]);
+    XCTAssertEqualObjects([game movesArrayAsString], @"1. e4 e5 ");
 }
 - (void)testLoadedGame
 {
@@ -68,6 +69,7 @@ using namespace Chess;
     [game doMoveFrom:SQ_A7 to:SQ_A6];
     XCTAssertEqual([game.moves count], 6);
     XCTAssertTrue([game atEnd]);
+    XCTAssertEqualObjects([game movesArrayAsString], @"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ");
 }
 
 @end

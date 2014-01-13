@@ -47,7 +47,7 @@ using namespace Chess;
 {
     self = [self init];
     if (self) {
-        self.pgnFile = [SFMPGNFile new];
+        self.pgnFile = [[SFMPGNFile alloc] init];
     }
     return self;
 }

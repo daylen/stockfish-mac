@@ -41,8 +41,10 @@
         self.moveText = nil;
         self.currentMoveIndex = 0;
         
-        self.startPosition = new Position([FEN_START_POSITION UTF8String]);
-        self.currPosition = new Position([FEN_START_POSITION UTF8String]);
+        self.startPosition = new Position;
+        self.currPosition = new Position;
+        self.startPosition->from_fen([FEN_START_POSITION UTF8String]);
+        self.currPosition->from_fen([FEN_START_POSITION UTF8String]);
         assert(self.startPosition->is_ok());
         assert(self.currPosition->is_ok());
     }
@@ -69,8 +71,8 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
+    NSLog(@"Converting move text to chess move objects");
     if (!movesAsText) {
-        NSLog(@"Called convert but no moves to convert!");
         return;
     }
     
@@ -110,7 +112,6 @@
 - (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType
 {
     assert(self.currPosition->is_ok());
-    self.currPosition->print();
     assert(square_is_ok(fromSquare));
     assert(square_is_ok(toSquare));
     assert(desiredPieceType == NO_PIECE_TYPE ||
@@ -125,6 +126,7 @@
             move = mlist[i];
             matches++;
         }
+    NSLog(@"%d matches", matches);
     assert(matches == 1);
     
     // Update position
@@ -235,6 +237,10 @@
         line[i++] = move.move;
     }
     line[i] = MOVE_NONE;
+    
+    NSLog(@"Printing the start position");
+    assert(self.startPosition->is_ok());
+    self.startPosition->print();
     
     return [NSString stringWithUTF8String:line_to_san(*self.startPosition, line, 0, true, 1).c_str()];
 }
