@@ -221,8 +221,10 @@ CGFloat squareSideLength;
     if (numHighlightedSquares == 0) {
         // You haven't selected a valid piece, since there are no highlighted
         // squares on the board.
-        
-        [self displayPossibleMoveHighlightsForPieceOnSquare:clickedSquare];
+        if (clickedSquare != SQ_NONE) {
+            [self displayPossibleMoveHighlightsForPieceOnSquare:clickedSquare];
+
+        }
         
     } else {
         // You previously selected a valid piece, and now you're trying to move it
