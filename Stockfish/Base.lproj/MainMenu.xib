@@ -325,6 +325,25 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Move" id="Kso-oh-Jcy">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Move" id="amd-0r-0b5">
+                        <items>
+                            <menuItem title="Previous Move" keyEquivalent="" id="Wog-Pq-npa">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="previousMove:" target="-1" id="keQ-hM-PRG"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Next Move" keyEquivalent="" id="t86-kz-bFa">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="nextMove:" target="-1" id="cbO-QH-Wwo"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="View" id="H8h-7b-M4v">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="HyV-fh-RgO">

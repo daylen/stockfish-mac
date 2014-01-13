@@ -45,6 +45,7 @@ CGFloat squareSideLength;
 
 - (void)updatePieceViews
 {
+    numHighlightedSquares = 0;
     
     assert(self.position->is_ok());
     
