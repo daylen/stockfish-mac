@@ -126,7 +126,6 @@
             move = mlist[i];
             matches++;
         }
-    NSLog(@"%d matches", matches);
     assert(matches == 1);
     
     // Update position

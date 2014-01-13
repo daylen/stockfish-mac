@@ -239,15 +239,42 @@ CGFloat squareSideLength;
             }
             
             if (isValidMove) {
-                /* TODO
-                 - castling
-                 - en passant
-                 - promotion
-                 */
-                Move theMove = [self.delegate doMoveFrom:selectedSquare to:clickedSquare];
+                PieceType pieceType = NO_PIECE_TYPE;
+                
+                // Handle promotions
+                if ([self isPromotionForMoveFromSquare:selectedSquare to:clickedSquare]) {
+                    pieceType = [self getDesiredPromotionPiece];
+                }
+                
+                // HACK: Castling. The user probably tries to move the king two squares to
+                // the side when castling, but Stockfish internally encodes castling moves
+                // as "king captures rook". We handle this by adjusting tSq when the user
+                // tries to move the king two squares to the side:
+                BOOL castle = NO;
+                
+                if (selectedSquare == SQ_E1 && clickedSquare == SQ_G1 &&
+                    self.position->piece_on(selectedSquare) == WK) {
+                    clickedSquare = SQ_H1;
+                    castle = YES;
+                } else if (selectedSquare == SQ_E1 && clickedSquare == SQ_C1 &&
+                           self.position->piece_on(selectedSquare) == WK) {
+                    clickedSquare = SQ_A1;
+                    castle = YES;
+                } else if (selectedSquare == SQ_E8 && clickedSquare == SQ_G8 &&
+                           self.position->piece_on(selectedSquare) == BK) {
+                    clickedSquare = SQ_H8;
+                    castle = YES;
+                } else if (selectedSquare == SQ_E8 && clickedSquare == SQ_C8 &&
+                           self.position->piece_on(selectedSquare) == BK) {
+                    clickedSquare = SQ_A8;
+                    castle = YES;
+                }
+                
+                Move theMove = [self.delegate doMoveFrom:selectedSquare to:clickedSquare promotion:pieceType];
                 UndoInfo u;
+                [self animatePieceOnSquare:selectedSquare to:clickedSquare promotion:pieceType shouldCastle:castle];
                 self.position->do_move(theMove, u);
-                [self animatePieceOnSquare:selectedSquare to:clickedSquare];
+
             }
             
         }
@@ -258,40 +285,167 @@ CGFloat squareSideLength;
     
 }
 
-- (void)animatePieceOnSquare:(Square)fromSquare to:(Square)toSquare
+- (SFMPieceView *)pieceViewOnSquare:(Square)square
 {
-    [self animatePieceOnSquare:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
+    for (SFMPieceView *pieceView in self.pieces) {
+        if (pieceView.square == square) {
+            return pieceView;
+        }
+    }
+    return nil;
 }
 
-- (void)animatePieceOnSquare:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPromotionPiece
+// Sets the piece view's square property and executes an animated move
+- (void)movePieceView:(SFMPieceView *)pieceView toSquare:(Square)square
 {
-    // TODO handle promotion, castling, en passant, etc.
-    SFMPieceView *thePiece;
-    SFMPieceView *capturedPiece;
-    for (SFMPieceView *pieceView in self.pieces) {
-        if (pieceView.square == fromSquare) {
-            thePiece = pieceView;
-        }
-        if (pieceView.square == toSquare) {
-            capturedPiece = pieceView;
-        }
-    }
+    pieceView.square = square;
+    [pieceView moveTo:[self coordinatesForSquare:square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
+}
+
+- (void)animatePieceOnSquare:(Square)fromSquare
+                          to:(Square)toSquare
+                   promotion:(PieceType)desiredPromotionPiece
+                shouldCastle:(BOOL)shouldCastle
+{
     
-    if (capturedPiece) {
+    // Find the piece(s)
+    SFMPieceView *thePiece = [self pieceViewOnSquare:fromSquare];
+    SFMPieceView *capturedPiece = [self pieceViewOnSquare:toSquare];
+    
+    /*
+     } else if (type_of_piece(self.position->piece_on(fromSquare)) == PAWN &&
+     square_file(fromSquare) != square_file(toSquare)) {
+
+     */
+    // PRINT STATEMENTS
+    PieceType piece = type_of_piece(self.position->piece_on(fromSquare));
+    NSLog(@"%c", piece_type_to_char(piece, false));
+    
+    if (shouldCastle) {
+        NSLog(@"Castling");
+        // Castle
+        if (toSquare == SQ_H1) {
+            // White kingside
+            [self movePieceView:[self pieceViewOnSquare:SQ_H1] toSquare:SQ_F1]; // Rook
+            [self movePieceView:thePiece toSquare:SQ_G1]; // King
+            
+        } else if (toSquare == SQ_A1) {
+            // White queenside
+            [self movePieceView:[self pieceViewOnSquare:SQ_A1] toSquare:SQ_D1]; // Rook
+            [self movePieceView:thePiece toSquare:SQ_C1]; // King
+            
+        } else if (toSquare == SQ_H8) {
+            // Black kingside
+            [self movePieceView:[self pieceViewOnSquare:SQ_H8] toSquare:SQ_F8]; // Rook
+            [self movePieceView:thePiece toSquare:SQ_G8]; // King
+            
+        } else {
+            // Black queenside
+            [self movePieceView:[self pieceViewOnSquare:SQ_A8] toSquare:SQ_D8]; // Rook
+            [self movePieceView:thePiece toSquare:SQ_C8]; // King
+            
+        }
+    } else if (desiredPromotionPiece != NO_PIECE_TYPE) {
+        NSLog(@"Promoting");
+        // Promotion
+        
+        // Remove all relevant pieces
+        [thePiece removeFromSuperview];
+        [self.pieces removeObject:thePiece];
+        
+        if (capturedPiece) {
+            // You could capture while promoting
+            [capturedPiece removeFromSuperview];
+            [self.pieces removeObject:capturedPiece];
+        }
+        
+        // Create a new piece view and add it
+        SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece_of_color_and_type(self.position->side_to_move(), desiredPromotionPiece) onSquare:toSquare boardView:self];
+        [self addSubview:pieceView];
+        [self.pieces addObject:pieceView];
+    } else if (capturedPiece) {
+        NSLog(@"Capturing");
+        // Capture
+        
+        // Remove the captured piece
         [capturedPiece removeFromSuperview];
         [self.pieces removeObject:capturedPiece];
+        
+        // Do a normal move
+        [self movePieceView:thePiece toSquare:toSquare];
+    } else if (type_of_piece(self.position->piece_on(fromSquare)) == PAWN &&
+               square_file(fromSquare) != square_file(toSquare)) {
+        NSLog(@"En passant");
+        // En passant
+        
+        // Find the en passant square
+        Square enPassantSquare = toSquare - pawn_push(self.position->side_to_move());
+        NSLog(@"%@", [NSString stringWithUTF8String:square_to_string(enPassantSquare).c_str()]);
+        
+        // Remove the piece on that square
+        SFMPieceView *toRemove = [self pieceViewOnSquare:enPassantSquare];
+        [toRemove removeFromSuperview];
+        [self.pieces removeObject:toRemove];
+        
+        // Do a normal move
+        [self movePieceView:thePiece toSquare:toSquare];
+    } else {
+        NSLog(@"Normal move");
+        // Normal move
+        [self movePieceView:thePiece toSquare:toSquare];
     }
-    thePiece.square = toSquare;
-    [thePiece moveTo:[self coordinatesForSquare:toSquare leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
-    
-    
+
 }
+
+
+
 
 - (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq
 {
     selectedSquare = sq;
     numHighlightedSquares = [self destinationSquaresFrom:sq saveInArray:highlightedSquares];
     [self setNeedsDisplay:YES];
+}
+
+#pragma mark - Promotion
+
+- (BOOL)isPromotionForMoveFromSquare:(Square)fromSquare to:(Square)toSquare
+{
+    Move mlist[32];
+    int i, n, count;
+    
+    assert(square_is_ok(fromSquare));
+    assert(square_is_ok(toSquare));
+    n = self.position->moves_from(fromSquare, mlist);
+    for (i = 0, count = 0; i < n; i++)
+        if (move_to(mlist[i]) == toSquare)
+            count++;
+    return count > 1;
+}
+
+- (PieceType)getDesiredPromotionPiece
+{
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"Queen"];
+    [alert addButtonWithTitle:@"Rook"];
+    [alert addButtonWithTitle:@"Bishop"];
+    [alert addButtonWithTitle:@"Knight"];
+    [alert setMessageText:@"Pawn Promotion"];
+    [alert setInformativeText:@"What would you like to promote your pawn to?"];
+    [alert setAlertStyle:NSWarningAlertStyle];
+    NSInteger choice = [alert runModal];
+    switch (choice) {
+        case 1000:
+            return QUEEN;
+        case 1001:
+            return ROOK;
+        case 1002:
+            return BISHOP;
+        case 1003:
+            return KNIGHT;
+        default:
+            return NO_PIECE_TYPE;
+    }
 }
 
 #pragma mark - Logic
