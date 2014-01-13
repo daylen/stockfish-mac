@@ -42,7 +42,6 @@
 - (NSData *)data
 {
     NSMutableString *concatString = [NSMutableString new];
-    NSLog(@"Concatenating %lu games", (unsigned long)[self.games count]);
     for (SFMChessGame *game in self.games) {
         [concatString appendString:[game pgnString]];
     }

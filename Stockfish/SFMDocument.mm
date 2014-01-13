@@ -66,7 +66,6 @@ using namespace Chess;
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
 {
-    NSLog(@"Saving file to disk.");
     return [self.pgnFile data];
 }
 

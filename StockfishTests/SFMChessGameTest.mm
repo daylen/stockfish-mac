@@ -61,10 +61,6 @@ using namespace Chess;
     XCTAssertTrue([game atBeginning]);
     [game goToEnd];
     XCTAssertTrue([game atEnd]);
-    for (SFMChessMove *chessMove in game.moves) {
-        NSLog(@"%@", [NSString stringWithUTF8String:move_to_string(chessMove.move).c_str()]);
-    }
-    
     [game doMoveFrom:SQ_F1 to:SQ_B5];
     [game doMoveFrom:SQ_A7 to:SQ_A6];
     XCTAssertEqual([game.moves count], 6);

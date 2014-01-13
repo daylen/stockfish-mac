@@ -71,7 +71,6 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
-    NSLog(@"Converting move text to chess move objects");
     if (!movesAsText) {
         return;
     }
@@ -237,7 +236,6 @@
     }
     line[i] = MOVE_NONE;
     
-    NSLog(@"Printing the start position");
     assert(self.startPosition->is_ok());
     self.startPosition->print();
     

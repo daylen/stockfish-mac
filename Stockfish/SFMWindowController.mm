@@ -35,11 +35,15 @@
 }
 - (IBAction)previousGame:(id)sender {
     int smallerIndex = MAX(0, self.currentGameIndex - 1);
-    [self loadGameAtIndex:smallerIndex];
+    if (smallerIndex != self.currentGameIndex) {
+        [self loadGameAtIndex:smallerIndex];
+    }
 }
 - (IBAction)nextGame:(id)sender {
     int biggerIndex = MIN(self.currentGameIndex + 1, (int) [self.pgnFile.games count] - 1);
-    [self loadGameAtIndex:biggerIndex];
+    if (biggerIndex != self.currentGameIndex) {
+        [self loadGameAtIndex:biggerIndex];
+    }
 }
 
 #pragma mark - Init

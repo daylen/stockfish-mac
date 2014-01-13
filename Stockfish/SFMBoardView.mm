@@ -313,17 +313,7 @@ CGFloat squareSideLength;
     SFMPieceView *thePiece = [self pieceViewOnSquare:fromSquare];
     SFMPieceView *capturedPiece = [self pieceViewOnSquare:toSquare];
     
-    /*
-     } else if (type_of_piece(self.position->piece_on(fromSquare)) == PAWN &&
-     square_file(fromSquare) != square_file(toSquare)) {
-
-     */
-    // PRINT STATEMENTS
-    PieceType piece = type_of_piece(self.position->piece_on(fromSquare));
-    NSLog(@"%c", piece_type_to_char(piece, false));
-    
     if (shouldCastle) {
-        NSLog(@"Castling");
         // Castle
         if (toSquare == SQ_H1) {
             // White kingside
@@ -347,7 +337,6 @@ CGFloat squareSideLength;
             
         }
     } else if (desiredPromotionPiece != NO_PIECE_TYPE) {
-        NSLog(@"Promoting");
         // Promotion
         
         // Remove all relevant pieces
@@ -365,7 +354,6 @@ CGFloat squareSideLength;
         [self addSubview:pieceView];
         [self.pieces addObject:pieceView];
     } else if (capturedPiece) {
-        NSLog(@"Capturing");
         // Capture
         
         // Remove the captured piece
@@ -376,12 +364,10 @@ CGFloat squareSideLength;
         [self movePieceView:thePiece toSquare:toSquare];
     } else if (type_of_piece(self.position->piece_on(fromSquare)) == PAWN &&
                square_file(fromSquare) != square_file(toSquare)) {
-        NSLog(@"En passant");
         // En passant
         
         // Find the en passant square
         Square enPassantSquare = toSquare - pawn_push(self.position->side_to_move());
-        NSLog(@"%@", [NSString stringWithUTF8String:square_to_string(enPassantSquare).c_str()]);
         
         // Remove the piece on that square
         SFMPieceView *toRemove = [self pieceViewOnSquare:enPassantSquare];
@@ -391,7 +377,6 @@ CGFloat squareSideLength;
         // Do a normal move
         [self movePieceView:thePiece toSquare:toSquare];
     } else {
-        NSLog(@"Normal move");
         // Normal move
         [self movePieceView:thePiece toSquare:toSquare];
     }
