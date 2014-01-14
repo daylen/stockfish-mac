@@ -17,7 +17,7 @@ using namespace Chess;
 
 @property (nonatomic) BOOL boardIsFlipped;
 @property (nonatomic) Position *position;
-@property (nonatomic) id <SFMBoardViewDelegate> delegate;
+@property (nonatomic, weak) id <SFMBoardViewDelegate> delegate;
 
 - (void)updatePieceViews; // If you change the position, you must call this
 

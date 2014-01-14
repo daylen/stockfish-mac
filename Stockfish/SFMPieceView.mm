@@ -11,7 +11,7 @@
 
 @interface SFMPieceView()
 
-@property SFMBoardView* boardView;
+@property (weak) SFMBoardView* boardView;
 
 @end
 
