@@ -101,20 +101,17 @@
 {
     static NSString* const rowIdentifier = @"CellView";
     NSTableCellView *view = [self.gameListView makeViewWithIdentifier:rowIdentifier owner:self];
-    assert(view != nil);
     
-    // Poke around in the view to get the label
-    id firstSubview = view.subviews[0];
+    SFMChessGame *game = (SFMChessGame *) self.pgnFile.games[row];
     
-    if ([firstSubview isKindOfClass:[NSTextField class]]) {
-        // Form what we want to display
-        SFMChessGame *game = (SFMChessGame *) self.pgnFile.games[row];
-        NSString *toDisplay = [NSString stringWithFormat:@"%@ vs. %@ (Result: %@)", game.tags[@"White"], game.tags[@"Black"], game.tags[@"Result"]];
-        
-        NSTextField *textField = (NSTextField *) firstSubview;
-        [textField setStringValue:toDisplay];
-    }
+    // Poke around in the view
+    NSTextField *white = (NSTextField *) view.subviews[0];
+    NSTextField *black = (NSTextField *) view.subviews[1];
+    NSTextField *result = (NSTextField *) view.subviews[2];
     
+    white.stringValue = [NSString stringWithFormat:@"White: %@", game.tags[@"White"]];
+    black.stringValue = [NSString stringWithFormat:@"Black: %@", game.tags[@"Black"]];
+    result.stringValue = [NSString stringWithFormat:@"Result: %@", game.tags[@"Result"]];
     return view;
 }
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
