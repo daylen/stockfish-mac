@@ -6,7 +6,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMWindowController">
             <connections>
-                <outlet property="boardView" destination="3BJ-fD-MBC" id="u0b-8O-lE9"/>
+                <outlet property="boardView" destination="WL8-9E-Fmq" id="TeT-JK-qok"/>
+                <outlet property="gameListView" destination="AHg-PP-zWW" id="AJp-12-O1Y"/>
                 <outlet property="toolbar" destination="Bvb-HD-m1w" id="nEL-KY-5N1"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
@@ -16,23 +17,107 @@
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="xOd-HO-29H" userLabel="Window">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
-            <rect key="contentRect" x="133" y="0.0" width="960" height="640"/>
+            <rect key="contentRect" x="0.0" y="0.0" width="960" height="500"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <value key="minSize" type="size" width="640" height="360"/>
             <view key="contentView" id="gIp-Ho-8D9">
-                <rect key="frame" x="0.0" y="0.0" width="960" height="640"/>
+                <rect key="frame" x="0.0" y="0.0" width="960" height="500"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="3BJ-fD-MBC" customClass="SFMBoardView">
-                        <rect key="frame" x="0.0" y="0.0" width="960" height="640"/>
+                    <splitView dividerStyle="paneSplitter" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I7a-Lu-hEd">
+                        <rect key="frame" x="0.0" y="0.0" width="960" height="500"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    </customView>
+                        <subviews>
+                            <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="80" horizontalPageScroll="10" verticalLineScroll="80" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="3KQ-ZS-PLz">
+                                <rect key="frame" x="0.0" y="0.0" width="199.5" height="500"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <clipView key="contentView" id="4k2-Fv-sRX">
+                                    <rect key="frame" x="0.0" y="0.0" width="199.5" height="500"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="78" rowSizeStyle="automatic" viewBased="YES" id="AHg-PP-zWW">
+                                            <rect key="frame" x="0.0" y="0.0" width="199.5" height="500"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <size key="intercellSpacing" width="3" height="2"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                            <tableColumns>
+                                                <tableColumn width="196.5" minWidth="40" maxWidth="1000" id="eHO-pQ-ois">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Games">
+                                                        <font key="font" metaFont="smallSystem"/>
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="Yiy-35-4bm">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                    <prototypeCellViews>
+                                                        <tableCellView identifier="CellView" id="rx1-hv-67A">
+                                                            <rect key="frame" x="1" y="1" width="196.5" height="78"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JYG-bJ-FLZ">
+                                                                    <rect key="frame" x="3" y="5" width="190" height="68"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                    <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" id="1n7-2h-GyN">
+                                                                        <font key="font" metaFont="system"/>
+                                                                        <string key="title">lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text </string>
+                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                    <string key="userLabel">Text Field - lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text lots of text</string>
+                                                                </textField>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstAttribute="bottom" secondItem="JYG-bJ-FLZ" secondAttribute="bottom" constant="5" id="DVH-od-KzF"/>
+                                                                <constraint firstItem="JYG-bJ-FLZ" firstAttribute="top" secondItem="rx1-hv-67A" secondAttribute="top" constant="5" id="kTJ-wk-8Ag"/>
+                                                                <constraint firstItem="JYG-bJ-FLZ" firstAttribute="leading" secondItem="rx1-hv-67A" secondAttribute="leading" constant="5" id="kYv-QK-I0L"/>
+                                                                <constraint firstAttribute="trailing" secondItem="JYG-bJ-FLZ" secondAttribute="trailing" constant="5" id="oPf-GE-v2W"/>
+                                                            </constraints>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
+                                            </tableColumns>
+                                        </tableView>
+                                    </subviews>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="Z9n-YJ-w3r">
+                                    <rect key="frame" x="1" y="483" width="0.0" height="16"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="OSB-Df-M59">
+                                    <rect key="frame" x="224" y="17" width="15" height="102"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                            </scrollView>
+                            <customView id="WL8-9E-Fmq" customClass="SFMBoardView">
+                                <rect key="frame" x="209.5" y="0.0" width="540.5" height="500"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="hSk-Zo-9ZJ"/>
+                                </constraints>
+                            </customView>
+                            <customView fixedFrame="YES" id="Kzf-iE-1IG">
+                                <rect key="frame" x="760" y="0.0" width="200" height="500"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            </customView>
+                        </subviews>
+                        <holdingPriorities>
+                            <real value="250"/>
+                            <real value="250"/>
+                            <real value="250"/>
+                        </holdingPriorities>
+                    </splitView>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="3BJ-fD-MBC" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" id="3Uc-tm-Y8h"/>
-                    <constraint firstItem="3BJ-fD-MBC" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="S4B-WI-cLu"/>
-                    <constraint firstAttribute="trailing" secondItem="3BJ-fD-MBC" secondAttribute="trailing" id="kyb-Fk-Ap2"/>
-                    <constraint firstAttribute="bottom" secondItem="3BJ-fD-MBC" secondAttribute="bottom" id="qEb-aM-1rC"/>
+                    <constraint firstItem="I7a-Lu-hEd" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" id="3Za-oJ-K7D"/>
+                    <constraint firstAttribute="bottom" secondItem="I7a-Lu-hEd" secondAttribute="bottom" id="Ipq-0f-1pj"/>
+                    <constraint firstAttribute="trailing" secondItem="I7a-Lu-hEd" secondAttribute="trailing" id="cBF-KZ-cpR"/>
+                    <constraint firstItem="I7a-Lu-hEd" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="zRX-Jb-tb3"/>
                 </constraints>
             </view>
             <toolbar key="toolbar" implicitIdentifier="27B8AA21-2840-4AAA-B330-9F3D8217836C" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="Bvb-HD-m1w">
@@ -54,25 +139,12 @@
                             <action selector="nextMove:" target="-2" id="5EU-Pa-JJX"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="21EF0339-C05D-43CD-BF23-BAC040FC0595" label="Previous Game" paletteLabel="Previous Game" tag="-1" id="ujD-q8-e4o">
-                        <connections>
-                            <action selector="previousGame:" target="-2" id="URa-9j-efS"/>
-                        </connections>
-                    </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="CD5D1A78-F604-49EA-BFD0-EB521CA83BE5" label="Next Game" paletteLabel="Next Game" tag="-1" id="xuB-bt-llf">
-                        <connections>
-                            <action selector="nextGame:" target="-2" id="Ksq-Nc-blI"/>
-                        </connections>
-                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="fPs-Da-evy"/>
                     <toolbarItem reference="A11-gZ-2uC"/>
                     <toolbarItem reference="8Kq-UT-Rac"/>
                     <toolbarItem reference="3v0-NX-5qO"/>
-                    <toolbarItem reference="A11-gZ-2uC"/>
-                    <toolbarItem reference="ujD-q8-e4o"/>
-                    <toolbarItem reference="xuB-bt-llf"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>
