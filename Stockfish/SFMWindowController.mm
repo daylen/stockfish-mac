@@ -11,6 +11,7 @@
 #import "SFMChessGame.h"
 
 @interface SFMWindowController ()
+@property (weak) IBOutlet NSSplitView *mainSplitView;
 @property (weak) IBOutlet NSTableView *gameListView;
 @property (weak) IBOutlet SFMBoardView *boardView;
 @property int currentGameIndex;
@@ -21,6 +22,7 @@
 @implementation SFMWindowController
 
 #pragma mark - Interactions
+
 - (IBAction)flipBoard:(id)sender {
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
@@ -33,18 +35,6 @@
     [self.currentGame goForwardOneMove];
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
-}
-- (IBAction)previousGame:(id)sender {
-    int smallerIndex = MAX(0, self.currentGameIndex - 1);
-    if (smallerIndex != self.currentGameIndex) {
-        [self loadGameAtIndex:smallerIndex];
-    }
-}
-- (IBAction)nextGame:(id)sender {
-    int biggerIndex = MIN(self.currentGameIndex + 1, (int) [self.pgnFile.games count] - 1);
-    if (biggerIndex != self.currentGameIndex) {
-        [self loadGameAtIndex:biggerIndex];
-    }
 }
 
 #pragma mark - Init
@@ -61,11 +51,17 @@
 {
     [super windowDidLoad];
     [self.boardView setDelegate:self];
-    [self.gameListView setDelegate:self];
-    [self.gameListView setDataSource:self];
-    [self.gameListView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
     [self loadGameAtIndex:0];
-    [self.gameListView selectRowIndexes:[NSIndexSet indexSetWithIndex:0] byExtendingSelection:NO];
+    
+    // Decide whether to show or hide the game sidebar
+    if ([self.pgnFile.games count] > 1) {
+        [self.gameListView setDelegate:self];
+        [self.gameListView setDataSource:self];
+        [self.gameListView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+    } else {
+        [self.mainSplitView.subviews[0] removeFromSuperview];
+    }
+    
 }
 
 - (void)loadGameAtIndex:(int)index
@@ -87,8 +83,7 @@
 
 - (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
 {
-    // TODO just the first game
-    return [self.pgnFile.games[0] doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
+    return [self.pgnFile.games[self.currentGameIndex] doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
 }
 
 #pragma mark - Table View Delegate Methods

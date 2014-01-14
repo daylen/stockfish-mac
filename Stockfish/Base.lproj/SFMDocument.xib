@@ -8,6 +8,7 @@
             <connections>
                 <outlet property="boardView" destination="WL8-9E-Fmq" id="TeT-JK-qok"/>
                 <outlet property="gameListView" destination="AHg-PP-zWW" id="AJp-12-O1Y"/>
+                <outlet property="mainSplitView" destination="I7a-Lu-hEd" id="fMm-9s-2RE"/>
                 <outlet property="toolbar" destination="Bvb-HD-m1w" id="nEL-KY-5N1"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
@@ -24,25 +25,25 @@
                 <rect key="frame" x="0.0" y="0.0" width="960" height="500"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView dividerStyle="paneSplitter" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I7a-Lu-hEd">
+                    <splitView dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I7a-Lu-hEd">
                         <rect key="frame" x="0.0" y="0.0" width="960" height="500"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
-                            <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="61" horizontalPageScroll="10" verticalLineScroll="61" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="3KQ-ZS-PLz">
-                                <rect key="frame" x="0.0" y="0.0" width="200" height="500"/>
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="61" horizontalPageScroll="10" verticalLineScroll="61" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="3KQ-ZS-PLz">
+                                <rect key="frame" x="0.0" y="0.0" width="200.5" height="500"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" id="4k2-Fv-sRX">
-                                    <rect key="frame" x="0.0" y="0.0" width="200" height="500"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="200.5" height="500"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="59" rowSizeStyle="automatic" viewBased="YES" id="AHg-PP-zWW">
-                                            <rect key="frame" x="0.0" y="0.0" width="200" height="500"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="200.5" height="500"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn width="196.5" minWidth="40" maxWidth="1000" id="eHO-pQ-ois">
+                                                <tableColumn width="197.5" minWidth="40" maxWidth="1000" id="eHO-pQ-ois">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Games">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -56,11 +57,11 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="CellView" id="rx1-hv-67A">
-                                                            <rect key="frame" x="1" y="1" width="196.5" height="59"/>
+                                                            <rect key="frame" x="1" y="1" width="197.5" height="59"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cXU-2G-agN">
-                                                                    <rect key="frame" x="3" y="37" width="189.5" height="17"/>
+                                                                    <rect key="frame" x="3" y="37" width="191" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" sendsActionOnEndEditing="YES" title="White: Bob Jones" id="Bou-0M-gC3">
                                                                         <font key="font" metaFont="systemBold"/>
@@ -69,7 +70,7 @@
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Q0A-B1-x7b">
-                                                                    <rect key="frame" x="3" y="20" width="189.5" height="17"/>
+                                                                    <rect key="frame" x="3" y="20" width="191" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" sendsActionOnEndEditing="YES" title="Black: Stockfish Engine" id="MqQ-ae-xDW">
                                                                         <font key="font" metaFont="systemBold"/>
@@ -78,7 +79,7 @@
                                                                     </textFieldCell>
                                                                 </textField>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JVY-E6-UXW">
-                                                                    <rect key="frame" x="3" y="5" width="189.5" height="14"/>
+                                                                    <rect key="frame" x="3" y="5" width="191" height="14"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" sendsActionOnEndEditing="YES" title="Result: 0-1" id="dsF-qF-P3V">
                                                                         <font key="font" metaFont="smallSystem"/>
@@ -107,8 +108,11 @@
                                     </subviews>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="dEN-jO-RNu"/>
+                                </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="Z9n-YJ-w3r">
-                                    <rect key="frame" x="1" y="483" width="0.0" height="16"/>
+                                    <rect key="frame" x="0.0" y="484" width="200" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="OSB-Df-M59">
@@ -117,15 +121,18 @@
                                 </scroller>
                             </scrollView>
                             <customView id="WL8-9E-Fmq" customClass="SFMBoardView">
-                                <rect key="frame" x="210" y="0.0" width="540" height="500"/>
+                                <rect key="frame" x="201.5" y="0.0" width="557" height="500"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="hSk-Zo-9ZJ"/>
                                 </constraints>
                             </customView>
-                            <customView fixedFrame="YES" id="Kzf-iE-1IG">
-                                <rect key="frame" x="760" y="0.0" width="200" height="500"/>
+                            <customView id="Kzf-iE-1IG">
+                                <rect key="frame" x="759.5" y="0.0" width="200.5" height="500"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="rdJ-da-HU1"/>
+                                </constraints>
                             </customView>
                         </subviews>
                         <holdingPriorities>
