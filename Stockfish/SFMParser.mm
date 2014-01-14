@@ -83,13 +83,22 @@ using namespace Chess;
         if ([token length] == 0) {
             continue;
         }
-        if ([token rangeOfString:@"{"].location != NSNotFound ||
-            [token rangeOfString:@"("].location != NSNotFound) {
+        BOOL foundBracket = NO;
+        if ([token rangeOfString:@"{"].location != NSNotFound) {
             depth++;
+            foundBracket = YES;
         }
-        if ([token rangeOfString:@"}"].location != NSNotFound ||
-            [token rangeOfString:@")"].location != NSNotFound) {
+        if ([token rangeOfString:@"("].location != NSNotFound) {
+            depth++;
+            foundBracket = YES;
+        }
+        if ([token rangeOfString:@"}"].location != NSNotFound) {
             depth--;
+            foundBracket = YES;
+        }
+        if ([token rangeOfString:@")"].location != NSNotFound) {
+            depth--;
+            foundBracket = YES;
         }
         
         if (depth < 0) {
@@ -97,7 +106,7 @@ using namespace Chess;
             @throw e;
         }
         
-        if (depth == 0 && [self isLetter:[token characterAtIndex:0]]) {
+        if (depth == 0 && [self isLetter:[token characterAtIndex:0]] && !foundBracket) {
             [moveTokens addObject:token];
         }
     }
