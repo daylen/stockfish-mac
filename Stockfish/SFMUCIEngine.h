@@ -16,7 +16,9 @@
 
 #pragma mark - Settings
 - (NSDictionary *)engineOptions;
-- (BOOL)setValue:(NSString *)value forOption:(NSString *)key;
+- (void)setValue:(NSString *)value forOption:(NSString *)key;
 - (void)automaticallySetThreadsAndHash;
+
+- (NSString *)engineName;
 
 @end
