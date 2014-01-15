@@ -83,7 +83,23 @@
 
 - (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
 {
-    return [self.pgnFile.games[self.currentGameIndex] doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
+    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
+    [self checkIfGameOver];
+    return m;
+}
+
+- (void)checkIfGameOver
+{
+    if (self.currentGame.currPosition->is_mate()) {
+        NSString *resultText = (self.currentGame.currPosition->side_to_move() == WHITE) ? @"0-1" : @"1-0";
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:(self.currentGame.currPosition->side_to_move() == WHITE) ? @"Black wins." : @"White wins."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        self.currentGame.tags[@"Result"] = resultText;
+    } else if (self.currentGame.currPosition->is_immediate_draw()) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        self.currentGame.tags[@"Result"] = @"1/2-1/2";
+    }
 }
 
 #pragma mark - Table View Delegate Methods
