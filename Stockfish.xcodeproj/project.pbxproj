@@ -46,6 +46,9 @@
 		773DE98618822DF8009156C3 /* queen_w.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97A18822DF8009156C3 /* queen_w.pdf */; };
 		773DE98718822DF8009156C3 /* rook_b.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97B18822DF8009156C3 /* rook_b.pdf */; };
 		773DE98818822DF8009156C3 /* rook_w.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97C18822DF8009156C3 /* rook_w.pdf */; };
+		7748D07B18868C95009E021E /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 7748D07918868C95009E021E /* stockfish-64 */; };
+		7748D07C18868C95009E021E /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 7748D07A18868C95009E021E /* stockfish-sse42 */; };
+		7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.m */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.mm */; };
 		77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.mm */; };
 		77924AED187DED010019C56E /* SFMChessGame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.mm */; };
@@ -138,6 +141,10 @@
 		773DE97A18822DF8009156C3 /* queen_w.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = queen_w.pdf; sourceTree = "<group>"; };
 		773DE97B18822DF8009156C3 /* rook_b.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = rook_b.pdf; sourceTree = "<group>"; };
 		773DE97C18822DF8009156C3 /* rook_w.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = rook_w.pdf; sourceTree = "<group>"; };
+		7748D07918868C95009E021E /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-64"; sourceTree = "<group>"; };
+		7748D07A18868C95009E021E /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-sse42"; sourceTree = "<group>"; };
+		7748D07E18868CD3009E021E /* SFMUCIEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMUCIEngine.h; path = Stockfish/SFMUCIEngine.h; sourceTree = "<group>"; };
+		7748D07F18868CD3009E021E /* SFMUCIEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMUCIEngine.m; path = Stockfish/SFMUCIEngine.m; sourceTree = "<group>"; };
 		7752FF4518810B30003E82B3 /* SFMBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardView.h; path = Stockfish/SFMBoardView.h; sourceTree = "<group>"; };
 		7752FF4618810B30003E82B3 /* SFMBoardView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMBoardView.mm; path = Stockfish/SFMBoardView.mm; sourceTree = "<group>"; };
 		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
@@ -183,6 +190,7 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
+				7748D07D18868CA0009E021E /* Engine Binaries */,
 				77924AF8187E57740019C56E /* Constants.h */,
 				779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */,
 				773DE97018822DF8009156C3 /* Piece PDFs */,
@@ -315,6 +323,8 @@
 		7715B8AD187E8981006F2366 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				7748D07E18868CD3009E021E /* SFMUCIEngine.h */,
+				7748D07F18868CD3009E021E /* SFMUCIEngine.m */,
 				77924AFB187E72940019C56E /* SFMParser.h */,
 				77924AFC187E72940019C56E /* SFMParser.mm */,
 				77924AF1187DFA040019C56E /* SFMPlayer.h */,
@@ -358,6 +368,15 @@
 			);
 			name = "Piece PDFs";
 			path = "Stockfish/Piece PDFs";
+			sourceTree = "<group>";
+		};
+		7748D07D18868CA0009E021E /* Engine Binaries */ = {
+			isa = PBXGroup;
+			children = (
+				7748D07918868C95009E021E /* stockfish-64 */,
+				7748D07A18868C95009E021E /* stockfish-sse42 */,
+			);
+			name = "Engine Binaries";
 			sourceTree = "<group>";
 		};
 		7752FF4818810B34003E82B3 /* View */ = {
@@ -451,12 +470,14 @@
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
+				7748D07B18868C95009E021E /* stockfish-64 in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
+				7748D07C18868C95009E021E /* stockfish-sse42 in Resources */,
 				773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */,
 				773DE98518822DF8009156C3 /* queen_b.pdf in Resources */,
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
@@ -485,6 +506,7 @@
 			files = (
 				770506D0187CE52D00BA4635 /* mersenne.cpp in Sources */,
 				770506D6187CE52D00BA4635 /* position.cpp in Sources */,
+				7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */,
 				770506D7187CE52D00BA4635 /* san.cpp in Sources */,
 				770506CE187CE52D00BA4635 /* color.cpp in Sources */,
 				770506D2187CE52D00BA4635 /* move.cpp in Sources */,

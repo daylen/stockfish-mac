@@ -9,6 +9,7 @@
 #import "SFMWindowController.h"
 #import "SFMBoardView.h"
 #import "SFMChessGame.h"
+#import "SFMUCIEngine.h"
 
 @interface SFMWindowController ()
 @property (weak) IBOutlet NSSplitView *mainSplitView;
@@ -16,6 +17,8 @@
 @property (weak) IBOutlet SFMBoardView *boardView;
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
+
+@property SFMUCIEngine *engine;
 
 @end
 
@@ -38,14 +41,6 @@
 }
 
 #pragma mark - Init
-- (id)initWithWindow:(NSWindow *)window
-{
-    self = [super initWithWindow:window];
-    if (self) {
-        // Nothing
-    }
-    return self;
-}
 
 - (void)windowDidLoad
 {
@@ -61,6 +56,8 @@
     } else {
         [self.mainSplitView.subviews[0] removeFromSuperview];
     }
+    
+    self.engine = [[SFMUCIEngine alloc] initStockfish];
     
 }
 
@@ -88,6 +85,9 @@
     return m;
 }
 
+/*
+ Check if the current position is a checkmate or a draw, and display an alert if so.
+ */
 - (void)checkIfGameOver
 {
     if (self.currentGame.currPosition->is_mate()) {
