@@ -18,10 +18,15 @@
 
 @implementation SFMUCIEngine
 
-#pragma mark - Convenience
+#pragma mark - Convenience methods
 - (void)sendCommandToEngine:(NSString *)string
 {
     [[self.inPipe fileHandleForWriting] writeData:[string dataUsingEncoding:NSUTF8StringEncoding]];
+}
+- (NSString *)outputFromEngine
+{
+    return [[NSString alloc] initWithData:[[self.outPipe fileHandleForReading] availableData]
+                                 encoding:NSUTF8StringEncoding];
 }
 
 #pragma mark - Init
@@ -51,6 +56,10 @@
     return self;
 }
 
+/*
+ Detects whether the CPU supports POPCNT and loads the appropriate version
+ of Stockfish.
+ */
 - (id)initStockfish
 {
     NSPipe *outputPipe = [[NSPipe alloc] init];
@@ -63,36 +72,43 @@
     NSData *data = [[outputPipe fileHandleForReading] availableData];
     NSString *cpuCapabilities = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
-    if ([cpuCapabilities rangeOfString:@"SSE4.2"].location == NSNotFound) {
+    if ([cpuCapabilities rangeOfString:@"POPCNT"].location == NSNotFound) {
         // Just load 64-bit
-        NSLog(@"Loading Stockfish 64-bit");
+        NSLog(@"No POPCNT");
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-64" ofType:@""]];
     } else {
         // Load 64-bit with SSE4.2
-        NSLog(@"Loading Stockfish SSE4.2");
+        NSLog(@"Detected POPCNT");
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-sse42" ofType:@""]];
     }
     
 }
-
+#pragma mark - Using the engine
 - (NSString *)engineName
 {
-    // TODO
-    return @"";
+    [self sendCommandToEngine:@"uci\n"];
+    NSString *output = [self outputFromEngine];
+    NSArray *lines = [output componentsSeparatedByString:@"\n"];
+    NSString *name = lines[0];
+    NSRange toRemove = [name rangeOfString:@"id name "];
+    name = [name substringFromIndex:toRemove.length];
+    return name;
 }
 
 #pragma mark - Settings
 - (NSDictionary *)engineOptions
 {
-    return @{};
+    return @{}; // TODO implement
 }
+
 - (void)setValue:(NSString *)value forOption:(NSString *)key
 {
     NSString *str = [NSString stringWithFormat:@"setoption name %@ value %@\n", key, value];
     [self sendCommandToEngine:str];
 }
+
 /*
  Automatically set the number of threads and hash size to be used by the engine.
  Set the number of threads to be the number of cores in the machine, including hyperthreaded cores.
@@ -101,9 +117,12 @@
  */
 - (void)automaticallySetThreadsAndHash
 {
+    // Set threads
     int numThreads = (int) [[NSProcessInfo processInfo] activeProcessorCount];
     NSLog(@"Using %d threads", numThreads);
     [self setValue:[NSString stringWithFormat:@"%d", numThreads] forOption:@"Threads"];
+    
+    // Set memory
     int totalMemory = (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024); // in MB
     int recommendedMemory = MIN(totalMemory / 4, 8192);
     NSLog(@"Using %d MB memory", recommendedMemory);
