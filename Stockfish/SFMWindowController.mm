@@ -17,6 +17,7 @@
 @property (weak) IBOutlet SFMBoardView *boardView;
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
+@property BOOL isAnalyzing;
 
 @property SFMUCIEngine *engine;
 
@@ -33,11 +34,35 @@
     [self.currentGame goBackOneMove];
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
+    if (self.isAnalyzing) {
+        [self sendPositionToEngine];
+    }
 }
 - (IBAction)nextMove:(id)sender {
     [self.currentGame goForwardOneMove];
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
+    if (self.isAnalyzing) {
+        [self sendPositionToEngine];
+    }
+}
+- (IBAction)toggleInfiniteAnalysis:(id)sender {
+    if (self.isAnalyzing) {
+        [self stopAnalysis];
+    } else {
+        [self sendPositionToEngine];
+    }
+    self.isAnalyzing = !self.isAnalyzing;
+}
+- (void)sendPositionToEngine
+{
+    [self.engine stopSearch];
+    [self.engine sendCommandToEngine:self.currentGame.uciPositionString];
+    [self.engine startInfiniteAnalysis];
+}
+- (void)stopAnalysis
+{
+    [self.engine stopSearch];
 }
 
 #pragma mark - Init
@@ -47,6 +72,7 @@
     [super windowDidLoad];
     [self.boardView setDelegate:self];
     [self loadGameAtIndex:0];
+    self.isAnalyzing = NO;
     
     // Decide whether to show or hide the game sidebar
     if ([self.pgnFile.games count] > 1) {
@@ -69,6 +95,10 @@
     
     self.boardView.position->copy(*self.currentGame.startPosition);
     [self.boardView updatePieceViews];
+    
+    if (self.isAnalyzing) {
+        [self sendPositionToEngine];
+    }
 }
 
 #pragma mark - SFMBoardViewDelegate
@@ -81,6 +111,9 @@
 - (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
 {
     Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
+    if (self.isAnalyzing) {
+        [self sendPositionToEngine];
+    }
     [self checkIfGameOver];
     return m;
 }

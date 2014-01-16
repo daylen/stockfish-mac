@@ -43,5 +43,6 @@ using namespace Chess;
 #pragma mark - Export
 - (NSString *)pgnString; // PGN string for this game
 - (NSString *)movesArrayAsString; // Just the move text
+- (NSString *)uciPositionString;
 
 @end

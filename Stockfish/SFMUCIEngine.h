@@ -16,6 +16,12 @@
 
 #pragma mark - Using the engine
 - (NSString *)engineName;
+- (void)setFEN:(NSString *)fenString;
+- (void)startInfiniteAnalysis;
+- (void)stopSearch;
+
+#pragma mark - Engine communication
+- (void)sendCommandToEngine:(NSString *)string;
 
 #pragma mark - Settings
 - (NSDictionary *)engineOptions;

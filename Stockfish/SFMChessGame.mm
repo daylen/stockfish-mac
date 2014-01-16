@@ -248,6 +248,25 @@
     return s;
 }
 
+- (NSString *)uciPositionString
+{
+    NSMutableString *str = [[NSMutableString alloc] initWithString:@"position "];
+    if ([self.tags objectForKey:@"FEN"] == nil) {
+        [str appendString:@"startpos"];
+    } else {
+        [str appendFormat:@"fen %@", self.tags[@"FEN"]];
+    }
+    if (![self atBeginning]) {
+        Move m;
+        [str appendString:@" moves"];
+        for (int i = 0; i < self.currentMoveIndex; i++) {
+            m = ((SFMChessMove *) self.moves[i]).move;
+            [str appendFormat:@" %s", move_to_string(m).c_str()];
+        }
+    }
+    return [str copy];
+}
+
 #pragma mark - Teardown
 - (void)dealloc
 {

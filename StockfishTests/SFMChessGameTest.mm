@@ -68,4 +68,13 @@ using namespace Chess;
     XCTAssertEqualObjects([game movesArrayAsString], @"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ");
 }
 
+- (void)testUciStringOutput
+{
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{} andMoves:@"1. e4 e5"];
+    [game populateMovesFromMoveText];
+    [game goToEnd];
+    NSString *uci = [game uciPositionString];
+    XCTAssertEqualObjects(uci, @"position startpos moves e2e4 e7e5");
+}
+
 @end

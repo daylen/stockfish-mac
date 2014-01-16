@@ -72,6 +72,10 @@
     NSString *complexFiveMoves = @"1.e4 (asdf ( ) ) e5 2.{!} Nf3 Nc6 {Na1} 3. Bb5 {Good} *";
     NSArray *complexFiveMovesParsed = [SFMParser parseMoves:complexFiveMoves];
     XCTAssertEqualObjects(complexFiveMovesParsed, fiveMovesExpect, @"Parse failure for complex 5 moves");
+    
+    NSString *anotherTest = @"1.e4 ({23}) e5 2. Nf3 Nc6 3.Bb5 {1123211344()}";
+    NSArray *anotherTestParsed = [SFMParser parseMoves:anotherTest];
+    XCTAssertEqualObjects(anotherTestParsed, fiveMovesExpect);
 }
 
 @end
