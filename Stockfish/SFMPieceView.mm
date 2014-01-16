@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
+#import "Constants.h"
 #import "SFMPieceView.h"
 #import <QuartzCore/CAMediaTimingFunction.h>
 
@@ -14,8 +15,6 @@
 @property (weak) SFMBoardView* boardView;
 
 @end
-
-#define PIECE_SHADOW_BLUR_RADIUS 5
 
 @implementation SFMPieceView
 

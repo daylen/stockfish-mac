@@ -27,12 +27,6 @@
 
 @implementation SFMBoardView
 
-#pragma mark - Constants
-#define EXTERIOR_BOARD_MARGIN 40
-#define INTERIOR_BOARD_MARGIN 20
-#define BOARD_SHADOW_BLUR_RADIUS 30
-#define FONT_SIZE 12
-
 #pragma mark - Instance Variables
 Square highlightedSquares[32];
 int numHighlightedSquares;
@@ -69,6 +63,9 @@ CGFloat squareSideLength;
 - (void)setBoardIsFlipped:(BOOL)boardIsFlipped
 {
     _boardIsFlipped = boardIsFlipped;
+    for (SFMPieceView *pv in self.pieces) {
+        [pv moveTo:[self coordinatesForSquare:pv.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
+    }
     [self setNeedsDisplay:YES];
 }
 

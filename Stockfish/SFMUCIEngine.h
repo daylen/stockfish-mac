@@ -10,13 +10,16 @@
 
 @interface SFMUCIEngine : NSObject
 
+#pragma mark - Properties
+@property NSString *engineName; // e.g. "Stockfish DD 64 SSE4.2"
+@property NSMutableDictionary *currentInfo;
+@property NSMutableArray *lineHistory;
+
 #pragma mark - Init
 - (id)initWithPathToEngine:(NSString *)path;
 - (id)initStockfish; // Special init for Stockfish
 
 #pragma mark - Using the engine
-- (NSString *)engineName;
-- (void)setFEN:(NSString *)fenString;
 - (void)startInfiniteAnalysis;
 - (void)stopSearch;
 
@@ -24,7 +27,6 @@
 - (void)sendCommandToEngine:(NSString *)string;
 
 #pragma mark - Settings
-- (NSDictionary *)engineOptions;
 - (void)setValue:(NSString *)value forOption:(NSString *)key;
 - (void)automaticallySetThreadsAndHash;
 

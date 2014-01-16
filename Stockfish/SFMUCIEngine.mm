@@ -7,6 +7,7 @@
 //
 
 #import "SFMUCIEngine.h"
+#import "Constants.h"
 
 @interface SFMUCIEngine()
 
@@ -33,8 +34,34 @@
 }
 - (void)dataIsAvailable:(NSNotification *)notification
 {
-    NSLog(@"%@", [self outputFromEngine]);
+    NSString *output = [self outputFromEngine];
+    if ([output rangeOfString:@"\n"].location != NSNotFound) {
+        NSArray *lines = [output componentsSeparatedByString:@"\n"];
+        for (NSString *str in lines) {
+            [self processEngineOutput:str];
+        }
+    } else {
+        [self processEngineOutput:output];
+    }
+    
     [self.readHandle waitForDataInBackgroundAndNotify];
+}
+
+/*
+ Updates the properties on the class based on the output from the engine.
+ */
+- (void)processEngineOutput:(NSString *)str
+{
+    NSLog(@"Processing %@", str);
+    if ([str rangeOfString:@"id name"].location != NSNotFound) {
+        // Process name
+        NSRange range = [str rangeOfString:@"id name"];
+        self.engineName = [str substringFromIndex:range.length + 1];
+    } else if ([str rangeOfString:@"currmovenumber"].location != NSNotFound) {
+        // TODO Process status update
+    } else if ([str rangeOfString:@"multipv"].location != NSNotFound) {
+        // TODO Process a line of analysis
+    }
 }
 
 #pragma mark - Init
@@ -43,7 +70,6 @@
 {
     self = [super init];
     if (self) {
-        
         // Init stuff
         self.engineTask = [[NSTask alloc] init];
         NSPipe *inPipe = [[NSPipe alloc] init];
@@ -62,10 +88,11 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
         [self.readHandle waitForDataInBackgroundAndNotify];
         
-        // Launch task and discard initial output
+        // Launch task
         [self.engineTask launch];
         
         // Set options on engine
+        [self sendCommandToEngine:@"uci"];
         [self automaticallySetThreadsAndHash];
         
     }
@@ -107,21 +134,6 @@
 }
 
 #pragma mark - Using the engine
-- (NSString *)engineName
-{
-    [self sendCommandToEngine:@"uci"];
-    NSString *output = [self outputFromEngine];
-    NSArray *lines = [output componentsSeparatedByString:@"\n"];
-    NSString *name = lines[0];
-    NSRange toRemove = [name rangeOfString:@"id name "];
-    name = [name substringFromIndex:toRemove.length];
-    return name;
-}
-
-- (void)setFEN:(NSString *)fenString
-{
-    [self sendCommandToEngine:[NSString stringWithFormat:@"position fen %@", fenString]];
-}
 
 - (void)startInfiniteAnalysis
 {
@@ -134,18 +146,12 @@
 }
 
 #pragma mark - Settings
-- (NSDictionary *)engineOptions
-{
-    return @{}; // TODO implement
-}
 
 - (void)setValue:(NSString *)value forOption:(NSString *)key
 {
     NSString *str = [NSString stringWithFormat:@"setoption name %@ value %@", key, value];
     [self sendCommandToEngine:str];
 }
-
-#define MAX_HASH_SIZE 8192
 
 /*
  Automatically set the number of threads and hash size to be used by the engine.
@@ -161,10 +167,8 @@
     
     // Set memory
     int totalMemory = (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024); // in MB
-    int recommendedMemory = MIN(totalMemory / 4, MAX_HASH_SIZE);
+    int recommendedMemory = MIN(totalMemory / DIVIDE_TOTAL_MEMORY_BY, MAX_HASH_SIZE);
     [self setValue:[NSString stringWithFormat:@"%d", recommendedMemory] forOption:@"Hash"];
-    
-    NSLog(@"Using %d threads and %d MB memory", numThreads, recommendedMemory);
 }
 
 #pragma mark - Teardown
@@ -173,7 +177,6 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self sendCommandToEngine:@"stop"];
     [self sendCommandToEngine:@"quit"];
-    
 }
 
 @end
