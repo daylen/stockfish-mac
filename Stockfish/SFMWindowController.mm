@@ -197,6 +197,10 @@ using namespace Chess;
     tmpPos->copy(*self.currentGame.currPosition);
     
     for (NSString *fromTo in pvFromToText) {
+        if ([fromTo length] < 4) {
+            NSLog(@"%@ is not a move!", fromTo);
+            return;
+        }
         Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
         UndoInfo u;
         SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];

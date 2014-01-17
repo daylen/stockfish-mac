@@ -88,6 +88,10 @@
         
         // Process the PV
         NSRange range = [str rangeOfString:@"multipv 1 pv"];
+        if (range.location == NSNotFound) {
+            NSLog(@"Somehow this is a multipv without a pv");
+            return;
+        }
         line[@"pv"] = [str substringFromIndex:range.location + range.length + 1];
         
         // Add the line to the line history
