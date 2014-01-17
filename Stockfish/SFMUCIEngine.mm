@@ -94,6 +94,8 @@
         [self.lineHistory addObject:[line copy]];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self];
+    } else if ([str rangeOfString:@"bestmove"].location != NSNotFound) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION object:self];
     } else if ([str rangeOfString:@"id name"].location != NSNotFound) {
         // Process name
         NSRange range = [str rangeOfString:@"id name"];
@@ -186,6 +188,8 @@
 - (void)startInfiniteAnalysis
 {
     self.isAnalyzing = YES;
+    self.currentInfo = [NSMutableDictionary new];
+    self.lineHistory = [NSMutableArray new];
     [self sendCommandToEngine:@"go infinite"];
 }
 

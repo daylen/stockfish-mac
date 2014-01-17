@@ -29,6 +29,7 @@
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
 @property SFMUCIEngine *engine;
+@property BOOL wantsAnalysis;
 
 @end
 
@@ -36,8 +37,7 @@ using namespace Chess;
 
 @implementation SFMWindowController
 
-#pragma mark - Interactions
-
+#pragma mark - Target/Action
 - (IBAction)flipBoard:(id)sender {
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
@@ -62,11 +62,8 @@ using namespace Chess;
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
         [self stopAnalysis];
-        self.goStopButton.title = @"Go";
     } else {
-        self.lineTextView.string = @"";
         [self sendPositionToEngine];
-        self.goStopButton.title = @"Stop";
     }
 }
 #pragma mark - Helper methods
@@ -80,17 +77,48 @@ using namespace Chess;
 }
 - (void)sendPositionToEngine
 {
+    self.lineTextView.string = @"";
     [self.engine stopSearch];
     [self.engine sendCommandToEngine:self.currentGame.uciPositionString];
     [self.engine startInfiniteAnalysis];
+    self.goStopButton.title = @"Stop";
 }
 - (void)stopAnalysis
 {
+    self.wantsAnalysis = NO;
+    self.goStopButton.title = @"Go";
     [self.engine stopSearch];
+}
+- (NSString *)movesArrayAsString:(NSArray *)movesArray
+{
+    Move line[800];
+    int i = 0;
+    
+    for (SFMChessMove *move in movesArray) {
+        line[i++] = move.move;
+    }
+    line[i] = MOVE_NONE;
+    
+    return [NSString stringWithUTF8String:line_to_san(*self.currentGame.currPosition, line, 0, false, self.currentGame.currentMoveIndex / 2 + 1).c_str()];
+}
+/*
+ Check if the current position is a checkmate or a draw, and display an alert if so.
+ */
+- (void)checkIfGameOver
+{
+    if (self.currentGame.currPosition->is_mate()) {
+        NSString *resultText = (self.currentGame.currPosition->side_to_move() == WHITE) ? @"0-1" : @"1-0";
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:(self.currentGame.currPosition->side_to_move() == WHITE) ? @"Black wins." : @"White wins."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        self.currentGame.tags[@"Result"] = resultText;
+    } else if (self.currentGame.currPosition->is_immediate_draw()) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        self.currentGame.tags[@"Result"] = @"1/2-1/2";
+    }
 }
 
 #pragma mark - Init
-
 - (void)windowDidLoad
 {
     [super windowDidLoad];
@@ -110,10 +138,21 @@ using namespace Chess;
     [[NSNotificationCenter defaultCenter] addObserverForName:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine queue:nil usingBlock:^(NSNotification *note) {
         self.engineTextField.stringValue = self.engine.engineName;
     }];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAnalysisLine:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineStatus:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
+    [self subscribeToNotifications:YES];
+    self.wantsAnalysis = NO;
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     
+}
+
+- (void)subscribeToNotifications:(BOOL)shouldSubscribe
+{
+    if (shouldSubscribe) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAnalysisLine:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineStatus:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedBestMove:) name:ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION object:self.engine];
+    } else {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
 }
 
 - (void)loadGameAtIndex:(int)index
@@ -121,13 +160,6 @@ using namespace Chess;
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
     [self.currentGame populateMovesFromMoveText];
-    
-//    NSLog(@"The starting position is");
-//    self.currentGame.startPosition->print();
-//    NSLog(@"The current position is");
-//    self.currentGame.currPosition->print();
-    NSLog(@"Currently at move %d", self.currentGame.currentMoveIndex);
-    
     [self syncModelWithView];
 }
 
@@ -144,14 +176,18 @@ using namespace Chess;
     return YES;
 }
 
-#pragma mark - View updates
+#pragma mark - Notifications
 - (void)updateEngineStatus:(NSNotification *)notification
 {
     NSLog(@"Updating engine status");
     //self.engineStatusTextField.value = self.engine.currentInfo[@"currmove"];
 }
+
 - (void)addAnalysisLine:(NSNotification *)notification
 {
+    if (!self.engine.isAnalyzing) {
+        return;
+    }
     NSDictionary *data = [self.engine.lineHistory lastObject];
     NSString *currentlyBeingShown = self.lineTextView.string;
     NSArray *pvFromToText = [data[@"pv"] componentsSeparatedByString:@" "];
@@ -169,23 +205,16 @@ using namespace Chess;
     }
     
     NSString *niceOutput = [self movesArrayAsString:pvMacMoveObjects];
-    NSLog(@"NICE OUTPUT");
-    NSLog(niceOutput);
     
     self.lineTextView.string = [NSString stringWithFormat:@"%@\n%@", currentlyBeingShown, niceOutput];
     [self.lineTextView scrollToEndOfDocument:self];
 }
-- (NSString *)movesArrayAsString:(NSArray *)movesArray
+
+- (void)receivedBestMove:(NSNotification *)notification
 {
-    Move line[800];
-    int i = 0;
-    
-    for (SFMChessMove *move in movesArray) {
-        line[i++] = move.move;
+    if (self.wantsAnalysis) {
+        [self sendPositionToEngine];
     }
-    line[i] = MOVE_NONE;
-    
-    return [NSString stringWithUTF8String:line_to_san(*self.currentGame.currPosition, line, 0, false, 1).c_str()];
 }
 
 #pragma mark - SFMBoardViewDelegate
@@ -197,29 +226,13 @@ using namespace Chess;
 
 - (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
 {
-    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
     if (self.engine.isAnalyzing) {
-        [self sendPositionToEngine];
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
     }
+    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
     [self checkIfGameOver];
     return m;
-}
-
-/*
- Check if the current position is a checkmate or a draw, and display an alert if so.
- */
-- (void)checkIfGameOver
-{
-    if (self.currentGame.currPosition->is_mate()) {
-        NSString *resultText = (self.currentGame.currPosition->side_to_move() == WHITE) ? @"0-1" : @"1-0";
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:(self.currentGame.currPosition->side_to_move() == WHITE) ? @"Black wins." : @"White wins."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
-        self.currentGame.tags[@"Result"] = resultText;
-    } else if (self.currentGame.currPosition->is_immediate_draw()) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
-        self.currentGame.tags[@"Result"] = @"1/2-1/2";
-    }
 }
 
 #pragma mark - Table View Delegate Methods
