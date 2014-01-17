@@ -21,6 +21,7 @@
 @property (weak) IBOutlet NSTextField *engineTextField;
 @property (weak) IBOutlet NSTextField *engineStatusTextField;
 @property (unsafe_unretained) IBOutlet NSTextView *lineTextView;
+@property (weak) IBOutlet NSButton *goStopButton;
 
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
@@ -56,8 +57,10 @@
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
         [self stopAnalysis];
+        self.goStopButton.title = @"Go";
     } else {
         [self sendPositionToEngine];
+        self.goStopButton.title = @"Stop";
     }
 }
 #pragma mark - Helper methods
