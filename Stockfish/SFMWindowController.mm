@@ -11,6 +11,9 @@
 #import "SFMChessGame.h"
 #import "SFMUCIEngine.h"
 #import "Constants.h"
+#import "SFMChessMove.h"
+
+#include "../Chess/san.h"
 
 @interface SFMWindowController ()
 
@@ -28,6 +31,8 @@
 @property SFMUCIEngine *engine;
 
 @end
+
+using namespace Chess;
 
 @implementation SFMWindowController
 
@@ -59,6 +64,7 @@
         [self stopAnalysis];
         self.goStopButton.title = @"Go";
     } else {
+        self.lineTextView.string = @"";
         [self sendPositionToEngine];
         self.goStopButton.title = @"Stop";
     }
@@ -148,8 +154,37 @@
 {
     NSDictionary *data = [self.engine.lineHistory lastObject];
     NSString *currentlyBeingShown = self.lineTextView.string;
-    self.lineTextView.string = [NSString stringWithFormat:@"%@\n%@", currentlyBeingShown, [data description]];
+    NSArray *pvFromToText = [data[@"pv"] componentsSeparatedByString:@" "];
+    NSMutableArray *pvMacMoveObjects = [NSMutableArray new];
+    
+    Position *tmpPos = new Position;
+    tmpPos->copy(*self.currentGame.currPosition);
+    
+    for (NSString *fromTo in pvFromToText) {
+        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
+        UndoInfo u;
+        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
+        [pvMacMoveObjects addObject:moveObject];
+    }
+    
+    NSString *niceOutput = [self movesArrayAsString:pvMacMoveObjects];
+    NSLog(@"NICE OUTPUT");
+    NSLog(niceOutput);
+    
+    self.lineTextView.string = [NSString stringWithFormat:@"%@\n%@", currentlyBeingShown, niceOutput];
     [self.lineTextView scrollToEndOfDocument:self];
+}
+- (NSString *)movesArrayAsString:(NSArray *)movesArray
+{
+    Move line[800];
+    int i = 0;
+    
+    for (SFMChessMove *move in movesArray) {
+        line[i++] = move.move;
+    }
+    line[i] = MOVE_NONE;
+    
+    return [NSString stringWithUTF8String:line_to_san(*self.currentGame.currPosition, line, 0, false, 1).c_str()];
 }
 
 #pragma mark - SFMBoardViewDelegate
