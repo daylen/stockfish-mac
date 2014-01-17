@@ -164,6 +164,7 @@ using namespace Chess;
         Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
         UndoInfo u;
         SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
+        tmpPos->do_move(m, u);
         [pvMacMoveObjects addObject:moveObject];
     }
     
