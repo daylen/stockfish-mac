@@ -24,7 +24,6 @@
 
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
-@property BOOL isAnalyzing;
 @property SFMUCIEngine *engine;
 
 @end
@@ -55,19 +54,18 @@
     [self syncModelWithView];
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
-    if (self.isAnalyzing) {
+    if (self.engine.isAnalyzing) {
         [self stopAnalysis];
     } else {
         [self sendPositionToEngine];
     }
-    self.isAnalyzing = !self.isAnalyzing;
 }
 #pragma mark - Helper methods
 - (void)syncModelWithView
 {
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
-    if (self.isAnalyzing) {
+    if (self.engine.isAnalyzing) {
         [self sendPositionToEngine];
     }
 }
@@ -89,7 +87,6 @@
     [super windowDidLoad];
     [self.boardView setDelegate:self];
     [self loadGameAtIndex:0];
-    self.isAnalyzing = NO;
     
     // Decide whether to show or hide the game sidebar
     if ([self.pgnFile.games count] > 1) {
@@ -116,19 +113,20 @@
     self.currentGame = self.pgnFile.games[index];
     [self.currentGame populateMovesFromMoveText];
     
-    self.boardView.position->copy(*self.currentGame.startPosition);
-    [self.boardView updatePieceViews];
+//    NSLog(@"The starting position is");
+//    self.currentGame.startPosition->print();
+//    NSLog(@"The current position is");
+//    self.currentGame.currPosition->print();
+    NSLog(@"Currently at move %d", self.currentGame.currentMoveIndex);
     
-    if (self.isAnalyzing) {
-        [self sendPositionToEngine];
-    }
+    [self syncModelWithView];
 }
 
 #pragma mark - Menu items
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
     if ([menuItem action] == @selector(toggleInfiniteAnalysis:)) {
-        if (self.isAnalyzing) {
+        if (self.engine.isAnalyzing) {
             [menuItem setTitle:@"Stop Infinite Analysis"];
         } else {
             [menuItem setTitle:@"Start Infinite Analysis"];
@@ -141,7 +139,7 @@
 - (void)updateEngineStatus:(NSNotification *)notification
 {
     NSLog(@"Updating engine status");
-    self.engineStatusTextField.stringValue = self.engine.currentInfo[@"currmove"];
+    //self.engineStatusTextField.value = self.engine.currentInfo[@"currmove"];
 }
 - (void)addAnalysisLine:(NSNotification *)notification
 {
@@ -161,7 +159,7 @@
 - (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
 {
     Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
-    if (self.isAnalyzing) {
+    if (self.engine.isAnalyzing) {
         [self sendPositionToEngine];
     }
     [self checkIfGameOver];

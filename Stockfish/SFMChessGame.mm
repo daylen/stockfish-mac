@@ -16,7 +16,7 @@
 
 @interface SFMChessGame()
 
-@property int currentMoveIndex;
+@property (readwrite) int currentMoveIndex;
 
 @end
 
@@ -71,7 +71,7 @@
 
 - (void)convertToChessMoveObjects:(NSArray *)movesAsText
 {
-    if (!movesAsText) {
+    if (!movesAsText || [movesAsText count] == 0) {
         return;
     }
     
@@ -270,6 +270,7 @@
 #pragma mark - Teardown
 - (void)dealloc
 {
+    NSLog(@"Deallocating this SFMChessGame");
     delete self.startPosition;
     delete self.currPosition;
 }

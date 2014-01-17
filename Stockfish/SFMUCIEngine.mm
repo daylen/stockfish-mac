@@ -36,6 +36,7 @@
 - (void)dataIsAvailable:(NSNotification *)notification
 {
     NSString *output = [self outputFromEngine];
+    NSLog(@"%@", output);
     if ([output rangeOfString:@"\n"].location != NSNotFound) {
         NSArray *lines = [output componentsSeparatedByString:@"\n"];
         for (NSString *str in lines) {
@@ -114,6 +115,7 @@
         NSPipe *outPipe = [[NSPipe alloc] init];
         self.currentInfo = [[NSMutableDictionary alloc] init];
         self.lineHistory = [[NSMutableArray alloc] init];
+        self.isAnalyzing = NO;
         
         // Set properties on task
         self.engineTask.launchPath = path;
@@ -126,7 +128,10 @@
         
         // Set up notifications
         [[NSNotificationCenter defaultCenter] addObserverForName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil queue:nil usingBlock:^(NSNotification *note) {
-            [self setThreadsAndHashFromPrefs];
+            if (!self.isAnalyzing) {
+                // Only adjust if we're not analyzing
+                [self setThreadsAndHashFromPrefs];
+            }
         }];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
         [self.readHandle waitForDataInBackgroundAndNotify];
@@ -180,11 +185,13 @@
 
 - (void)startInfiniteAnalysis
 {
+    self.isAnalyzing = YES;
     [self sendCommandToEngine:@"go infinite"];
 }
 
 - (void)stopSearch
 {
+    self.isAnalyzing = NO;
     [self sendCommandToEngine:@"stop"];
 }
 
@@ -205,6 +212,7 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    self.isAnalyzing = NO;
     [self sendCommandToEngine:@"stop"];
     [self sendCommandToEngine:@"quit"];
 }

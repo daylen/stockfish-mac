@@ -21,6 +21,7 @@ using namespace Chess;
 @property NSString *moveText;
 @property Position *startPosition;
 @property Position *currPosition;
+@property (readonly) int currentMoveIndex;
 
 #pragma mark - Init and Set Up
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;

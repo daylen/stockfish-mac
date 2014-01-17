@@ -14,6 +14,7 @@
 @property NSString *engineName; // e.g. "Stockfish DD 64 SSE4.2"
 @property NSMutableDictionary *currentInfo;
 @property NSMutableArray *lineHistory;
+@property BOOL isAnalyzing;
 
 #pragma mark - Init
 - (id)initWithPathToEngine:(NSString *)path;
