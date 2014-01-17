@@ -9,7 +9,6 @@
                 <outlet property="boardView" destination="WL8-9E-Fmq" id="TeT-JK-qok"/>
                 <outlet property="gameListView" destination="AHg-PP-zWW" id="AJp-12-O1Y"/>
                 <outlet property="mainSplitView" destination="I7a-Lu-hEd" id="fMm-9s-2RE"/>
-                <outlet property="toolbar" destination="Bvb-HD-m1w" id="nEL-KY-5N1"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
         </customObject>
@@ -29,14 +28,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="960" height="500"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
-                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="61" horizontalPageScroll="10" verticalLineScroll="61" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="3KQ-ZS-PLz">
+                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="3KQ-ZS-PLz">
                                 <rect key="frame" x="0.0" y="0.0" width="209" height="500"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" id="4k2-Fv-sRX">
                                     <rect key="frame" x="0.0" y="0.0" width="209" height="500"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowHeight="59" rowSizeStyle="automatic" viewBased="YES" id="AHg-PP-zWW">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="AHg-PP-zWW">
                                             <rect key="frame" x="0.0" y="0.0" width="209" height="500"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -163,40 +162,6 @@
                     <constraint firstItem="I7a-Lu-hEd" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="zRX-Jb-tb3"/>
                 </constraints>
             </view>
-            <toolbar key="toolbar" implicitIdentifier="27B8AA21-2840-4AAA-B330-9F3D8217836C" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="Bvb-HD-m1w">
-                <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="A11-gZ-2uC"/>
-                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="ipJ-8N-tAF"/>
-                    <toolbarItem implicitItemIdentifier="A1EFB345-4482-4893-A510-6B3244D55524" label="Flip Board" paletteLabel="Flip Board" tag="-1" id="fPs-Da-evy">
-                        <connections>
-                            <action selector="flipBoard:" target="-2" id="dYJ-pX-0Le"/>
-                        </connections>
-                    </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="CFD726E1-0DB5-4F91-886B-8649F553AFE2" label="Previous Move" paletteLabel="Previous Move" tag="-1" id="8Kq-UT-Rac">
-                        <connections>
-                            <action selector="previousMove:" target="-2" id="2nr-tK-LoX"/>
-                        </connections>
-                    </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="8BA48BC7-AAC9-46BA-8AA4-7EE325770B3A" label="Next Move" paletteLabel="Next Move" tag="-1" id="3v0-NX-5qO">
-                        <connections>
-                            <action selector="nextMove:" target="-2" id="5EU-Pa-JJX"/>
-                        </connections>
-                    </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="6EF17250-0023-42A5-84DE-89FC9ACF05D8" label="Toggle Analysis" paletteLabel="Toggle Analysis" tag="-1" id="wFx-Iz-3d9">
-                        <connections>
-                            <action selector="toggleInfiniteAnalysis:" target="-2" id="fW7-JX-h6O"/>
-                        </connections>
-                    </toolbarItem>
-                </allowedToolbarItems>
-                <defaultToolbarItems>
-                    <toolbarItem reference="fPs-Da-evy"/>
-                    <toolbarItem reference="A11-gZ-2uC"/>
-                    <toolbarItem reference="8Kq-UT-Rac"/>
-                    <toolbarItem reference="3v0-NX-5qO"/>
-                    <toolbarItem reference="A11-gZ-2uC"/>
-                    <toolbarItem reference="wFx-Iz-3d9"/>
-                </defaultToolbarItems>
-            </toolbar>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-x8E"/>
             </connections>

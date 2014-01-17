@@ -9,6 +9,7 @@
 #import "SFMDocument.h"
 #import "SFMWindowController.h"
 #import "SFMPGNFile.h"
+#import "SFMPreferencesWindowController.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -21,6 +22,7 @@ using namespace Chess;
 @interface SFMDocument()
 
 @property SFMPGNFile *pgnFile;
+@property SFMPreferencesWindowController *prefWinController;
 
 @end
 
@@ -58,7 +60,11 @@ using namespace Chess;
     windowController.pgnFile = self.pgnFile;
     [self addWindowController:windowController];
 }
-
+- (IBAction)displayPreferencesWindow:(id)sender
+{
+    self.prefWinController = [[SFMPreferencesWindowController alloc] initWithWindowNibName:@"Preferences"];
+    [self.prefWinController.window makeKeyAndOrderFront:nil];
+}
 + (BOOL)autosavesInPlace
 {
     return YES;

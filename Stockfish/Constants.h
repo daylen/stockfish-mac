@@ -20,8 +20,15 @@
 // For the piece view
 #define PIECE_SHADOW_BLUR_RADIUS 5
 
-// For the engine auto-configuration
-#define MAX_HASH_SIZE 8192
-#define DIVIDE_TOTAL_MEMORY_BY 4
+// Notifications
+#define ENGINE_NAME_AVAILABLE_NOTIFICATION @"EngNameAvail"
+#define ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION @"EngNewLineAvail"
+#define ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION @"EngineCurrMoveChanged"
+#define SETTINGS_HAVE_CHANGED_NOTIFICATION @"SettingsChanged"
+
+// For the settings
+#define ENGINE_SETTINGS_KEY @"Engine Settings"
+#define NUM_THREADS_SETTING @"Threads"
+#define HASH_SIZE_SETTING @"Memory"
 
 #endif

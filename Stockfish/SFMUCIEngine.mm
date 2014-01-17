@@ -8,6 +8,7 @@
 
 #import "SFMUCIEngine.h"
 #import "Constants.h"
+#import "DYUserDefaults.h"
 
 @interface SFMUCIEngine()
 
@@ -52,15 +53,52 @@
  */
 - (void)processEngineOutput:(NSString *)str
 {
-    NSLog(@"Processing %@", str);
-    if ([str rangeOfString:@"id name"].location != NSNotFound) {
+    // What we want to look for
+    NSArray *statusKeywords = @[@"depth", @"currmove", @"currmovenumber"];
+    NSArray *lineKeywords = @[@"depth", @"seldepth", @"nps", @"cp", @"mate", @"time", @"nodes"];
+    
+    // Tokenize the string
+    NSArray *tokens = [str componentsSeparatedByString:@" "];
+    
+    if ([str rangeOfString:@"currmovenumber"].location != NSNotFound) {
+        // Process status update
+        for (int i = 0; i < [tokens count]; i++) {
+            for (NSString *keyword in statusKeywords) {
+                if ([tokens[i] isEqualToString:keyword]) {
+                    self.currentInfo[keyword] = tokens[++i];
+                }
+            }
+        }
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self];
+    } else if ([str rangeOfString:@"multipv"].location != NSNotFound) {
+        // Process a line of analysis
+        NSMutableDictionary *line = [[NSMutableDictionary alloc] init];
+        for (int i = 0; i < [tokens count]; i++) {
+            if ([tokens[i] isEqualToString:@"multipv"]) {
+                break;
+            }
+            for (NSString *keyword in lineKeywords) {
+                if ([tokens[i] isEqualToString:keyword]) {
+                    line[keyword] = tokens[++i];
+                }
+            }
+        }
+        
+        // Process the PV
+        NSRange range = [str rangeOfString:@"multipv 1 pv"];
+        line[@"pv"] = [str substringFromIndex:range.location + range.length + 1];
+        
+        // Add the line to the line history
+        [self.lineHistory addObject:[line copy]];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self];
+    } else if ([str rangeOfString:@"id name"].location != NSNotFound) {
         // Process name
         NSRange range = [str rangeOfString:@"id name"];
         self.engineName = [str substringFromIndex:range.length + 1];
-    } else if ([str rangeOfString:@"currmovenumber"].location != NSNotFound) {
-        // TODO Process status update
-    } else if ([str rangeOfString:@"multipv"].location != NSNotFound) {
-        // TODO Process a line of analysis
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self];
     }
 }
 
@@ -74,6 +112,8 @@
         self.engineTask = [[NSTask alloc] init];
         NSPipe *inPipe = [[NSPipe alloc] init];
         NSPipe *outPipe = [[NSPipe alloc] init];
+        self.currentInfo = [[NSMutableDictionary alloc] init];
+        self.lineHistory = [[NSMutableArray alloc] init];
         
         // Set properties on task
         self.engineTask.launchPath = path;
@@ -84,7 +124,10 @@
         self.readHandle = [outPipe fileHandleForReading];
         self.writeHandle = [inPipe fileHandleForWriting];
         
-        // Set up notification
+        // Set up notifications
+        [[NSNotificationCenter defaultCenter] addObserverForName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil queue:nil usingBlock:^(NSNotification *note) {
+            [self setThreadsAndHashFromPrefs];
+        }];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
         [self.readHandle waitForDataInBackgroundAndNotify];
         
@@ -93,7 +136,7 @@
         
         // Set options on engine
         [self sendCommandToEngine:@"uci"];
-        [self automaticallySetThreadsAndHash];
+        [self setThreadsAndHashFromPrefs];
         
     }
     return self;
@@ -152,23 +195,10 @@
     NSString *str = [NSString stringWithFormat:@"setoption name %@ value %@", key, value];
     [self sendCommandToEngine:str];
 }
-
-/*
- Automatically set the number of threads and hash size to be used by the engine.
- Set the number of threads to be the number of cores in the machine, including hyperthreaded cores.
- Set the hash size to be either total memory divided by 4, or 8 GB, whichever is smaller.
- (Stockfish does not support more than 8 GB hash size.)
- */
-- (void)automaticallySetThreadsAndHash
+- (void)setThreadsAndHashFromPrefs
 {
-    // Set threads
-    int numThreads = (int) [[NSProcessInfo processInfo] activeProcessorCount];
-    [self setValue:[NSString stringWithFormat:@"%d", numThreads] forOption:@"Threads"];
-    
-    // Set memory
-    int totalMemory = (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024); // in MB
-    int recommendedMemory = MIN(totalMemory / DIVIDE_TOTAL_MEMORY_BY, MAX_HASH_SIZE);
-    [self setValue:[NSString stringWithFormat:@"%d", recommendedMemory] forOption:@"Hash"];
+    [self setValue:[NSString stringWithFormat:@"%d", [(NSNumber *) [DYUserDefaults getSettingForKey:NUM_THREADS_SETTING] intValue]] forOption:@"Threads"];
+    [self setValue:[NSString stringWithFormat:@"%d", [(NSNumber *) [DYUserDefaults getSettingForKey:HASH_SIZE_SETTING] intValue]] forOption:@"Hash"];
 }
 
 #pragma mark - Teardown

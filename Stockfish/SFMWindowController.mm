@@ -10,6 +10,7 @@
 #import "SFMBoardView.h"
 #import "SFMChessGame.h"
 #import "SFMUCIEngine.h"
+#import "Constants.h"
 
 @interface SFMWindowController ()
 @property (weak) IBOutlet NSSplitView *mainSplitView;
@@ -32,19 +33,21 @@
 }
 - (IBAction)previousMove:(id)sender {
     [self.currentGame goBackOneMove];
-    self.boardView.position->copy(*self.currentGame.currPosition);
-    [self.boardView updatePieceViews];
-    if (self.isAnalyzing) {
-        [self sendPositionToEngine];
-    }
+    [self syncModelWithView];
 }
 - (IBAction)nextMove:(id)sender {
     [self.currentGame goForwardOneMove];
-    self.boardView.position->copy(*self.currentGame.currPosition);
-    [self.boardView updatePieceViews];
-    if (self.isAnalyzing) {
-        [self sendPositionToEngine];
-    }
+    [self syncModelWithView];
+}
+- (IBAction)firstMove:(id)sender
+{
+    [self.currentGame goToBeginning];
+    [self syncModelWithView];
+}
+- (IBAction)lastMove:(id)sender
+{
+    [self.currentGame goToEnd];
+    [self syncModelWithView];
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.isAnalyzing) {
@@ -53,6 +56,15 @@
         [self sendPositionToEngine];
     }
     self.isAnalyzing = !self.isAnalyzing;
+}
+#pragma mark - Helper methods
+- (void)syncModelWithView
+{
+    self.boardView.position->copy(*self.currentGame.currPosition);
+    [self.boardView updatePieceViews];
+    if (self.isAnalyzing) {
+        [self sendPositionToEngine];
+    }
 }
 - (void)sendPositionToEngine
 {
@@ -83,6 +95,10 @@
         [self.mainSplitView.subviews[0] removeFromSuperview];
     }
     
+    // Subscribe to notifications
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     
 }
@@ -99,6 +115,27 @@
     if (self.isAnalyzing) {
         [self sendPositionToEngine];
     }
+}
+
+#pragma mark - Menu items
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+    if ([menuItem action] == @selector(toggleInfiniteAnalysis:)) {
+        if (self.isAnalyzing) {
+            [menuItem setTitle:@"Stop Infinite Analysis"];
+        } else {
+            [menuItem setTitle:@"Start Infinite Analysis"];
+        }
+    }
+    return YES;
+}
+
+#pragma mark - View updates
+- (void)updateEngineView:(NSNotification *)notification
+{
+    NSLog(@"Engine name: %@", self.engine.engineName);
+    NSLog(@"Status: %@", [self.engine.currentInfo description]);
+    NSLog(@"Line: %@", [[self.engine.lineHistory lastObject] description]);
 }
 
 #pragma mark - SFMBoardViewDelegate
