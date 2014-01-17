@@ -13,13 +13,18 @@
 #import "Constants.h"
 
 @interface SFMWindowController ()
+
 @property (weak) IBOutlet NSSplitView *mainSplitView;
 @property (weak) IBOutlet NSTableView *gameListView;
 @property (weak) IBOutlet SFMBoardView *boardView;
+
+@property (weak) IBOutlet NSTextField *engineTextField;
+@property (weak) IBOutlet NSTextField *engineStatusTextField;
+@property (unsafe_unretained) IBOutlet NSTextView *lineTextView;
+
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
 @property BOOL isAnalyzing;
-
 @property SFMUCIEngine *engine;
 
 @end
@@ -96,9 +101,11 @@
     }
     
     // Subscribe to notifications
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineView:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
+    [[NSNotificationCenter defaultCenter] addObserverForName:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine queue:nil usingBlock:^(NSNotification *note) {
+        self.engineTextField.stringValue = self.engine.engineName;
+    }];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAnalysisLine:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineStatus:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     
 }
@@ -131,11 +138,17 @@
 }
 
 #pragma mark - View updates
-- (void)updateEngineView:(NSNotification *)notification
+- (void)updateEngineStatus:(NSNotification *)notification
 {
-    NSLog(@"Engine name: %@", self.engine.engineName);
-    NSLog(@"Status: %@", [self.engine.currentInfo description]);
-    NSLog(@"Line: %@", [[self.engine.lineHistory lastObject] description]);
+    NSLog(@"Updating engine status");
+    self.engineStatusTextField.stringValue = self.engine.currentInfo[@"currmove"];
+}
+- (void)addAnalysisLine:(NSNotification *)notification
+{
+    NSDictionary *data = [self.engine.lineHistory lastObject];
+    NSString *currentlyBeingShown = self.lineTextView.string;
+    self.lineTextView.string = [NSString stringWithFormat:@"%@\n%@", currentlyBeingShown, [data description]];
+    [self.lineTextView scrollToEndOfDocument:self];
 }
 
 #pragma mark - SFMBoardViewDelegate

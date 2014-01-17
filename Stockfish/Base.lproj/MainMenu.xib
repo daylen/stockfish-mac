@@ -110,12 +110,32 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Edit" id="FZY-0E-cMZ">
+                <menuItem title="Edit" id="ROd-aY-hZh">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Edit" id="gde-Ae-uaY">
+                    <menu key="submenu" title="Edit" id="5QJ-2n-rg0">
                         <items>
-                            <menuItem title="Copy FEN" keyEquivalent="c" id="bna-9a-r9o"/>
-                            <menuItem title="Paste FEN" keyEquivalent="v" id="a8G-kV-wEv"/>
+                            <menuItem title="Copy" keyEquivalent="c" id="vyg-5a-Ddd">
+                                <connections>
+                                    <action selector="copy:" target="-1" id="xdu-9O-0zb"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Paste" keyEquivalent="v" id="Bti-Gn-zho">
+                                <connections>
+                                    <action selector="paste:" target="-1" id="EIZ-Ii-d9o"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Select All" keyEquivalent="a" id="x65-De-tVg">
+                                <connections>
+                                    <action selector="selectAll:" target="-1" id="gi6-gT-tCL"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="Zaf-Yf-kRC"/>
+                            <menuItem title="Copy FEN" keyEquivalent="c" id="XRh-uQ-qOa">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Paste FEN" keyEquivalent="v" id="jTy-cv-Pfy">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
@@ -142,7 +162,7 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Engine" id="bT9-Bb-a6S">
                         <items>
-                            <menuItem title="Infinite Analysis" keyEquivalent="a" id="Z6k-Vc-LPy">
+                            <menuItem title="Infinite Analysis" keyEquivalent="i" id="Z6k-Vc-LPy">
                                 <connections>
                                     <action selector="toggleInfiniteAnalysis:" target="-1" id="UiJ-oq-txp"/>
                                 </connections>
