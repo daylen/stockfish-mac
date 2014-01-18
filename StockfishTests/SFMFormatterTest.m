@@ -29,9 +29,10 @@
 
 - (void)testScore
 {
-    XCTAssertEqualObjects([SFMFormatter scoreAsText:23 isMate:NO isWhiteToMove:YES], @"+ (0.23)");
-    XCTAssertEqualObjects([SFMFormatter scoreAsText:-5 isMate:YES isWhiteToMove:YES], @"- (#5)");
-    XCTAssertEqualObjects([SFMFormatter scoreAsText:10327 isMate:NO isWhiteToMove:NO], @"- (103.27)");
+    XCTAssertEqualObjects([SFMFormatter scoreAsText:23 isMate:NO isWhiteToMove:YES isLowerBound:NO isUpperBound:NO], @"+ (0.23)");
+    XCTAssertEqualObjects([SFMFormatter scoreAsText:-5 isMate:YES isWhiteToMove:YES isLowerBound:NO isUpperBound:NO], @"- (#5)");
+    XCTAssertEqualObjects([SFMFormatter scoreAsText:10327 isMate:NO isWhiteToMove:NO isLowerBound:NO isUpperBound:NO], @"- (103.27)");
+    XCTAssertEqualObjects([SFMFormatter scoreAsText:502 isMate:NO isWhiteToMove:NO isLowerBound:YES isUpperBound:NO], @"- (5.02++)");
 }
 
 - (void)testNodes

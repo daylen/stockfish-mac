@@ -46,14 +46,14 @@
 		773DE98618822DF8009156C3 /* queen_w.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97A18822DF8009156C3 /* queen_w.pdf */; };
 		773DE98718822DF8009156C3 /* rook_b.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97B18822DF8009156C3 /* rook_b.pdf */; };
 		773DE98818822DF8009156C3 /* rook_w.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97C18822DF8009156C3 /* rook_w.pdf */; };
-		7748D07B18868C95009E021E /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 7748D07918868C95009E021E /* stockfish-64 */; };
-		7748D07C18868C95009E021E /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 7748D07A18868C95009E021E /* stockfish-sse42 */; };
 		7748D08018868CD3009E021E /* SFMUCIEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.mm */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.mm */; };
 		77764F071888B80C00A7C4CC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77764F051888B80C00A7C4CC /* Preferences.xib */; };
 		77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */; };
 		77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */; };
-		77764F131888D88000A7C4CC /* DYUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F121888D88000A7C4CC /* DYUserDefaults.m */; };
+		778A271A188A1E3B00F57827 /* DYUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 778A2719188A1E3B00F57827 /* DYUserDefaults.m */; };
+		778A271D188A1E4300F57827 /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271B188A1E4300F57827 /* stockfish-64 */; };
+		778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271C188A1E4300F57827 /* stockfish-sse42 */; };
 		77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.mm */; };
 		77924AED187DED010019C56E /* SFMChessGame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.mm */; };
 		77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEF187DED6E0019C56E /* SFMChessMove.mm */; };
@@ -147,8 +147,6 @@
 		773DE97A18822DF8009156C3 /* queen_w.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = queen_w.pdf; sourceTree = "<group>"; };
 		773DE97B18822DF8009156C3 /* rook_b.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = rook_b.pdf; sourceTree = "<group>"; };
 		773DE97C18822DF8009156C3 /* rook_w.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = rook_w.pdf; sourceTree = "<group>"; };
-		7748D07918868C95009E021E /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-64"; sourceTree = "<group>"; };
-		7748D07A18868C95009E021E /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-sse42"; sourceTree = "<group>"; };
 		7748D07E18868CD3009E021E /* SFMUCIEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMUCIEngine.h; path = Stockfish/SFMUCIEngine.h; sourceTree = "<group>"; };
 		7748D07F18868CD3009E021E /* SFMUCIEngine.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMUCIEngine.mm; path = Stockfish/SFMUCIEngine.mm; sourceTree = "<group>"; };
 		7752FF4518810B30003E82B3 /* SFMBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardView.h; path = Stockfish/SFMBoardView.h; sourceTree = "<group>"; };
@@ -158,8 +156,10 @@
 		77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMPreferencesWindowController.m; sourceTree = "<group>"; };
 		77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMHardwareDetector.h; path = Stockfish/SFMHardwareDetector.h; sourceTree = "<group>"; };
 		77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMHardwareDetector.m; path = Stockfish/SFMHardwareDetector.m; sourceTree = "<group>"; };
-		77764F111888D88000A7C4CC /* DYUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DYUserDefaults.h; sourceTree = "<group>"; };
-		77764F121888D88000A7C4CC /* DYUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DYUserDefaults.m; sourceTree = "<group>"; };
+		778A2718188A1E3B00F57827 /* DYUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DYUserDefaults.h; path = Stockfish/DYUserDefaults.h; sourceTree = "<group>"; };
+		778A2719188A1E3B00F57827 /* DYUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DYUserDefaults.m; path = Stockfish/DYUserDefaults.m; sourceTree = "<group>"; };
+		778A271B188A1E4300F57827 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-64"; path = "Stockfish/stockfish-64"; sourceTree = "<group>"; };
+		778A271C188A1E4300F57827 /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-sse42"; path = "Stockfish/stockfish-sse42"; sourceTree = "<group>"; };
 		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
 		77924AE9187DECEB0019C56E /* SFMPGNFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPGNFile.mm; path = Stockfish/SFMPGNFile.mm; sourceTree = "<group>"; };
 		77924AEB187DED010019C56E /* SFMChessGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMChessGame.h; path = Stockfish/SFMChessGame.h; sourceTree = "<group>"; };
@@ -342,10 +342,10 @@
 		7715B8AD187E8981006F2366 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				778A2718188A1E3B00F57827 /* DYUserDefaults.h */,
+				778A2719188A1E3B00F57827 /* DYUserDefaults.m */,
 				77CA8B031889C42F004402D2 /* SFMFormatter.h */,
 				77CA8B041889C42F004402D2 /* SFMFormatter.m */,
-				77764F111888D88000A7C4CC /* DYUserDefaults.h */,
-				77764F121888D88000A7C4CC /* DYUserDefaults.m */,
 				77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */,
 				77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */,
 				7748D07E18868CD3009E021E /* SFMUCIEngine.h */,
@@ -399,8 +399,8 @@
 		7748D07D18868CA0009E021E /* Engine Binaries */ = {
 			isa = PBXGroup;
 			children = (
-				7748D07918868C95009E021E /* stockfish-64 */,
-				7748D07A18868C95009E021E /* stockfish-sse42 */,
+				778A271B188A1E4300F57827 /* stockfish-64 */,
+				778A271C188A1E4300F57827 /* stockfish-sse42 */,
 			);
 			name = "Engine Binaries";
 			sourceTree = "<group>";
@@ -496,14 +496,14 @@
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
-				7748D07B18868C95009E021E /* stockfish-64 in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
+				778A271D188A1E4300F57827 /* stockfish-64 in Resources */,
+				778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
-				7748D07C18868C95009E021E /* stockfish-sse42 in Resources */,
 				773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */,
 				773DE98518822DF8009156C3 /* queen_b.pdf in Resources */,
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
@@ -547,11 +547,11 @@
 				77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */,
 				7752FF4718810B30003E82B3 /* SFMBoardView.mm in Sources */,
 				770506D8187CE52D00BA4635 /* square.cpp in Sources */,
-				77764F131888D88000A7C4CC /* DYUserDefaults.m in Sources */,
 				77924AF3187DFA040019C56E /* SFMPlayer.mm in Sources */,
 				77924AEA187DECEB0019C56E /* SFMPGNFile.mm in Sources */,
 				7705067E187CE43300BA4635 /* main.m in Sources */,
 				773DE96F18822DD0009156C3 /* SFMPieceView.mm in Sources */,
+				778A271A188A1E3B00F57827 /* DYUserDefaults.m in Sources */,
 				770506CF187CE52D00BA4635 /* direction.cpp in Sources */,
 				770506D1187CE52D00BA4635 /* misc.cpp in Sources */,
 				770506D5187CE52D00BA4635 /* piece.cpp in Sources */,
