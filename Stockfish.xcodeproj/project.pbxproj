@@ -160,6 +160,7 @@
 		778A2719188A1E3B00F57827 /* DYUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DYUserDefaults.m; path = Stockfish/DYUserDefaults.m; sourceTree = "<group>"; };
 		778A271B188A1E4300F57827 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-64"; path = "Stockfish/stockfish-64"; sourceTree = "<group>"; };
 		778A271C188A1E4300F57827 /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-sse42"; path = "Stockfish/stockfish-sse42"; sourceTree = "<group>"; };
+		778A271F188A7A1A00F57827 /* Stockfish.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Stockfish.entitlements; sourceTree = "<group>"; };
 		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
 		77924AE9187DECEB0019C56E /* SFMPGNFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPGNFile.mm; path = Stockfish/SFMPGNFile.mm; sourceTree = "<group>"; };
 		77924AEB187DED010019C56E /* SFMChessGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMChessGame.h; path = Stockfish/SFMChessGame.h; sourceTree = "<group>"; };
@@ -254,6 +255,7 @@
 		77050677187CE43300BA4635 /* Stockfish */ = {
 			isa = PBXGroup;
 			children = (
+				778A271F188A7A1A00F57827 /* Stockfish.entitlements */,
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
 				770506DE187CF2B100BA4635 /* SFMWindowController.h */,
@@ -464,6 +466,13 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Daylen Yang";
 				TargetAttributes = {
+					7705066D187CE43300BA4635 = {
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
+					};
 					77050691187CE43400BA4635 = {
 						TestTargetID = 7705066D187CE43300BA4635;
 					};
@@ -708,6 +717,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Stockfish/Stockfish.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -722,6 +733,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Stockfish/Stockfish.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

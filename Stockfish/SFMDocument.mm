@@ -69,6 +69,10 @@ using namespace Chess;
 {
     return YES;
 }
+- (NSString *)defaultDraftName
+{
+    return @"New Game";
+}
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
 {

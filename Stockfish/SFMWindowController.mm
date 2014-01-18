@@ -39,6 +39,13 @@ using namespace Chess;
 @implementation SFMWindowController
 
 #pragma mark - Target/Action
+- (IBAction)copyFenString:(id)sender
+{
+    NSString *fen = [NSString stringWithCString:self.currentGame.currPosition->to_fen().c_str() encoding:NSUTF8StringEncoding];
+    [[NSPasteboard generalPasteboard] declareTypes:@[NSStringPboardType] owner:nil];
+    [[NSPasteboard generalPasteboard] setString:fen forType:NSStringPboardType];
+    
+}
 - (IBAction)flipBoard:(id)sender {
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
@@ -357,6 +364,7 @@ using namespace Chess;
     }
     Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
     [self checkIfGameOver];
+    [self.document updateChangeCount:NSChangeDone];
     return m;
 }
 
