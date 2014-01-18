@@ -37,7 +37,7 @@
 }
 + (int)normMemory
 {
-    return MIN(8192, [self totalMemory] / 4);
+    return MIN(16384, [self totalMemory] / 4);
 }
 
 #pragma mark - Max
@@ -47,7 +47,7 @@
 }
 + (int)maxMemory
 {
-    return MIN(8192, 7 * [self totalMemory] / 8);
+    return MIN(16384, 7 * [self totalMemory] / 8);
 }
 
 #pragma mark - Validation
