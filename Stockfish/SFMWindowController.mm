@@ -194,7 +194,9 @@ using namespace Chess;
 #pragma mark - Notifications
 - (void)updateEngineName:(NSNotification *)notification
 {
-    self.engineTextField.stringValue = self.engine.engineName;
+    if (self.engine.engineName != nil && [self.engine.engineName length] > 0) {
+        self.engineTextField.stringValue = self.engine.engineName;
+    }
 }
 - (void)updateEngineStatus:(NSNotification *)notification
 {

@@ -12,7 +12,7 @@
 
 - (NSString *)description
 {
-    return @"SFMPlayer Object";
+    return @"Human";
 }
 
 @end
