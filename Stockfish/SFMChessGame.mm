@@ -94,6 +94,7 @@
             @throw e;
         } else {
             UndoInfo u;
+            //NSLog(@"Calling do_move from SFMChessGame convertToChessMoveObjects");
             self.currPosition->do_move(m, u);
             SFMChessMove *cm = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
             [self.moves addObject:cm];
@@ -129,6 +130,7 @@
     
     // Update position
     UndoInfo u;
+    //NSLog(@"Calling do_move from SFMChessGame doMoveFrom:to:promotion:");
     self.currPosition->do_move(move, u);
     
     // Update move list
@@ -177,6 +179,7 @@
         SFMChessMove *chessMove = self.moves[self.currentMoveIndex];
         Move move = chessMove.move;
         UndoInfo undoInfo = chessMove.undoInfo;
+        //NSLog(@"Calling do_move from SFMChessGame goForwardOneMove");
         self.currPosition->do_move(move, undoInfo);
         self.currentMoveIndex++;
     }
@@ -270,7 +273,7 @@
 #pragma mark - Teardown
 - (void)dealloc
 {
-    NSLog(@"Deallocating this SFMChessGame");
+    //NSLog(@"Deallocating this SFMChessGame");
     delete self.startPosition;
     delete self.currPosition;
 }

@@ -272,6 +272,7 @@ CGFloat squareSideLength;
                 Move theMove = [self.delegate doMoveFrom:selectedSquare to:clickedSquare promotion:pieceType];
                 UndoInfo u;
                 [self animatePieceOnSquare:selectedSquare to:clickedSquare promotion:pieceType shouldCastle:castle];
+                //NSLog(@"Calling do_move from SFMBoardView");
                 self.position->do_move(theMove, u);
 
             }

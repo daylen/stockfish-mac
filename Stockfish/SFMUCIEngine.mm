@@ -24,7 +24,7 @@
 - (void)sendCommandToEngine:(NSString *)string
 {
     assert([string rangeOfString:@"\n"].location == NSNotFound);
-    NSLog(@"GUI TO ENGINE: %@", string);
+    //NSLog(@"GUI TO ENGINE: %@", string);
     NSString *strWithNewLine = [NSString stringWithFormat:@"%@\n", string];
     [self.writeHandle writeData:[strWithNewLine dataUsingEncoding:NSUTF8StringEncoding]];
 }
@@ -39,6 +39,7 @@
 - (void)dataIsAvailable:(NSNotification *)notification
 {
     NSString *output = [self outputFromEngine];
+    //NSLog(@"%@", output);
     if ([output rangeOfString:@"\n"].location != NSNotFound) {
         NSArray *lines = [output componentsSeparatedByString:@"\n"];
         for (NSString *str in lines) {
@@ -91,7 +92,7 @@
         // Process the PV
         NSRange range = [str rangeOfString:@"multipv 1 pv"];
         if (range.location == NSNotFound) {
-            NSLog(@"Somehow this is a multipv without a pv");
+            //NSLog(@"Somehow this is a multipv without a pv");
             return;
         }
         line[@"pv"] = [str substringFromIndex:range.location + range.length + 1];
@@ -167,11 +168,11 @@
 - (id)initStockfish
 {
     if ([self hasAdvancedCPU]) {
-        NSLog(@"Detected POPCNT");
+        //NSLog(@"Detected POPCNT");
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-sse42" ofType:@""]];
     } else {
-        NSLog(@"No POPCNT");
+        //NSLog(@"No POPCNT");
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-64" ofType:@""]];
     }
@@ -230,7 +231,7 @@
 
 - (void)dealloc
 {
-    NSLog(@"Deallocating engine");
+    //NSLog(@"Deallocating engine");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopSearch];
     [self sendCommandToEngine:@"quit"];

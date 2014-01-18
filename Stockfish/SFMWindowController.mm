@@ -198,6 +198,9 @@ using namespace Chess;
 }
 - (void)updateEngineStatus:(NSNotification *)notification
 {
+    if (!self.engine.isAnalyzing) {
+        return;
+    }
     NSMutableString *statusText = [NSMutableString new];
     NSDictionary *latestPV = [self.engine.lineHistory lastObject];
     
@@ -271,6 +274,8 @@ using namespace Chess;
     
     // Get the attributed string out of the view
     NSMutableAttributedString *viewText = [self.lineTextView.attributedString mutableCopy];
+    [viewText addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, viewText.length)];
+    
     NSAttributedString *pvBold;
     
     // Use a try catch since there might be an exception
@@ -388,7 +393,7 @@ using namespace Chess;
 }
 - (void)dealloc
 {
-    NSLog(@"Deallocating controller");
+    //NSLog(@"Deallocating controller");
     self.engine = nil;
 }
 
