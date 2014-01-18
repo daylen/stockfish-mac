@@ -33,10 +33,12 @@
     return [[NSString alloc] initWithData:[self.readHandle availableData]
                                  encoding:NSUTF8StringEncoding];
 }
+
+#pragma mark - Handling notifications
+
 - (void)dataIsAvailable:(NSNotification *)notification
 {
     NSString *output = [self outputFromEngine];
-    NSLog(@"%@", output);
     if ([output rangeOfString:@"\n"].location != NSNotFound) {
         NSArray *lines = [output componentsSeparatedByString:@"\n"];
         for (NSString *str in lines) {
@@ -94,6 +96,16 @@
         }
         line[@"pv"] = [str substringFromIndex:range.location + range.length + 1];
         
+        // Check for upper/lower bounds
+        range = [str rangeOfString:@"upperbound"];
+        if (range.location != NSNotFound) {
+            line[@"upperbound"] = [NSNumber numberWithBool:YES];
+        }
+        range = [str rangeOfString:@"lowerbound"];
+        if (range.location != NSNotFound) {
+            line[@"lowerbound"] = [NSNumber numberWithBool:YES];
+        }
+        
         // Add the line to the line history
         [self.lineHistory addObject:[line copy]];
         
@@ -133,12 +145,7 @@
         self.writeHandle = [inPipe fileHandleForWriting];
         
         // Set up notifications
-        [[NSNotificationCenter defaultCenter] addObserverForName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil queue:nil usingBlock:^(NSNotification *note) {
-            if (!self.isAnalyzing) {
-                // Only adjust if we're not analyzing
-                [self setThreadsAndHashFromPrefs];
-            }
-        }];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setThreadsAndHashFromPrefs:) name:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
         [self.readHandle waitForDataInBackgroundAndNotify];
         
@@ -147,7 +154,7 @@
         
         // Set options on engine
         [self sendCommandToEngine:@"uci"];
-        [self setThreadsAndHashFromPrefs];
+        [self setThreadsAndHashFromPrefs:nil];
         
     }
     return self;
@@ -210,19 +217,24 @@
     NSString *str = [NSString stringWithFormat:@"setoption name %@ value %@", key, value];
     [self sendCommandToEngine:str];
 }
-- (void)setThreadsAndHashFromPrefs
+- (void)setThreadsAndHashFromPrefs:(NSNotification *)notification
 {
+    if (self.isAnalyzing) {
+        return;
+    }
     [self setValue:[NSString stringWithFormat:@"%d", [(NSNumber *) [DYUserDefaults getSettingForKey:NUM_THREADS_SETTING] intValue]] forOption:@"Threads"];
     [self setValue:[NSString stringWithFormat:@"%d", [(NSNumber *) [DYUserDefaults getSettingForKey:HASH_SIZE_SETTING] intValue]] forOption:@"Hash"];
 }
 
 #pragma mark - Teardown
+
 - (void)dealloc
 {
+    NSLog(@"Deallocating engine");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    self.isAnalyzing = NO;
-    [self sendCommandToEngine:@"stop"];
+    [self stopSearch];
     [self sendCommandToEngine:@"quit"];
+
 }
 
 @end

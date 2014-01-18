@@ -29,6 +29,7 @@
 
 #pragma mark - Settings
 - (void)setValue:(NSString *)value forOption:(NSString *)key;
-- (void)setThreadsAndHashFromPrefs;
+- (void)setThreadsAndHashFromPrefs:(NSNotification *)notification;
+
 
 @end

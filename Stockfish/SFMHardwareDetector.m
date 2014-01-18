@@ -10,6 +10,7 @@
 
 @implementation SFMHardwareDetector
 
+#pragma mark - Private
 + (int)cpuCores
 {
     return (int) [[NSProcessInfo processInfo] activeProcessorCount];
@@ -19,35 +20,44 @@
     return (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024);
 }
 
+#pragma mark - Min
 + (int)minCpuCores
 {
     return 1;
 }
 + (int)minMemory
 {
-    int minMemory = 0.125 * [self totalMemory];
-    if (minMemory < 32) {
-        minMemory = 32;
-    }
-    return minMemory;
+    return 32;
 }
 
+#pragma mark - Normal
++ (int)normCpuCores
+{
+    return MAX(1, [self cpuCores] / 2);
+}
++ (int)normMemory
+{
+    return MIN(8192, [self totalMemory] / 4);
+}
+
+#pragma mark - Max
 + (int)maxCpuCores
 {
     return [self cpuCores];
 }
 + (int)maxMemory
 {
-    return MIN(8192, 0.625 * [self totalMemory]);
+    return MIN(8192, 7 * [self totalMemory] / 8);
 }
 
+#pragma mark - Validation
 + (BOOL)isValidCpuCoreValue:(int)value
 {
-    return (value >= 1 && value <= [self cpuCores]);
+    return (value >= [self minCpuCores] && value <= [self maxCpuCores]);
 }
 + (BOOL)isValidMemoryValue:(int)value;
 {
-    return (value >= 32 && value <= 8192);
+    return (value >= [self minMemory] && value <= [self maxMemory]);
 }
 
 @end

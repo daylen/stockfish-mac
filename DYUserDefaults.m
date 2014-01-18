@@ -14,8 +14,8 @@
 
 + (NSDictionary *)defaultSettings
 {
-    return @{NUM_THREADS_SETTING: [NSNumber numberWithInt:[SFMHardwareDetector minCpuCores]],
-             HASH_SIZE_SETTING: [NSNumber numberWithInt:[SFMHardwareDetector minMemory]]};
+    return @{NUM_THREADS_SETTING: [NSNumber numberWithInt:[SFMHardwareDetector normCpuCores]],
+             HASH_SIZE_SETTING: [NSNumber numberWithInt:[SFMHardwareDetector normMemory]]};
 }
 + (NSDictionary *)getSettings
 {

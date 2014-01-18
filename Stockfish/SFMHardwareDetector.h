@@ -10,11 +10,11 @@
 
 @interface SFMHardwareDetector : NSObject
 
-+ (int)cpuCores;
-+ (int)totalMemory; // in MB
-
 + (int)minCpuCores;
 + (int)minMemory;
+
++ (int)normCpuCores;
++ (int)normMemory;
 
 + (int)maxCpuCores;
 + (int)maxMemory;

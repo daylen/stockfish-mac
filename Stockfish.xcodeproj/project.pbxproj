@@ -50,6 +50,7 @@
 		7748D07C18868C95009E021E /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 7748D07A18868C95009E021E /* stockfish-sse42 */; };
 		7748D08018868CD3009E021E /* SFMUCIEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.mm */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.mm */; };
+		775B7AE71889E122003473AB /* SFMApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 775B7AE61889E122003473AB /* SFMApplication.m */; };
 		77764F071888B80C00A7C4CC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77764F051888B80C00A7C4CC /* Preferences.xib */; };
 		77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */; };
 		77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */; };
@@ -63,6 +64,8 @@
 		779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.mm */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
+		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
+		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +154,8 @@
 		7748D07F18868CD3009E021E /* SFMUCIEngine.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMUCIEngine.mm; path = Stockfish/SFMUCIEngine.mm; sourceTree = "<group>"; };
 		7752FF4518810B30003E82B3 /* SFMBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardView.h; path = Stockfish/SFMBoardView.h; sourceTree = "<group>"; };
 		7752FF4618810B30003E82B3 /* SFMBoardView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMBoardView.mm; path = Stockfish/SFMBoardView.mm; sourceTree = "<group>"; };
+		775B7AE51889E122003473AB /* SFMApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMApplication.h; sourceTree = "<group>"; };
+		775B7AE61889E122003473AB /* SFMApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMApplication.m; sourceTree = "<group>"; };
 		77764F061888B80C00A7C4CC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/Preferences.xib; sourceTree = "<group>"; };
 		77764F081888C04E00A7C4CC /* SFMPreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMPreferencesWindowController.h; sourceTree = "<group>"; };
 		77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMPreferencesWindowController.m; sourceTree = "<group>"; };
@@ -174,6 +179,9 @@
 		779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardViewDelegate.h; path = Stockfish/SFMBoardViewDelegate.h; sourceTree = "<group>"; };
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PositionTest.mm; sourceTree = "<group>"; };
+		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
+		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
+		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -249,6 +257,8 @@
 		77050677187CE43300BA4635 /* Stockfish */ = {
 			isa = PBXGroup;
 			children = (
+				775B7AE51889E122003473AB /* SFMApplication.h */,
+				775B7AE61889E122003473AB /* SFMApplication.m */,
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
 				770506DE187CF2B100BA4635 /* SFMWindowController.h */,
@@ -277,6 +287,7 @@
 			children = (
 				77050699187CE43400BA4635 /* Supporting Files */,
 				77924AFE187E77770019C56E /* SFMParserTest.mm */,
+				77CA8B061889C499004402D2 /* SFMFormatterTest.m */,
 				779925D8188273C800EAAEDD /* SFMChessGameTest.mm */,
 				77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */,
 			);
@@ -336,6 +347,8 @@
 		7715B8AD187E8981006F2366 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				77CA8B031889C42F004402D2 /* SFMFormatter.h */,
+				77CA8B041889C42F004402D2 /* SFMFormatter.m */,
 				77764F111888D88000A7C4CC /* DYUserDefaults.h */,
 				77764F121888D88000A7C4CC /* DYUserDefaults.m */,
 				77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */,
@@ -536,6 +549,7 @@
 				770506CD187CE52D00BA4635 /* book.cpp in Sources */,
 				77924AFD187E72940019C56E /* SFMParser.mm in Sources */,
 				770506DA187CE52D00BA4635 /* value.cpp in Sources */,
+				77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */,
 				7752FF4718810B30003E82B3 /* SFMBoardView.mm in Sources */,
 				770506D8187CE52D00BA4635 /* square.cpp in Sources */,
 				77764F131888D88000A7C4CC /* DYUserDefaults.m in Sources */,
@@ -549,6 +563,7 @@
 				77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */,
 				77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */,
 				770506D4187CE52D00BA4635 /* movepick.cpp in Sources */,
+				775B7AE71889E122003473AB /* SFMApplication.m in Sources */,
 				77050685187CE43400BA4635 /* SFMDocument.mm in Sources */,
 				770506CC187CE52D00BA4635 /* bitboard.cpp in Sources */,
 			);
@@ -561,6 +576,7 @@
 				779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */,
 				77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */,
 				77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */,
+				77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

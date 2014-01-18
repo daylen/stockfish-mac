@@ -12,6 +12,7 @@
 #import "SFMUCIEngine.h"
 #import "Constants.h"
 #import "SFMChessMove.h"
+#import "SFMFormatter.h"
 
 #include "../Chess/san.h"
 
@@ -42,20 +43,36 @@ using namespace Chess;
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
 - (IBAction)previousMove:(id)sender {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
     [self.currentGame goBackOneMove];
     [self syncModelWithView];
 }
 - (IBAction)nextMove:(id)sender {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
     [self.currentGame goForwardOneMove];
     [self syncModelWithView];
 }
 - (IBAction)firstMove:(id)sender
 {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
     [self.currentGame goToBeginning];
     [self syncModelWithView];
 }
 - (IBAction)lastMove:(id)sender
 {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
     [self.currentGame goToEnd];
     [self syncModelWithView];
 }
@@ -71,9 +88,6 @@ using namespace Chess;
 {
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
-    if (self.engine.isAnalyzing) {
-        [self sendPositionToEngine];
-    }
 }
 - (void)sendPositionToEngine
 {
@@ -135,9 +149,6 @@ using namespace Chess;
     }
     
     // Subscribe to notifications
-    [[NSNotificationCenter defaultCenter] addObserverForName:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine queue:nil usingBlock:^(NSNotification *note) {
-        self.engineTextField.stringValue = self.engine.engineName;
-    }];
     [self subscribeToNotifications:YES];
     self.wantsAnalysis = NO;
     self.engine = [[SFMUCIEngine alloc] initStockfish];
@@ -150,6 +161,7 @@ using namespace Chess;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAnalysisLine:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineStatus:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedBestMove:) name:ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION object:self.engine];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineName:) name:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine];
     } else {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
@@ -177,10 +189,54 @@ using namespace Chess;
 }
 
 #pragma mark - Notifications
+- (void)updateEngineName:(NSNotification *)notification
+{
+    self.engineTextField.stringValue = self.engine.engineName;
+}
 - (void)updateEngineStatus:(NSNotification *)notification
 {
-    NSLog(@"Updating engine status");
-    //self.engineStatusTextField.value = self.engine.currentInfo[@"currmove"];
+    NSMutableString *statusText = [NSMutableString new];
+    NSDictionary *latestPV = [self.engine.lineHistory lastObject];
+    
+    // The score
+    if ([latestPV objectForKey:@"cp"]) {
+        int score = [latestPV[@"cp"] intValue];
+        [statusText appendString:[SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE]];
+    } else if ([latestPV objectForKey:@"mate"]) {
+        int score = [latestPV[@"mate"] intValue];
+        [statusText appendString:[SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE]];
+    }
+    
+    [statusText appendString:@"    Depth="];
+    
+    // The depth
+    if ([self.engine.currentInfo objectForKey:@"depth"]) {
+        [statusText appendFormat:@"%d", [self.engine.currentInfo[@"depth"] intValue]];
+    } else {
+        [statusText appendFormat:@"%d", [latestPV[@"depth"] intValue]];
+    }
+    // The selective depth
+    [statusText appendFormat:@"/%d    ", [latestPV[@"seldepth"] intValue]];
+    
+    // The current move
+    if ([self.engine.currentInfo objectForKey:@"currmove"]) {
+        Position *tmpPos = new Position;
+        tmpPos->copy(*self.currentGame.currPosition);
+        Move mlist[500];
+        int numLegalMoves = tmpPos->all_legal_moves(mlist);
+        
+        Move m = move_from_string(*tmpPos, [self.engine.currentInfo[@"currmove"] UTF8String]);
+        UndoInfo u;
+        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
+        NSString *niceOutput = [self movesArrayAsString:@[moveObject]];
+        
+        [statusText appendFormat:@"%@(%@/%d)    ", niceOutput, self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
+    }
+    
+    // The speed
+    [statusText appendFormat:@"%@/s", [SFMFormatter nodesAsText:latestPV[@"nps"]]];
+    
+    self.engineStatusTextField.stringValue = [statusText copy];
 }
 
 - (void)addAnalysisLine:(NSNotification *)notification
@@ -188,6 +244,8 @@ using namespace Chess;
     if (!self.engine.isAnalyzing) {
         return;
     }
+    [self updateEngineStatus:nil];
+    
     NSDictionary *data = [self.engine.lineHistory lastObject];
     NSString *currentlyBeingShown = self.lineTextView.string;
     NSArray *pvFromToText = [data[@"pv"] componentsSeparatedByString:@" "];
@@ -220,6 +278,8 @@ using namespace Chess;
         [self sendPositionToEngine];
     }
 }
+
+
 
 #pragma mark - SFMBoardViewDelegate
 
@@ -265,6 +325,17 @@ using namespace Chess;
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
 {
     [self loadGameAtIndex:(int) self.gameListView.selectedRow];
+}
+
+#pragma mark - Teardown
+- (void)windowWillClose:(NSNotification *)notification
+{
+    [self subscribeToNotifications:NO];
+}
+- (void)dealloc
+{
+    NSLog(@"Deallocating controller");
+    self.engine = nil;
 }
 
 @end
