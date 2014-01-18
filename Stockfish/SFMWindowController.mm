@@ -103,6 +103,8 @@ using namespace Chess;
     self.goStopButton.title = @"Go";
     [self.engine stopSearch];
 }
+
+// TODO move to formatter
 - (NSString *)movesArrayAsString:(NSArray *)movesArray
 {
     Move line[800];
@@ -169,6 +171,7 @@ using namespace Chess;
 
 - (void)loadGameAtIndex:(int)index
 {
+    [self stopAnalysis];
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
     [self.currentGame populateMovesFromMoveText];
@@ -198,14 +201,7 @@ using namespace Chess;
     NSMutableString *statusText = [NSMutableString new];
     NSDictionary *latestPV = [self.engine.lineHistory lastObject];
     
-    // The score
-    if ([latestPV objectForKey:@"cp"]) {
-        int score = [latestPV[@"cp"] intValue];
-        [statusText appendString:[SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE]];
-    } else if ([latestPV objectForKey:@"mate"]) {
-        int score = [latestPV[@"mate"] intValue];
-        [statusText appendString:[SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE]];
-    }
+    [statusText appendString:[self scoreForPV:latestPV]];
     
     [statusText appendString:@"    Depth="];
     
@@ -239,36 +235,70 @@ using namespace Chess;
     self.engineStatusTextField.stringValue = [statusText copy];
 }
 
+- (NSString *)scoreForPV:(NSDictionary *)pv
+{
+    BOOL isLowerBound = [pv objectForKey:@"lowerbound"] != nil;
+    BOOL isUpperBound = [pv objectForKey:@"upperbound"] != nil;
+    
+    // The score
+    if ([pv objectForKey:@"cp"]) {
+        int score = [pv[@"cp"] intValue];
+        
+        NSString *theScore = [SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
+        
+        return theScore;
+        
+    } else if ([pv objectForKey:@"mate"]) {
+        int score = [pv[@"mate"] intValue];
+        
+        NSString *theScore = [SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
+        
+        return theScore;
+    } else {
+        return @""; // this shouldn't be reached anyway
+    }
+}
+
 - (void)addAnalysisLine:(NSNotification *)notification
 {
     if (!self.engine.isAnalyzing) {
         return;
     }
+    // Also update the status text
     [self updateEngineStatus:nil];
     
     NSDictionary *data = [self.engine.lineHistory lastObject];
-    NSString *currentlyBeingShown = self.lineTextView.string;
-    NSArray *pvFromToText = [data[@"pv"] componentsSeparatedByString:@" "];
-    NSMutableArray *pvMacMoveObjects = [NSMutableArray new];
     
-    Position *tmpPos = new Position;
-    tmpPos->copy(*self.currentGame.currPosition);
+    // Get the attributed string out of the view
+    NSMutableAttributedString *viewText = [self.lineTextView.attributedString mutableCopy];
+    NSAttributedString *pvBold;
     
-    for (NSString *fromTo in pvFromToText) {
-        if ([fromTo length] < 4) {
-            NSLog(@"%@ is not a move!", fromTo);
-            return;
-        }
-        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
-        UndoInfo u;
-        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
-        tmpPos->do_move(m, u);
-        [pvMacMoveObjects addObject:moveObject];
+    // Use a try catch since there might be an exception
+    @try {
+       pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:13]}];
     }
+    @catch (NSException *exception) {
+        return;
+    }
+    [viewText appendAttributedString:pvBold];
+    [viewText appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
     
-    NSString *niceOutput = [self movesArrayAsString:pvMacMoveObjects];
+    // Second line of text
     
-    self.lineTextView.string = [NSString stringWithFormat:@"%@\n%@", currentlyBeingShown, niceOutput];
+    NSString *score = [self scoreForPV:data];
+    NSString *depth = [NSString stringWithFormat:@"%d/%d", [data[@"depth"] intValue], [data[@"seldepth"] intValue]];
+    NSString *time = [SFMFormatter millisecondsToClock:[data[@"time"] longLongValue]];
+    NSString *nodes = [SFMFormatter nodesAsText:data[@"nodes"]];
+    NSString *secondLine = [NSString stringWithFormat:@"    %@    Depth: %@    %@    %@\n\n",
+                             score,
+                             depth,
+                             time,
+                             nodes];
+    NSAttributedString *secondLineFormatted = [[NSAttributedString alloc] initWithString:secondLine attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:13]}];
+    [viewText appendAttributedString:secondLineFormatted];
+    
+    [self.lineTextView.textStorage setAttributedString:[viewText copy]];
+    
     [self.lineTextView scrollToEndOfDocument:self];
 }
 
@@ -277,6 +307,30 @@ using namespace Chess;
     if (self.wantsAnalysis) {
         [self sendPositionToEngine];
     }
+}
+
+// TODO move to formatter
+- (NSString *)prettyPV:(NSString *)pvAsText
+{
+    NSArray *pvFromToText = [pvAsText componentsSeparatedByString:@" "];
+    NSMutableArray *pvMacMoveObjects = [NSMutableArray new];
+    
+    Position *tmpPos = new Position;
+    tmpPos->copy(*self.currentGame.currPosition);
+    
+    for (NSString *fromTo in pvFromToText) {
+        if ([fromTo length] < 4) {
+            @throw [NSException exceptionWithName:@"Bad Move Exception" reason:[NSString stringWithFormat:@"%@ is not a move", fromTo] userInfo:nil];
+        }
+        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
+        UndoInfo u;
+        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
+        tmpPos->do_move(m, u);
+        [pvMacMoveObjects addObject:moveObject];
+    }
+    
+    return [self movesArrayAsString:pvMacMoveObjects];
+
 }
 
 

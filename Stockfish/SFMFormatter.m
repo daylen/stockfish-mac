@@ -10,7 +10,11 @@
 
 @implementation SFMFormatter
 
-+ (NSString *)scoreAsText:(int)score isMate:(BOOL)isMate isWhiteToMove:(BOOL)whiteToMove
++ (NSString *)scoreAsText:(int)score
+                   isMate:(BOOL)isMate
+            isWhiteToMove:(BOOL)whiteToMove
+             isLowerBound:(BOOL)isLowerBound
+             isUpperBound:(BOOL)isUpperBound
 {
     NSMutableString *str = [NSMutableString new];
     
@@ -36,10 +40,18 @@
     }
     [str appendString:@" ("];
     if (isMate) {
-        [str appendFormat:@"#%d)", ABS(score)];
+        [str appendFormat:@"#%d", ABS(score)];
     } else {
-        [str appendFormat:@"%.2f)", ABS(score) / 100.0];
+        [str appendFormat:@"%.2f", ABS(score) / 100.0];
     }
+    
+    if (isLowerBound) {
+        [str appendString:@"++"];
+    } else if (isUpperBound) {
+        [str appendString:@"--"];
+    }
+    
+    [str appendString:@")"];
     
     return [str copy];
 }
@@ -55,6 +67,20 @@
         // Meganodes
         return [NSString stringWithFormat:@"%@ MN", [nodes substringToIndex:[nodes length] - 6]];
     }
+}
++ (NSString *)millisecondsToClock:(unsigned long long)milliseconds
+{
+    long millisecondsInOneDay = 86400000;
+    long days = milliseconds / millisecondsInOneDay;
+    milliseconds %= millisecondsInOneDay;
+    long millisecondsInOneMinute = 60000;
+    long minutes = milliseconds / millisecondsInOneMinute;
+    milliseconds %= millisecondsInOneMinute;
+    long millisecondsInOneSecond = 1000;
+    long seconds = milliseconds / millisecondsInOneSecond;
+    
+    return [NSString stringWithFormat:@"%ld:%02ld:%02ld", days, minutes, seconds];
+    
 }
 
 @end

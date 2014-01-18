@@ -10,7 +10,12 @@
 
 @interface SFMFormatter : NSObject
 
-+ (NSString *)scoreAsText:(int)score isMate:(BOOL)isMate isWhiteToMove:(BOOL)whiteToMove;
++ (NSString *)scoreAsText:(int)score
+                   isMate:(BOOL)isMate
+            isWhiteToMove:(BOOL)whiteToMove
+             isLowerBound:(BOOL)isLowerBound
+             isUpperBound:(BOOL)isUpperBound;
 + (NSString *)nodesAsText:(NSString *)nodes;
++ (NSString *)millisecondsToClock:(unsigned long long)milliseconds; // 0:00:00
 
 @end
