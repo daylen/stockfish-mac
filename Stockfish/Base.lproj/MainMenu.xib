@@ -136,6 +136,12 @@
                                     <action selector="copyFenString:" target="-1" id="lWp-Ga-Nbl"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Paste FEN" keyEquivalent="v" id="gzM-CP-T6K">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="pasteFenString:" target="-1" id="RGc-WF-LMi"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

@@ -25,6 +25,7 @@ using namespace Chess;
 
 #pragma mark - Init and Set Up
 - (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;
+- (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2 andFen:(NSString *)fen;
 - (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Saves the tags and move text
 - (void)populateMovesFromMoveText; // Actually load the game
 

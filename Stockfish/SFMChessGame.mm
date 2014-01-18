@@ -51,6 +51,21 @@
     return self;
 }
 
+- (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2 andFen:(NSString *)fen
+{
+    self = [self initWithWhite:p1 andBlack:p2];
+    if (self) {
+        self.tags[@"FEN"] = fen;
+        self.startPosition = new Position;
+        self.currPosition = new Position;
+        self.startPosition->from_fen([fen UTF8String]);
+        self.currPosition->from_fen([fen UTF8String]);
+        assert(self.startPosition->is_ok());
+        assert(self.currPosition->is_ok());
+    }
+    return self;
+}
+
 - (id)initWithTags:(NSMutableDictionary *)tags andMoves:(NSString *)moves
 {
     self = [super init];
@@ -240,7 +255,6 @@
     line[i] = MOVE_NONE;
     
     assert(self.startPosition->is_ok());
-    self.startPosition->print();
     
     return [NSString stringWithUTF8String:line_to_san(*self.startPosition, line, 0, true, 1).c_str()];
 }

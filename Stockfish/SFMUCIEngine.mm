@@ -24,7 +24,6 @@
 - (void)sendCommandToEngine:(NSString *)string
 {
     assert([string rangeOfString:@"\n"].location == NSNotFound);
-    //NSLog(@"GUI TO ENGINE: %@", string);
     NSString *strWithNewLine = [NSString stringWithFormat:@"%@\n", string];
     [self.writeHandle writeData:[strWithNewLine dataUsingEncoding:NSUTF8StringEncoding]];
 }

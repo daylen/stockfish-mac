@@ -41,9 +41,27 @@ using namespace Chess;
 #pragma mark - Target/Action
 - (IBAction)copyFenString:(id)sender
 {
-    NSString *fen = [NSString stringWithCString:self.currentGame.currPosition->to_fen().c_str() encoding:NSUTF8StringEncoding];
-    [[NSPasteboard generalPasteboard] declareTypes:@[NSStringPboardType] owner:nil];
-    [[NSPasteboard generalPasteboard] setString:fen forType:NSStringPboardType];
+    NSMutableString *fen = [[NSString stringWithCString:self.currentGame.currPosition->to_fen().c_str() encoding:NSUTF8StringEncoding] mutableCopy];
+    [fen appendFormat:@" %d %d", self.currentGame.currentMoveIndex, self.currentGame.currentMoveIndex / 2 + 1];
+    [[NSPasteboard generalPasteboard] declareTypes:@[NSPasteboardTypeString] owner:nil];
+    [[NSPasteboard generalPasteboard] setString:[fen copy] forType:NSPasteboardTypeString];
+    
+}
+- (IBAction)pasteFenString:(id)sender
+{
+    if ([self.pgnFile.games count] > 1) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Please create a new document first."];
+        [alert runModal];
+        return;
+    }
+    NSString *fen = [[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString];
+    // TODO Validate the fen…
+
+    [self.pgnFile.games removeAllObjects];
+
+    [self.pgnFile.games addObject:[[SFMChessGame alloc] initWithWhite:[SFMPlayer new] andBlack:[SFMPlayer new] andFen:fen]];
+    self.currentGame = nil;
+    [self loadGameAtIndex:0];
     
 }
 - (IBAction)flipBoard:(id)sender {
