@@ -15,6 +15,7 @@
 #import "SFMFormatter.h"
 
 #include "../Chess/san.h"
+#include "../Chess/position.h"
 
 @interface SFMWindowController ()
 
@@ -49,16 +50,25 @@ using namespace Chess;
 }
 - (IBAction)pasteFenString:(id)sender
 {
+    // Don't want to deal with multi-game PGN
     if ([self.pgnFile.games count] > 1) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Please create a new document first."];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Please create a new game first."];
         [alert runModal];
         return;
     }
+    
+    // Fetch from clipboard
     NSString *fen = [[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString];
-    // TODO Validate the fen…
 
+    // Validate the FEN string and throw a modal if invalid
+    if (!Position::is_valid_fen([fen UTF8String])) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The FEN string is not valid."];
+        [alert runModal];
+        return;
+    }
+
+    // Basically insert a new game and reload
     [self.pgnFile.games removeAllObjects];
-
     [self.pgnFile.games addObject:[[SFMChessGame alloc] initWithWhite:[SFMPlayer new] andBlack:[SFMPlayer new] andFen:fen]];
     self.currentGame = nil;
     [self loadGameAtIndex:0];
