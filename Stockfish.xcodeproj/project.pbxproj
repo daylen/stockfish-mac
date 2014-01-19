@@ -51,6 +51,7 @@
 		77764F071888B80C00A7C4CC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77764F051888B80C00A7C4CC /* Preferences.xib */; };
 		77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */; };
 		77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */; };
+		777DB5C7188C93DF007072FA /* SFMHardwareDetectorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 777DB5C6188C93DF007072FA /* SFMHardwareDetectorTest.m */; };
 		778A271A188A1E3B00F57827 /* DYUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 778A2719188A1E3B00F57827 /* DYUserDefaults.m */; };
 		778A271D188A1E4300F57827 /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271B188A1E4300F57827 /* stockfish-64 */; };
 		778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271C188A1E4300F57827 /* stockfish-sse42 */; };
@@ -158,6 +159,7 @@
 		77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMPreferencesWindowController.m; sourceTree = "<group>"; };
 		77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMHardwareDetector.h; path = Stockfish/SFMHardwareDetector.h; sourceTree = "<group>"; };
 		77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMHardwareDetector.m; path = Stockfish/SFMHardwareDetector.m; sourceTree = "<group>"; };
+		777DB5C6188C93DF007072FA /* SFMHardwareDetectorTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMHardwareDetectorTest.m; sourceTree = "<group>"; };
 		778A2718188A1E3B00F57827 /* DYUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DYUserDefaults.h; path = Stockfish/DYUserDefaults.h; sourceTree = "<group>"; };
 		778A2719188A1E3B00F57827 /* DYUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DYUserDefaults.m; path = Stockfish/DYUserDefaults.m; sourceTree = "<group>"; };
 		778A271B188A1E4300F57827 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-64"; path = "Stockfish/stockfish-64"; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 				77CA8B061889C499004402D2 /* SFMFormatterTest.m */,
 				779925D8188273C800EAAEDD /* SFMChessGameTest.mm */,
 				77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */,
+				777DB5C6188C93DF007072FA /* SFMHardwareDetectorTest.m */,
 			);
 			path = StockfishTests;
 			sourceTree = "<group>";
@@ -591,6 +594,7 @@
 				77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */,
 				77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */,
 				77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */,
+				777DB5C7188C93DF007072FA /* SFMHardwareDetectorTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -800,6 +804,83 @@
 			};
 			name = Release;
 		};
+		7729D857188C97F700831ECD /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Test;
+		};
+		7729D858188C97F700831ECD /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Stockfish/Stockfish.entitlements;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
+				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Test;
+		};
+		7729D859188C97F700831ECD /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "StockfishTests/StockfishTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Test;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -807,6 +888,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				770506A0187CE43400BA4635 /* Debug */,
+				7729D857188C97F700831ECD /* Test */,
 				770506A1187CE43400BA4635 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -816,6 +898,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				770506A3187CE43400BA4635 /* Debug */,
+				7729D858188C97F700831ECD /* Test */,
 				770506A4187CE43400BA4635 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -825,6 +908,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				770506A6187CE43400BA4635 /* Debug */,
+				7729D859188C97F700831ECD /* Test */,
 				770506A7187CE43400BA4635 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;

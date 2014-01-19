@@ -32,4 +32,8 @@
 #define NUM_THREADS_SETTING @"Threads2"
 #define HASH_SIZE_SETTING @"Memory2"
 
+// For the hardware detector
+#define MIN_SUPPORTED_THREADS 1
+#define MIN_MEMORY_POWER 5
+
 #endif

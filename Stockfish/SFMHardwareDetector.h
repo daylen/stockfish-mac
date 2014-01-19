@@ -10,10 +10,15 @@
 
 @interface SFMHardwareDetector : NSObject
 
+// Minimum
 + (int)minimumSupportedThreads;
-+ (int)maximumSupportedThreads;
-
 + (int)minimumMemoryPower;
+
+// Maximum
++ (int)maximumSupportedThreads;
 + (int)maximumMemoryPower;
+
+// Testing only
++ (int)maximumMemoryPower:(int)totalMemory;
 
 @end
