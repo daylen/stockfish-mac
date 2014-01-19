@@ -7,12 +7,24 @@
 //
 
 #import "SFMApplication.h"
+#import "SFMPreferencesWindowController.h"
+
+@interface SFMApplication()
+
+@property SFMPreferencesWindowController *prefWinController;
+
+@end
 
 @implementation SFMApplication
 
 - (void)showHelp:(id)sender
 {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://stockfishchess.org/mac/"]];
+}
+- (IBAction)displayPreferencesWindow:(id)sender
+{
+    self.prefWinController = [[SFMPreferencesWindowController alloc] initWithWindowNibName:@"Preferences"];
+    [self.prefWinController.window makeKeyAndOrderFront:nil];
 }
 
 @end
