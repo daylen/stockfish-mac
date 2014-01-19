@@ -10,16 +10,10 @@
 
 @interface SFMHardwareDetector : NSObject
 
-+ (int)minCpuCores;
-+ (int)minMemory;
++ (int)minimumSupportedThreads;
++ (int)maximumSupportedThreads;
 
-+ (int)normCpuCores;
-+ (int)normMemory;
-
-+ (int)maxCpuCores;
-+ (int)maxMemory;
-
-+ (BOOL)isValidCpuCoreValue:(int)value;
-+ (BOOL)isValidMemoryValue:(int)value;
++ (int)minimumMemoryPower;
++ (int)maximumMemoryPower;
 
 @end

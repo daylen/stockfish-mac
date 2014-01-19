@@ -23,10 +23,13 @@
 @property (weak) IBOutlet NSTableView *gameListView;
 @property (weak) IBOutlet SFMBoardView *boardView;
 
+// Engine
 @property (weak) IBOutlet NSTextField *engineTextField;
 @property (weak) IBOutlet NSTextField *engineStatusTextField;
 @property (unsafe_unretained) IBOutlet NSTextView *lineTextView;
 @property (weak) IBOutlet NSButton *goStopButton;
+
+@property (unsafe_unretained) IBOutlet NSTextView *notationView;
 
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
@@ -123,6 +126,7 @@ using namespace Chess;
 {
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
+    [self updateNotationView];
 }
 - (void)sendPositionToEngine
 {
@@ -167,6 +171,12 @@ using namespace Chess;
         [alert beginSheetModalForWindow:self.window completionHandler:nil];
         self.currentGame.tags[@"Result"] = @"1/2-1/2";
     }
+}
+- (void)updateNotationView
+{
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame movesArrayAsHtmlString] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+    // TODO change to system font
+    [self.notationView.textStorage setAttributedString:[str copy]];
 }
 
 #pragma mark - Init
@@ -317,7 +327,7 @@ using namespace Chess;
     
     // Use a try catch since there might be an exception
     @try {
-       pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:13]}];
+       pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
     }
     @catch (NSException *exception) {
         return;
@@ -336,7 +346,7 @@ using namespace Chess;
                              depth,
                              time,
                              nodes];
-    NSAttributedString *secondLineFormatted = [[NSAttributedString alloc] initWithString:secondLine attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:13]}];
+    NSAttributedString *secondLineFormatted = [[NSAttributedString alloc] initWithString:secondLine attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
     [viewText appendAttributedString:secondLineFormatted];
     
     [self.lineTextView.textStorage setAttributedString:[viewText copy]];
@@ -393,6 +403,7 @@ using namespace Chess;
     Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
     [self checkIfGameOver];
     [self.document updateChangeCount:NSChangeDone];
+    [self updateNotationView];
     return m;
 }
 

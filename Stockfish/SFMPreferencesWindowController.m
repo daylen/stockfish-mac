@@ -12,61 +12,66 @@
 #import "Constants.h"
 
 @interface SFMPreferencesWindowController ()
-@property (weak) IBOutlet NSTextField *threadsTextField;
-@property (weak) IBOutlet NSTextField *hashSizeTextField;
-@property (weak) IBOutlet NSTextField *threadsDescription;
-@property (weak) IBOutlet NSTextField *memoryDescription;
+@property (weak) IBOutlet NSPopUpButton *threadsChooser;
+@property (weak) IBOutlet NSPopUpButton *memoryChooser;
 
 @end
 
 @implementation SFMPreferencesWindowController
 - (IBAction)optimizeForMinUsage:(id)sender {
-    int threads = [SFMHardwareDetector minCpuCores];
-    int memory = [SFMHardwareDetector minMemory];
+    int threads = [SFMHardwareDetector minimumSupportedThreads];
+    int memory = (int) pow(2, [SFMHardwareDetector minimumMemoryPower]);
+    
     [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
     [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
-    self.threadsTextField.stringValue = [NSString stringWithFormat:@"%d", threads];
-    self.hashSizeTextField.stringValue = [NSString stringWithFormat:@"%d", memory];
-}
-- (IBAction)optimizeforNormal:(id)sender
-{
-    int threads = [SFMHardwareDetector normCpuCores];
-    int memory = [SFMHardwareDetector normMemory];
-    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
-    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
-    self.threadsTextField.stringValue = [NSString stringWithFormat:@"%d", threads];
-    self.hashSizeTextField.stringValue = [NSString stringWithFormat:@"%d", memory];
+    
+    [self updateViewFromSettings];
 }
 - (IBAction)optimizeForMaxPerf:(id)sender {
-    int threads = [SFMHardwareDetector maxCpuCores];
-    int memory = [SFMHardwareDetector maxMemory];
+    int threads = [SFMHardwareDetector maximumSupportedThreads];
+    int memory = (int) pow(2, [SFMHardwareDetector maximumMemoryPower]);
+    
     [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
     [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
-    self.threadsTextField.stringValue = [NSString stringWithFormat:@"%d", threads];
-    self.hashSizeTextField.stringValue = [NSString stringWithFormat:@"%d", memory];
+    
+    [self updateViewFromSettings];
 }
 
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    self.threadsTextField.stringValue = [[DYUserDefaults getSettingForKey:NUM_THREADS_SETTING] description];
-    self.hashSizeTextField.stringValue = [[DYUserDefaults getSettingForKey:HASH_SIZE_SETTING] description];
-    self.threadsDescription.stringValue = [NSString stringWithFormat:@"Must be between %d and %d.", [SFMHardwareDetector minCpuCores], [SFMHardwareDetector maxCpuCores]];
-    self.memoryDescription.stringValue = [NSString stringWithFormat:@"Must be between %d and %d.", [SFMHardwareDetector minMemory], [SFMHardwareDetector maxMemory]];
+    
+    // Populate the choosers
+    for (int i = 1; i <= [SFMHardwareDetector maximumSupportedThreads]; i++) {
+        [self.threadsChooser addItemWithTitle:[NSString stringWithFormat:@"%d", i]];
+    }
+    for (int i = [SFMHardwareDetector minimumMemoryPower]; i <= [SFMHardwareDetector maximumMemoryPower]; i++) {
+        [self.memoryChooser addItemWithTitle:[NSString stringWithFormat:@"%d MB", (int) pow(2, i)]];
+    }
+    
+    [self updateViewFromSettings];
+    
+}
+- (void)updateViewFromSettings
+{
+    // Select the correct option
+    int threads = [[DYUserDefaults getSettingForKey:NUM_THREADS_SETTING] intValue];
+    int memory = [[DYUserDefaults getSettingForKey:HASH_SIZE_SETTING] intValue];
+    int memoryIndex = log2(memory) - [SFMHardwareDetector minimumMemoryPower];
+    
+    [self.threadsChooser selectItemAtIndex:threads - 1];
+    [self.memoryChooser selectItemAtIndex:memoryIndex];
+    
 }
 
-- (void)controlTextDidChange:(NSNotification *)obj
-{
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-    int threads = [[formatter numberFromString:self.threadsTextField.stringValue] intValue];
-    int memory = [[formatter numberFromString:self.hashSizeTextField.stringValue] intValue];
-    if ([SFMHardwareDetector isValidCpuCoreValue:threads]) {
-        [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
-    }
-    if ([SFMHardwareDetector isValidMemoryValue:memory]) {
-        [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
-    }
+- (IBAction)pickedOption:(id)sender {
+    int threads = (int) [self.threadsChooser indexOfSelectedItem] + 1;
+    int memoryPower = (int) [self.memoryChooser indexOfSelectedItem] + [SFMHardwareDetector minimumMemoryPower];
+    int memory = (int) pow(2, memoryPower);
+        
+    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
+    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
 }
+
 
 @end

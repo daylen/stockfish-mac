@@ -237,14 +237,14 @@
         [str appendString:self.moveText];
     } else {
         [str appendString:@"\n"];
-        [str appendString:[self movesArrayAsString]];
+        [str appendString:[self movesArrayAsString:YES]];
         [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
     }
     
     return str;
 }
 
-- (NSString *)movesArrayAsString
+- (NSString *)movesArrayAsString:(BOOL)breakLines
 {
     Move line[800];
     int i = 0;
@@ -256,7 +256,23 @@
     
     assert(self.startPosition->is_ok());
     
-    return [NSString stringWithUTF8String:line_to_san(*self.startPosition, line, 0, true, 1).c_str()];
+    return [NSString stringWithUTF8String:line_to_san(*self.startPosition, line, 0, breakLines, 1).c_str()];
+}
+
+- (NSString *)movesArrayAsHtmlString
+{
+    Move line[800];
+    int i = 0;
+    
+    for (SFMChessMove *move in self.moves) {
+        line[i++] = move.move;
+    }
+    line[i] = MOVE_NONE;
+    
+    assert(self.startPosition->is_ok());
+    
+    return [NSString stringWithUTF8String:line_to_html(*self.startPosition, line, self.currentMoveIndex, false).c_str()];
+
 }
 
 - (NSString *)description

@@ -13,6 +13,7 @@
                 <outlet property="goStopButton" destination="m3z-YE-0jX" id="obB-x6-qVj"/>
                 <outlet property="lineTextView" destination="zBr-J2-zpW" id="IT5-M0-mtD"/>
                 <outlet property="mainSplitView" destination="I7a-Lu-hEd" id="fMm-9s-2RE"/>
+                <outlet property="notationView" destination="H26-JL-r5T" id="Yy7-cM-pO6"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
         </customObject>
@@ -115,7 +116,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="dEN-jO-RNu"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="Z9n-YJ-w3r">
-                                    <rect key="frame" x="0.0" y="484" width="37" height="16"/>
+                                    <rect key="frame" x="0.0" y="484" width="0.0" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="OSB-Df-M59">
@@ -134,9 +135,46 @@
                                 <rect key="frame" x="535" y="0.0" width="425" height="500"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <subviews>
-                                    <customView fixedFrame="YES" id="xnb-oy-kvM">
+                                    <customView id="xnb-oy-kvM">
                                         <rect key="frame" x="0.0" y="0.0" width="425" height="240"/>
                                         <autoresizingMask key="autoresizingMask"/>
+                                        <subviews>
+                                            <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eRa-OG-clS">
+                                                <rect key="frame" x="20" y="20" width="385" height="200"/>
+                                                <autoresizingMask key="autoresizingMask"/>
+                                                <clipView key="contentView" id="xNN-rq-riy">
+                                                    <rect key="frame" x="1" y="1" width="383" height="198"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <subviews>
+                                                        <textView editable="NO" importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="H26-JL-r5T">
+                                                            <rect key="frame" x="0.0" y="0.0" width="387" height="198"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                            <size key="minSize" width="383" height="198"/>
+                                                            <size key="maxSize" width="463" height="10000000"/>
+                                                            <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                                            <size key="minSize" width="383" height="198"/>
+                                                            <size key="maxSize" width="463" height="10000000"/>
+                                                        </textView>
+                                                    </subviews>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                </clipView>
+                                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="SbP-eM-5ku">
+                                                    <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                </scroller>
+                                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="Cyu-6g-VZQ">
+                                                    <rect key="frame" x="368" y="1" width="16" height="198"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                </scroller>
+                                            </scrollView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="eRa-OG-clS" secondAttribute="bottom" constant="20" symbolic="YES" id="88r-sq-7lE"/>
+                                            <constraint firstItem="eRa-OG-clS" firstAttribute="leading" secondItem="xnb-oy-kvM" secondAttribute="leading" constant="20" symbolic="YES" id="kAI-Gs-oeu"/>
+                                            <constraint firstItem="eRa-OG-clS" firstAttribute="top" secondItem="xnb-oy-kvM" secondAttribute="top" constant="20" symbolic="YES" id="v4i-Vh-Jhb"/>
+                                            <constraint firstAttribute="trailing" secondItem="eRa-OG-clS" secondAttribute="trailing" constant="20" symbolic="YES" id="z5p-6o-kDp"/>
+                                        </constraints>
                                     </customView>
                                     <customView id="s1Z-Jk-Ff1">
                                         <rect key="frame" x="0.0" y="250" width="425" height="250"/>
@@ -247,5 +285,15 @@
                 <outlet property="delegate" destination="-2" id="0bl-1N-x8E"/>
             </connections>
         </window>
+        <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="Cvy-fZ-Dra">
+            <rect key="frame" x="0.0" y="0.0" width="242" height="133"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <size key="minSize" width="238" height="133"/>
+            <size key="maxSize" width="463" height="10000000"/>
+            <color key="insertionPointColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+            <size key="minSize" width="238" height="133"/>
+            <size key="maxSize" width="463" height="10000000"/>
+        </textView>
     </objects>
 </document>

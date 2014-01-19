@@ -29,7 +29,7 @@
 
 // For the settings
 #define ENGINE_SETTINGS_KEY @"Engine Settings"
-#define NUM_THREADS_SETTING @"Threads"
-#define HASH_SIZE_SETTING @"Memory"
+#define NUM_THREADS_SETTING @"Threads2"
+#define HASH_SIZE_SETTING @"Memory2"
 
 #endif

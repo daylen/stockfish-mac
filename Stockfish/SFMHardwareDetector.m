@@ -20,44 +20,23 @@
     return (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024);
 }
 
-#pragma mark - Min
-+ (int)minCpuCores
+#pragma mark - Public
++ (int)minimumSupportedThreads
 {
     return 1;
 }
-+ (int)minMemory
-{
-    return 32;
-}
-
-#pragma mark - Normal
-+ (int)normCpuCores
-{
-    return MAX(1, [self cpuCores] / 2);
-}
-+ (int)normMemory
-{
-    return MIN(16384, [self totalMemory] / 4);
-}
-
-#pragma mark - Max
-+ (int)maxCpuCores
++ (int)maximumSupportedThreads
 {
     return [self cpuCores];
 }
-+ (int)maxMemory
-{
-    return MIN(16384, 7 * [self totalMemory] / 8);
-}
 
-#pragma mark - Validation
-+ (BOOL)isValidCpuCoreValue:(int)value
++ (int)minimumMemoryPower
 {
-    return (value >= [self minCpuCores] && value <= [self maxCpuCores]);
+    return 5; // 2^5 = 32
 }
-+ (BOOL)isValidMemoryValue:(int)value;
++ (int)maximumMemoryPower
 {
-    return (value >= [self minMemory] && value <= [self maxMemory]);
+    return (int) log2([self totalMemory] / 2);
 }
 
 @end

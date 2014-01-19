@@ -43,8 +43,9 @@ using namespace Chess;
 - (void)goToPly:(int)ply;
 
 #pragma mark - Export
-- (NSString *)pgnString; // PGN string for this game
-- (NSString *)movesArrayAsString; // Just the move text
-- (NSString *)uciPositionString;
+- (NSString *)pgnString; // Includes PGN tags, e.g. "[Event ..."
+- (NSString *)movesArrayAsString:(BOOL)breakLines; // The SAN, e.g. "1. e2 e4 ..."
+- (NSString *)movesArrayAsHtmlString;
+- (NSString *)uciPositionString; // For the engine, e.g. "position startpos..."
 
 @end

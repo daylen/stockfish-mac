@@ -6,10 +6,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMPreferencesWindowController">
             <connections>
-                <outlet property="hashSizeTextField" destination="Gzb-BZ-4qA" id="LRQ-ov-F6w"/>
-                <outlet property="memoryDescription" destination="hci-79-NSw" id="RkD-Wz-B12"/>
-                <outlet property="threadsDescription" destination="Oal-wK-WYR" id="IWA-OZ-HY4"/>
-                <outlet property="threadsTextField" destination="z6P-3T-60c" id="Lmi-TJ-QRf"/>
+                <outlet property="memoryChooser" destination="7jy-cY-fKz" id="k9W-LI-IhX"/>
+                <outlet property="threadsChooser" destination="Kfp-R8-vKl" id="X94-bT-iQU"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="aEU-LR-8KM"/>
             </connections>
         </customObject>
@@ -18,14 +16,14 @@
         <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="500" width="480" height="278"/>
+            <rect key="contentRect" x="196" y="500" width="480" height="245"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="278"/>
+                <rect key="frame" x="0.0" y="0.0" width="480" height="245"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dsW-pD-vD1">
-                        <rect key="frame" x="130" y="238" width="135" height="17"/>
+                        <rect key="frame" x="130" y="205" width="135" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Number of Threads" id="6so-FC-vRP">
                             <font key="font" metaFont="systemBold"/>
@@ -34,67 +32,41 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0w8-Uz-gwk">
-                        <rect key="frame" x="161" y="177" width="104" height="17"/>
+                        <rect key="frame" x="195" y="144" width="70" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Hash Size (MB)" id="I21-19-jaW">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Hash Size" id="I21-19-jaW">
                             <font key="font" metaFont="systemBold"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gzb-BZ-4qA">
-                        <rect key="frame" x="281" y="175" width="96" height="22"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="KbC-ph-uTx">
-                            <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="309" maximumFractionDigits="3" id="WXs-dI-qaJ"/>
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                        <connections>
-                            <outlet property="delegate" destination="-2" id="Klr-uY-LYh"/>
-                        </connections>
-                    </textField>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hci-79-NSw">
-                        <rect key="frame" x="50" y="141" width="216" height="28"/>
+                        <rect key="frame" x="50" y="108" width="216" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Descriptive Text" id="jcD-ne-tGS">
+                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="The amount of memory to use during analysis." id="jcD-ne-tGS">
                             <font key="font" metaFont="smallSystem"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Oal-wK-WYR">
-                        <rect key="frame" x="50" y="202" width="216" height="28"/>
+                        <rect key="frame" x="50" y="169" width="216" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Descriptive Text" id="hqQ-Kv-lbY">
+                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="The number of CPU cores to use during analysis." id="hqQ-Kv-lbY">
                             <font key="font" metaFont="smallSystem"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="z6P-3T-60c">
-                        <rect key="frame" x="281" y="236" width="96" height="22"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="omm-eB-QRd">
-                            <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="309" maximumFractionDigits="3" id="Hgg-zt-gkF"/>
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                        <connections>
-                            <outlet property="delegate" destination="-2" id="1WP-Fg-ddB"/>
-                        </connections>
-                    </textField>
                     <box autoresizesSubviews="NO" verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="5j1-iy-O3D">
-                        <rect key="frame" x="0.0" y="125" width="480" height="5"/>
+                        <rect key="frame" x="0.0" y="92" width="480" height="5"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
                         <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <font key="titleFont" metaFont="system"/>
                     </box>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M9E-Se-4dQ">
-                        <rect key="frame" x="90" y="79" width="301" height="32"/>
+                        <rect key="frame" x="90" y="46" width="301" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Optimize for Minimum Resource Usage" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="G1d-ix-o9d">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -102,17 +74,6 @@
                         </buttonCell>
                         <connections>
                             <action selector="optimizeForMinUsage:" target="-2" id="Eag-g2-kbZ"/>
-                        </connections>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3hc-QQ-84D">
-                        <rect key="frame" x="90" y="46" width="301" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Balance Resource Usage and Performance" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="H0w-tc-qsm">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="optimizeforNormal:" target="-2" id="COG-Lh-pGk"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qxX-qD-JXA">
@@ -126,6 +87,30 @@
                             <action selector="optimizeForMaxPerf:" target="-2" id="tFG-K0-ttI"/>
                         </connections>
                     </button>
+                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7jy-cY-fKz">
+                        <rect key="frame" x="279" y="139" width="101" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="EyI-1b-sYY">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <menu key="menu" title="OtherViews" id="F6u-Qu-vUT"/>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="pickedOption:" target="-2" id="keA-Gw-vY1"/>
+                        </connections>
+                    </popUpButton>
+                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Kfp-R8-vKl">
+                        <rect key="frame" x="279" y="200" width="101" height="26"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="GKB-Pb-vCA">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                            <menu key="menu" title="OtherViews" id="Awc-Gq-hkC"/>
+                        </popUpButtonCell>
+                        <connections>
+                            <action selector="pickedOption:" target="-2" id="xNF-Pw-rqc"/>
+                        </connections>
+                    </popUpButton>
                 </subviews>
             </view>
         </window>
