@@ -175,7 +175,15 @@ using namespace Chess;
 - (void)updateNotationView
 {
     NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame movesArrayAsHtmlString] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
-    // TODO change to system font
+    [str enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, str.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
+        NSFont *currFont = (NSFont *) value;
+        if ([[currFont fontDescriptor] symbolicTraits] & NSFontBoldTrait) {
+            [str setAttributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]} range:range];
+        } else {
+            [str setAttributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]} range:range];
+
+        }
+    }];
     [self.notationView.textStorage setAttributedString:[str copy]];
 }
 
