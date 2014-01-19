@@ -261,6 +261,10 @@
 
 - (NSString *)movesArrayAsHtmlString
 {
+    if ([self.moves count] == 0) {
+        return @"Make a move!";
+    }
+    
     Move line[800];
     int i = 0;
     

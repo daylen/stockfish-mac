@@ -19,7 +19,7 @@
 
 - (void)showHelp:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://stockfishchess.org/mac/"]];
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://stockfishchess.org/mac-help/"]];
 }
 - (IBAction)displayPreferencesWindow:(id)sender
 {
