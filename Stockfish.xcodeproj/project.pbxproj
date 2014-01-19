@@ -65,6 +65,7 @@
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
+		77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 77E215BD188BA99900E935D0 /* Binaries.entitlements */; };
 		77F42E73188B8405003A4AC6 /* SFMApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F42E72188B8405003A4AC6 /* SFMApplication.m */; };
 /* End PBXBuildFile section */
 
@@ -181,6 +182,7 @@
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
 		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
+		77E215BD188BA99900E935D0 /* Binaries.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Binaries.entitlements; sourceTree = "<group>"; };
 		77F42E71188B8405003A4AC6 /* SFMApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMApplication.h; sourceTree = "<group>"; };
 		77F42E72188B8405003A4AC6 /* SFMApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMApplication.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -260,6 +262,7 @@
 			children = (
 				77F42E71188B8405003A4AC6 /* SFMApplication.h */,
 				77F42E72188B8405003A4AC6 /* SFMApplication.m */,
+				77E215BD188BA99900E935D0 /* Binaries.entitlements */,
 				778A271F188A7A1A00F57827 /* Stockfish.entitlements */,
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
@@ -472,6 +475,7 @@
 				ORGANIZATIONNAME = "Daylen Yang";
 				TargetAttributes = {
 					7705066D187CE43300BA4635 = {
+						DevelopmentTeam = NR8F7ZFLA3;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
 								enabled = 1;
@@ -514,6 +518,7 @@
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
 				778A271D188A1E4300F57827 /* stockfish-64 in Resources */,
+				77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */,
 				778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
@@ -724,13 +729,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Stockfish/Stockfish.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -740,13 +747,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Stockfish/Stockfish.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
