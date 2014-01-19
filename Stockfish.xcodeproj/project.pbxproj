@@ -65,6 +65,7 @@
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
+		77F42E73188B8405003A4AC6 /* SFMApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F42E72188B8405003A4AC6 /* SFMApplication.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -180,6 +181,8 @@
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
 		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
+		77F42E71188B8405003A4AC6 /* SFMApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMApplication.h; sourceTree = "<group>"; };
+		77F42E72188B8405003A4AC6 /* SFMApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMApplication.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -255,6 +258,8 @@
 		77050677187CE43300BA4635 /* Stockfish */ = {
 			isa = PBXGroup;
 			children = (
+				77F42E71188B8405003A4AC6 /* SFMApplication.h */,
+				77F42E72188B8405003A4AC6 /* SFMApplication.m */,
 				778A271F188A7A1A00F57827 /* Stockfish.entitlements */,
 				77050683187CE43400BA4635 /* SFMDocument.h */,
 				77050684187CE43400BA4635 /* SFMDocument.mm */,
@@ -567,6 +572,7 @@
 				77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */,
 				77924AF0187DED6E0019C56E /* SFMChessMove.mm in Sources */,
 				770506D4187CE52D00BA4635 /* movepick.cpp in Sources */,
+				77F42E73188B8405003A4AC6 /* SFMApplication.m in Sources */,
 				77050685187CE43400BA4635 /* SFMDocument.mm in Sources */,
 				770506CC187CE52D00BA4635 /* bitboard.cpp in Sources */,
 			);
