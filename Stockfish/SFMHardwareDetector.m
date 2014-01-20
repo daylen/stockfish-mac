@@ -22,7 +22,11 @@
 }
 + (int)maximumMemoryPower:(int)totalMemory
 {
-    return (int) log2(totalMemory / 2);
+    int power = (int) log2(totalMemory);
+    if (power == log2(totalMemory)) {
+        power--;
+    }
+    return MIN(MAX_MEMORY_POWER, power);
 }
 
 #pragma mark - Public

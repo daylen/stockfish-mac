@@ -35,5 +35,6 @@
 // For the hardware detector
 #define MIN_SUPPORTED_THREADS 1
 #define MIN_MEMORY_POWER 5
+#define MAX_MEMORY_POWER 14
 
 #endif

@@ -18,22 +18,31 @@
 - (void)testMemory
 {
     // Test all the basic memory configurations and see if they're what we expect
-    XCTAssertEqual(1, 1);
-}
-
-+ (int)maxMemoryForSimulatedSystemMemory:(int)megabytes
-{
-    return [self powerToMegabytes:[self maxPowerForSimulatedSystemMemory:megabytes]];
-}
-
-+ (int)maxPowerForSimulatedSystemMemory:(int)megabytes
-{
-    return [SFMHardwareDetector maximumMemoryPower:megabytes];
-}
-
-+ (int)powerToMegabytes:(int)power
-{
-    return (int) pow(2, power);
+    
+    // Machines running OS X 10.9 require at least 2 GB of RAM
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:2 * 1024]), 1024);
+    
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:3 * 1024]), 2048);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:4 * 1024]), 2048);
+    
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:5 * 1024]), 4096);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:6 * 1024]), 4096);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:7 * 1024]), 4096);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:8 * 1024]), 4096);
+    
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:9 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:10 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:11 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:12 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:13 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:14 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:15 * 1024]), 8192);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:16 * 1024]), 8192);
+    
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:17 * 1024]), 16384);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:32 * 1024]), 16384);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:48 * 1024]), 16384);
+    XCTAssertEqual((int) pow(2, [SFMHardwareDetector maximumMemoryPower:64 * 1024]), 16384);
 }
 
 @end
