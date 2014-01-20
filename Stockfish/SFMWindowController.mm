@@ -379,6 +379,9 @@ using namespace Chess;
     tmpPos->copy(*self.currentGame.currPosition);
     
     for (NSString *fromTo in pvFromToText) {
+        if ([fromTo length] == 0) {
+            continue;
+        }
         if ([fromTo length] < 4) {
             @throw [NSException exceptionWithName:@"Bad Move Exception" reason:[NSString stringWithFormat:@"%@ is not a move", fromTo] userInfo:nil];
         }

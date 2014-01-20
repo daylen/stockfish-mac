@@ -38,7 +38,6 @@
 - (void)dataIsAvailable:(NSNotification *)notification
 {
     NSString *output = [self outputFromEngine];
-    //NSLog(@"%@", output);
     if ([output rangeOfString:@"\n"].location != NSNotFound) {
         NSArray *lines = [output componentsSeparatedByString:@"\n"];
         for (NSString *str in lines) {
@@ -74,11 +73,11 @@
         }
         
         [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self];
-    } else if ([str rangeOfString:@"multipv"].location != NSNotFound) {
+    } else if ([str rangeOfString:@" pv "].location != NSNotFound) {
         // Process a line of analysis
         NSMutableDictionary *line = [[NSMutableDictionary alloc] init];
         for (int i = 0; i < [tokens count]; i++) {
-            if ([tokens[i] isEqualToString:@"multipv"]) {
+            if ([tokens[i] isEqualToString:@" pv "]) {
                 break;
             }
             for (NSString *keyword in lineKeywords) {
@@ -89,12 +88,12 @@
         }
         
         // Process the PV
-        NSRange range = [str rangeOfString:@"multipv 1 pv"];
+        NSRange range = [str rangeOfString:@" pv "];
         if (range.location == NSNotFound) {
             //NSLog(@"Somehow this is a multipv without a pv");
             return;
         }
-        line[@"pv"] = [str substringFromIndex:range.location + range.length + 1];
+        line[@"pv"] = [str substringFromIndex:range.location + range.length];
         
         // Check for upper/lower bounds
         range = [str rangeOfString:@"upperbound"];
