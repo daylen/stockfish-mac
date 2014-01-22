@@ -2,9 +2,9 @@
 
 Stockfish for Mac is a powerful chess analysis app. Play two-player games on the beautiful chess board, or get instant accurate analysis of any game.
 
-# Project Status
+[Stockfish for Mac web site](http://stockfishchess.org/mac/)
 
-Stockfish for Mac has been submitted to the Mac App Store. When it's released, it'll be available for free.
+[Mac App Store download link](https://itunes.apple.com/us/app/stockfish/id801463932?ls=1&mt=12)
 
 # Features
 
