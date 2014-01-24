@@ -33,6 +33,7 @@ int numHighlightedSquares;
 
 Square fromSquare;
 Square toSquare;
+BOOL hasDragged;
 
 CGFloat leftInset;
 CGFloat topInset;
@@ -214,6 +215,8 @@ CGFloat squareSideLength;
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
+    hasDragged = NO;
+    
     // Figure out which square you clicked on
     NSPoint clickLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     Square clickedSquare = [self squareForCoordinates:clickLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
@@ -238,6 +241,7 @@ CGFloat squareSideLength;
         if (!isValidMove) {
             // If it's not a valid move, cancel the highlight
             numHighlightedSquares = 0;
+            fromSquare = SQ_NONE;
         }
     }
     
@@ -247,8 +251,9 @@ CGFloat squareSideLength;
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    // Make the dragged piece follow the mouse
+    hasDragged = YES;
     
+    // Make the dragged piece follow the mouse
     NSPoint mouseLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     // Center the piece
     mouseLocation.x -= squareSideLength / 2;
@@ -322,6 +327,10 @@ CGFloat squareSideLength;
             
         }
         
+    }
+    
+    if (hasDragged) {
+        numHighlightedSquares = 0;
     }
     
     [self setNeedsDisplay:YES];
