@@ -24,7 +24,8 @@ Some of the features Stockfish for Mac *does not* have:
 - Variations and commentary
 - Endgame tablebases
 - Set up position
-- Piece drag and drop
+- One player mode
+- Skill level adjustment
 - etc.
 
 Those features didn't make the 1.0.

@@ -30,7 +30,10 @@
 #pragma mark - Instance Variables
 Square highlightedSquares[32];
 int numHighlightedSquares;
-Square selectedSquare;
+
+Square fromSquare;
+Square toSquare;
+
 CGFloat leftInset;
 CGFloat topInset;
 CGFloat squareSideLength;
@@ -209,7 +212,7 @@ CGFloat squareSideLength;
 
 #pragma mark - Interaction
 
-- (void)mouseUp:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent *)theEvent
 {
     // Figure out which square you clicked on
     NSPoint clickLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
@@ -220,18 +223,58 @@ CGFloat squareSideLength;
         // squares on the board.
         if (clickedSquare != SQ_NONE) {
             [self displayPossibleMoveHighlightsForPieceOnSquare:clickedSquare];
-
+            fromSquare = clickedSquare;
+        }
+    } else {
+        // Is it possible to move to the square you clicked on?
+        BOOL isValidMove = NO;
+        for (int i = 0; i < numHighlightedSquares; i++) {
+            if (highlightedSquares[i] == clickedSquare) {
+                isValidMove = YES;
+                break;
+            }
         }
         
-    } else {
+        if (!isValidMove) {
+            // If it's not a valid move, cancel the highlight
+            numHighlightedSquares = 0;
+        }
+    }
+    
+    [self setNeedsDisplay:YES];
+    
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    // Make the dragged piece follow the mouse
+    
+    NSPoint mouseLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    // Center the piece
+    mouseLocation.x -= squareSideLength / 2;
+    mouseLocation.y -= squareSideLength / 2;
+    
+    SFMPieceView *draggedPiece = [self pieceViewOnSquare:fromSquare];
+    [draggedPiece setFrameOrigin:mouseLocation];
+    [draggedPiece setNeedsDisplay:YES];
+    
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+    // Figure out which square you let go on
+    NSPoint upLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    toSquare = [self squareForCoordinates:upLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
+    
+    if (numHighlightedSquares != 0) {
         // You previously selected a valid piece, and now you're trying to move it
         
-        if (clickedSquare != SQ_NONE) {
+        if (toSquare != SQ_NONE) {
             
             // Is it possible to move to the square you clicked on?
             BOOL isValidMove = NO;
             for (int i = 0; i < numHighlightedSquares; i++) {
-                if (highlightedSquares[i] == clickedSquare) {
+                if (highlightedSquares[i] == toSquare) {
                     isValidMove = YES;
                     break;
                 }
@@ -241,7 +284,7 @@ CGFloat squareSideLength;
                 PieceType pieceType = NO_PIECE_TYPE;
                 
                 // Handle promotions
-                if ([self isPromotionForMoveFromSquare:selectedSquare to:clickedSquare]) {
+                if ([self isPromotionForMoveFromSquare:fromSquare to:toSquare]) {
                     pieceType = [self getDesiredPromotionPiece];
                 }
                 
@@ -251,34 +294,34 @@ CGFloat squareSideLength;
                 // tries to move the king two squares to the side:
                 BOOL castle = NO;
                 
-                if (selectedSquare == SQ_E1 && clickedSquare == SQ_G1 &&
-                    self.position->piece_on(selectedSquare) == WK) {
-                    clickedSquare = SQ_H1;
+                if (fromSquare == SQ_E1 && toSquare == SQ_G1 &&
+                    self.position->piece_on(fromSquare) == WK) {
+                    toSquare = SQ_H1;
                     castle = YES;
-                } else if (selectedSquare == SQ_E1 && clickedSquare == SQ_C1 &&
-                           self.position->piece_on(selectedSquare) == WK) {
-                    clickedSquare = SQ_A1;
+                } else if (fromSquare == SQ_E1 && toSquare == SQ_C1 &&
+                           self.position->piece_on(fromSquare) == WK) {
+                    toSquare = SQ_A1;
                     castle = YES;
-                } else if (selectedSquare == SQ_E8 && clickedSquare == SQ_G8 &&
-                           self.position->piece_on(selectedSquare) == BK) {
-                    clickedSquare = SQ_H8;
+                } else if (fromSquare == SQ_E8 && toSquare == SQ_G8 &&
+                           self.position->piece_on(fromSquare) == BK) {
+                    toSquare = SQ_H8;
                     castle = YES;
-                } else if (selectedSquare == SQ_E8 && clickedSquare == SQ_C8 &&
-                           self.position->piece_on(selectedSquare) == BK) {
-                    clickedSquare = SQ_A8;
+                } else if (fromSquare == SQ_E8 && toSquare == SQ_C8 &&
+                           self.position->piece_on(fromSquare) == BK) {
+                    toSquare = SQ_A8;
                     castle = YES;
                 }
                 
-                Move theMove = [self.delegate doMoveFrom:selectedSquare to:clickedSquare promotion:pieceType];
+                Move theMove = [self.delegate doMoveFrom:fromSquare to:toSquare promotion:pieceType];
                 UndoInfo u;
-                [self animatePieceOnSquare:selectedSquare to:clickedSquare promotion:pieceType shouldCastle:castle];
-                //NSLog(@"Calling do_move from SFMBoardView");
+                [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];
                 self.position->do_move(theMove, u);
+                numHighlightedSquares = 0;
 
             }
             
         }
-        numHighlightedSquares = 0;
+        
     }
     
     [self setNeedsDisplay:YES];
@@ -387,7 +430,7 @@ CGFloat squareSideLength;
 
 - (void)displayPossibleMoveHighlightsForPieceOnSquare:(Chess::Square)sq
 {
-    selectedSquare = sq;
+    fromSquare = sq;
     numHighlightedSquares = [self destinationSquaresFrom:sq saveInArray:highlightedSquares];
     [self setNeedsDisplay:YES];
 }
