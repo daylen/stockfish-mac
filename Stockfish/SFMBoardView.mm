@@ -227,7 +227,14 @@ CGFloat squareSideLength;
         if (clickedSquare != SQ_NONE) {
             [self displayPossibleMoveHighlightsForPieceOnSquare:clickedSquare];
             fromSquare = clickedSquare;
+            
+            // Bring to front
+            SFMPieceView *view = [self pieceViewOnSquare:fromSquare];
+            CALayer* superlayer = [[view layer] superlayer];
+            [[view layer] removeFromSuperlayer];
+            [superlayer addSublayer:[view layer]];
         }
+        
     } else {
         // Is it possible to move to the square you clicked on?
         BOOL isValidMove = NO;
