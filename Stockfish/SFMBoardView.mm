@@ -278,62 +278,63 @@ CGFloat squareSideLength;
     NSPoint upLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     toSquare = [self squareForCoordinates:upLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
     
-    if (numHighlightedSquares != 0) {
+    // Is it possible to move to the square you clicked on?
+    BOOL isValidMove = NO;
+    for (int i = 0; i < numHighlightedSquares; i++) {
+        if (highlightedSquares[i] == toSquare) {
+            isValidMove = YES;
+            break;
+        }
+    }
+    
+    if (numHighlightedSquares != 0 && toSquare != SQ_NONE && isValidMove) {
         // You previously selected a valid piece, and now you're trying to move it
         
-        if (toSquare != SQ_NONE) {
-            
-            // Is it possible to move to the square you clicked on?
-            BOOL isValidMove = NO;
-            for (int i = 0; i < numHighlightedSquares; i++) {
-                if (highlightedSquares[i] == toSquare) {
-                    isValidMove = YES;
-                    break;
-                }
-            }
-            
-            if (isValidMove) {
-                PieceType pieceType = NO_PIECE_TYPE;
-                
-                // Handle promotions
-                if ([self isPromotionForMoveFromSquare:fromSquare to:toSquare]) {
-                    pieceType = [self getDesiredPromotionPiece];
-                }
-                
-                // HACK: Castling. The user probably tries to move the king two squares to
-                // the side when castling, but Stockfish internally encodes castling moves
-                // as "king captures rook". We handle this by adjusting tSq when the user
-                // tries to move the king two squares to the side:
-                BOOL castle = NO;
-                
-                if (fromSquare == SQ_E1 && toSquare == SQ_G1 &&
-                    self.position->piece_on(fromSquare) == WK) {
-                    toSquare = SQ_H1;
-                    castle = YES;
-                } else if (fromSquare == SQ_E1 && toSquare == SQ_C1 &&
-                           self.position->piece_on(fromSquare) == WK) {
-                    toSquare = SQ_A1;
-                    castle = YES;
-                } else if (fromSquare == SQ_E8 && toSquare == SQ_G8 &&
-                           self.position->piece_on(fromSquare) == BK) {
-                    toSquare = SQ_H8;
-                    castle = YES;
-                } else if (fromSquare == SQ_E8 && toSquare == SQ_C8 &&
-                           self.position->piece_on(fromSquare) == BK) {
-                    toSquare = SQ_A8;
-                    castle = YES;
-                }
-                
-                Move theMove = [self.delegate doMoveFrom:fromSquare to:toSquare promotion:pieceType];
-                UndoInfo u;
-                [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];
-                self.position->do_move(theMove, u);
-                numHighlightedSquares = 0;
-
-            }
-            
+        
+        
+        
+        PieceType pieceType = NO_PIECE_TYPE;
+        
+        // Handle promotions
+        if ([self isPromotionForMoveFromSquare:fromSquare to:toSquare]) {
+            pieceType = [self getDesiredPromotionPiece];
         }
         
+        // HACK: Castling. The user probably tries to move the king two squares to
+        // the side when castling, but Stockfish internally encodes castling moves
+        // as "king captures rook". We handle this by adjusting tSq when the user
+        // tries to move the king two squares to the side:
+        BOOL castle = NO;
+        
+        if (fromSquare == SQ_E1 && toSquare == SQ_G1 &&
+            self.position->piece_on(fromSquare) == WK) {
+            toSquare = SQ_H1;
+            castle = YES;
+        } else if (fromSquare == SQ_E1 && toSquare == SQ_C1 &&
+                   self.position->piece_on(fromSquare) == WK) {
+            toSquare = SQ_A1;
+            castle = YES;
+        } else if (fromSquare == SQ_E8 && toSquare == SQ_G8 &&
+                   self.position->piece_on(fromSquare) == BK) {
+            toSquare = SQ_H8;
+            castle = YES;
+        } else if (fromSquare == SQ_E8 && toSquare == SQ_C8 &&
+                   self.position->piece_on(fromSquare) == BK) {
+            toSquare = SQ_A8;
+            castle = YES;
+        }
+        
+        Move theMove = [self.delegate doMoveFrom:fromSquare to:toSquare promotion:pieceType];
+        UndoInfo u;
+        [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];
+        self.position->do_move(theMove, u);
+        numHighlightedSquares = 0;
+        
+    } else {
+        
+        // Not a valid move, slide it back
+        SFMPieceView *piece = [self pieceViewOnSquare:fromSquare];
+        [piece moveTo:[self coordinatesForSquare:piece.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
     }
     
     if (hasDragged) {
@@ -438,7 +439,7 @@ CGFloat squareSideLength;
         // Normal move
         [self movePieceView:thePiece toSquare:toSquare];
     }
-
+    
 }
 
 
