@@ -379,12 +379,12 @@ CGFloat squareSideLength;
             castle = YES;
         }
 
+        [self clearArrows];
         Move theMove = [self.delegate doMoveFrom:fromSquare to:toSquare promotion:pieceType];
         UndoInfo u;
         [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];
         self.position->do_move(theMove, u);
         numHighlightedSquares = 0;
-        [self clearArrows];
         
     } else {
         
