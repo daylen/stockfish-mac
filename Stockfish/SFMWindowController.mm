@@ -317,9 +317,13 @@ using namespace Chess;
     }
 }
 
+/*
+ Adds an analysis line to the text view. Specifically, adds the PV as SAN and search info.
+ */
 - (void)addAnalysisLine:(NSNotification *)notification
 {
     if (!self.engine.isAnalyzing) {
+        // The engine isn't analyzing, so the view shouldn't be updated
         return;
     }
     // Also update the status text
@@ -369,7 +373,12 @@ using namespace Chess;
     }
 }
 
+
 // TODO move to formatter
+/*
+ Input: something like "d2d4 d7d5 g1f3 g8f6 b1c3"
+ Output: something like "1. d4 d5 2. Nf3 Nf6 3. Nc3"
+ */
 - (NSString *)prettyPV:(NSString *)pvAsText
 {
     NSArray *pvFromToText = [pvAsText componentsSeparatedByString:@" "];
@@ -383,6 +392,7 @@ using namespace Chess;
             continue;
         }
         if ([fromTo length] < 4) {
+            // This should not even happen, but sometimes it does. Weird.
             @throw [NSException exceptionWithName:@"Bad Move Exception" reason:[NSString stringWithFormat:@"%@ is not a move", fromTo] userInfo:nil];
         }
         Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
@@ -391,6 +401,12 @@ using namespace Chess;
         tmpPos->do_move(m, u);
         [pvMacMoveObjects addObject:moveObject];
     }
+    
+    // And now, we add the arrow to the board
+    Move firstMove = ((SFMChessMove *)[pvMacMoveObjects firstObject]).move;
+    NSLog(@"%s", move_to_string(firstMove).c_str());
+    [self.boardView clearArrows];
+    [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
     
     return [self movesArrayAsString:pvMacMoveObjects];
 

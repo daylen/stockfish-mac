@@ -20,5 +20,7 @@ using namespace Chess;
 @property (nonatomic, weak) id <SFMBoardViewDelegate> delegate;
 
 - (void)updatePieceViews; // If you change the position, you must call this
+- (void)clearArrows;
+- (void)addArrowFrom:(Square)from to:(Square)to;
 
 @end

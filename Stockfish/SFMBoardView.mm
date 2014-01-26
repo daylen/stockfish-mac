@@ -20,12 +20,21 @@
 @property NSColor *darkSquareColor;
 @property NSColor *fontColor;
 @property NSColor *highlightColor;
+@property NSColor *arrowColor;
 @property NSShadow *boardShadow;
 @property NSMutableArray *pieces;
+@property NSMutableArray *arrows;
 
 @end
 
 @implementation SFMBoardView
+
+#pragma mark - Struct
+
+struct Arrow {
+    Square fromSquare;
+    Square toSquare;
+};
 
 #pragma mark - Instance Variables
 Square highlightedSquares[32];
@@ -55,7 +64,7 @@ CGFloat squareSideLength;
     for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
         Piece piece = self.position->piece_on(sq);
         if (piece != EMPTY) {
-            SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece onSquare:sq boardView:self];
+            SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece onSquare:sq];
             [self addSubview:pieceView];
             [self.pieces addObject:pieceView];
         }
@@ -89,12 +98,15 @@ CGFloat squareSideLength;
         self.darkSquareColor = [NSColor brownColor];
         self.fontColor = [NSColor whiteColor];
         self.highlightColor = [NSColor colorWithRed:1 green:1 blue:0 alpha:0.7];
+        self.arrowColor = [NSColor colorWithRed:1 green:0 blue:0 alpha:0.4];
         
         self.boardShadow = [NSShadow new];
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
         [self.boardShadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.75]]; // Gray
         
         self.position = new Position([FEN_START_POSITION UTF8String]);
+        
+        self.arrows = [NSMutableArray new];
         
     }
     return self;
@@ -163,12 +175,64 @@ CGFloat squareSideLength;
     }
     
     // Draw highlights
+    [self.highlightColor set]; // Highlight color
+
     for (int i = 0; i < numHighlightedSquares; i++) {
-        [self.highlightColor set];
         CGPoint coordinate = [self coordinatesForSquare:highlightedSquares[i] leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
         [NSBezierPath fillRect:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
     }
+    // Draw arrows
+    [self.arrowColor set]; // Arrow color
     
+    for (NSValue *value in self.arrows) {
+        Arrow a;
+        [value getValue:&a];
+        
+        [self drawArrowFrom:a.fromSquare to:a.toSquare];
+        
+    }
+    
+}
+
+#pragma mark - Arrows
+
+#define ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH 0.2;
+
+- (void)drawArrowFrom:(Square)from to:(Square)to
+{
+    NSLog(@"Drawing arrow from %s to %s", square_to_string(from).c_str(), square_to_string(to).c_str());
+    CGFloat arrowLineWidth = squareSideLength * ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH;
+    
+    CGPoint fromPoint = [self coordinatesForSquare:from leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+    CGPoint toPoint = [self coordinatesForSquare:to leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+    
+    NSBezierPath *path = [[NSBezierPath alloc] init];
+    
+    // The from point is pretty simple
+    [path moveToPoint:NSMakePoint(fromPoint.x - 0.5 * arrowLineWidth, fromPoint.y)];
+    [path lineToPoint:NSMakePoint(fromPoint.x + 0.5 * arrowLineWidth, fromPoint.y)];
+    
+    // TODO bug: horizontal lines are invisible
+    [path lineToPoint:NSMakePoint(toPoint.x + 0.5 * arrowLineWidth, toPoint.y)];
+    [path lineToPoint:NSMakePoint(toPoint.x - 0.5 * arrowLineWidth, toPoint.y)];
+    [path closePath];
+    [path fill];
+
+}
+
+- (void)clearArrows
+{
+    [self.arrows removeAllObjects];
+    [self setNeedsDisplay:YES];
+}
+- (void)addArrowFrom:(Square)from to:(Square)to
+{
+    NSLog(@"Adding arrow");
+    Arrow a;
+    a.fromSquare = from;
+    a.toSquare = to;
+    [self.arrows addObject:[NSValue valueWithBytes:&a objCType:@encode(Arrow)]];
+    [self setNeedsDisplay:YES];
 }
 
 #pragma mark - Helper methods
@@ -290,9 +354,6 @@ CGFloat squareSideLength;
     if (numHighlightedSquares != 0 && toSquare != SQ_NONE && isValidMove) {
         // You previously selected a valid piece, and now you're trying to move it
         
-        
-        
-        
         PieceType pieceType = NO_PIECE_TYPE;
         
         // Handle promotions
@@ -409,7 +470,7 @@ CGFloat squareSideLength;
         }
         
         // Create a new piece view and add it
-        SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece_of_color_and_type(self.position->side_to_move(), desiredPromotionPiece) onSquare:toSquare boardView:self];
+        SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece_of_color_and_type(self.position->side_to_move(), desiredPromotionPiece) onSquare:toSquare];
         [self addSubview:pieceView];
         [self.pieces addObject:pieceView];
     } else if (capturedPiece) {
@@ -469,7 +530,7 @@ CGFloat squareSideLength;
 }
 
 - (PieceType)getDesiredPromotionPiece
-{
+{    
     NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"Queen"];
     [alert addButtonWithTitle:@"Rook"];

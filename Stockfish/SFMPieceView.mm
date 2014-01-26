@@ -12,7 +12,6 @@
 
 @interface SFMPieceView()
 
-@property (weak) SFMBoardView* boardView;
 
 @end
 
@@ -20,7 +19,6 @@
 
 - (id)initWithPieceType:(Chess::Piece)pieceType
                onSquare:(Chess::Square)square
-              boardView:(SFMBoardView *)boardView
 {
     self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)];
     if (self) {
@@ -28,7 +26,6 @@
         [self setImage:[NSImage imageNamed:name]];
         
         self.square = square;
-        self.boardView = boardView;
         
         NSShadow *shadow = [NSShadow new];
         [shadow setShadowBlurRadius:PIECE_SHADOW_BLUR_RADIUS];
