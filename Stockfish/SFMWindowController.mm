@@ -126,6 +126,7 @@ using namespace Chess;
 {
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
+    [self.boardView clearArrows];
     [self updateNotationView];
 }
 - (void)sendPositionToEngine

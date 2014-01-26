@@ -384,6 +384,7 @@ CGFloat squareSideLength;
         [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];
         self.position->do_move(theMove, u);
         numHighlightedSquares = 0;
+        [self clearArrows];
         
     } else {
         
