@@ -200,9 +200,7 @@ CGFloat squareSideLength;
         arrowView.toPoint = [self coordinatesForSquare:arrowView.toSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
         arrowView.squareSideLength = squareSideLength;
 
-        
-        
-        [arrowView setFrame:self.frame];
+        [arrowView setFrame:self.bounds];
         [arrowView setNeedsDisplay:YES];
     }
 }
@@ -267,6 +265,7 @@ CGFloat squareSideLength;
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
+    NSLog(@"Mouse down");
     hasDragged = NO;
     
     // Figure out which square you clicked on
@@ -285,6 +284,9 @@ CGFloat squareSideLength;
             CALayer* superlayer = [[view layer] superlayer];
             [[view layer] removeFromSuperlayer];
             [superlayer addSublayer:[view layer]];
+            
+            // But the arrow needs to be even more above
+            [self updateArrowViews];
         }
         
     } else {
@@ -310,6 +312,7 @@ CGFloat squareSideLength;
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
+    NSLog(@"mouse dragged");
     hasDragged = YES;
     
     // Make the dragged piece follow the mouse
@@ -326,6 +329,7 @@ CGFloat squareSideLength;
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
+    NSLog(@"Mouse up");
     // Figure out which square you let go on
     NSPoint upLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     toSquare = [self squareForCoordinates:upLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
@@ -372,7 +376,7 @@ CGFloat squareSideLength;
             toSquare = SQ_A8;
             castle = YES;
         }
-        
+
         Move theMove = [self.delegate doMoveFrom:fromSquare to:toSquare promotion:pieceType];
         UndoInfo u;
         [self animatePieceOnSquare:fromSquare to:toSquare promotion:pieceType shouldCastle:castle];

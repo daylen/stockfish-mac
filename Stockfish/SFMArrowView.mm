@@ -18,6 +18,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
+    // TODO color
     [[NSColor redColor] set];
     
     CGFloat arrowLineWidth = self.squareSideLength * ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH;
@@ -35,6 +36,11 @@
     [path lineToPoint:NSMakePoint(self.toPoint.x - 0.5 * arrowLineWidth, self.toPoint.y)];
     [path closePath];
     [path fill];
+}
+
+- (NSView *)hitTest:(NSPoint)aPoint
+{
+    return nil;
 }
 
 - (BOOL)isFlipped
