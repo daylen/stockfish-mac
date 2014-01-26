@@ -9,6 +9,7 @@
 #import "SFMBoardView.h"
 #import "Constants.h"
 #import "SFMPieceView.h"
+#import "SFMArrowView.h"
 
 #include "../Chess/square.h"
 
@@ -20,7 +21,6 @@
 @property NSColor *darkSquareColor;
 @property NSColor *fontColor;
 @property NSColor *highlightColor;
-@property NSColor *arrowColor;
 @property NSShadow *boardShadow;
 @property NSMutableArray *pieces;
 @property NSMutableArray *arrows;
@@ -28,13 +28,6 @@
 @end
 
 @implementation SFMBoardView
-
-#pragma mark - Struct
-
-struct Arrow {
-    Square fromSquare;
-    Square toSquare;
-};
 
 #pragma mark - Instance Variables
 Square highlightedSquares[32];
@@ -50,7 +43,7 @@ CGFloat squareSideLength;
 
 #pragma mark - Setters
 
-- (void)updatePieceViews
+- (void)updatePieceViews // and the arrow views too!
 {
     numHighlightedSquares = 0;
     
@@ -59,6 +52,7 @@ CGFloat squareSideLength;
     // Invalidate pieces array
     self.pieces = [NSMutableArray new];
     // Remove subviews
+    NSLog(@"Removing subviews");
     [self setSubviews:[NSArray new]];
     
     for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
@@ -70,6 +64,22 @@ CGFloat squareSideLength;
         }
     }
     
+    // Now for the arrows
+    [self updateArrowViews];
+    
+    [self setNeedsDisplay:YES];
+}
+
+- (void)updateArrowViews
+{
+    for (NSView *view in self.subviews) {
+        if ([view isKindOfClass:[SFMArrowView class]]) {
+            [view removeFromSuperview];
+        }
+    }
+    for (SFMArrowView *arrowView in self.arrows) {
+        [self addSubview:arrowView];
+    }
     [self setNeedsDisplay:YES];
 }
 
@@ -79,6 +89,8 @@ CGFloat squareSideLength;
     for (SFMPieceView *pv in self.pieces) {
         [pv moveTo:[self coordinatesForSquare:pv.square leftOffset:leftInset topOffset:topInset sideLength:squareSideLength]];
     }
+    [self updateArrowViews];
+    
     [self setNeedsDisplay:YES];
 }
 
@@ -98,7 +110,6 @@ CGFloat squareSideLength;
         self.darkSquareColor = [NSColor brownColor];
         self.fontColor = [NSColor whiteColor];
         self.highlightColor = [NSColor colorWithRed:1 green:1 blue:0 alpha:0.7];
-        self.arrowColor = [NSColor colorWithRed:1 green:0 blue:0 alpha:0.4];
         
         self.boardShadow = [NSShadow new];
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
@@ -181,58 +192,35 @@ CGFloat squareSideLength;
         CGPoint coordinate = [self coordinatesForSquare:highlightedSquares[i] leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];
         [NSBezierPath fillRect:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, squareSideLength)];
     }
+    
     // Draw arrows
-    [self.arrowColor set]; // Arrow color
-    
-    for (NSValue *value in self.arrows) {
-        Arrow a;
-        [value getValue:&a];
+    for (SFMArrowView *arrowView in self.arrows) {
         
-        [self drawArrowFrom:a.fromSquare to:a.toSquare];
+        arrowView.fromPoint = [self coordinatesForSquare:arrowView.fromSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+        arrowView.toPoint = [self coordinatesForSquare:arrowView.toSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+        arrowView.squareSideLength = squareSideLength;
+
         
+        
+        [arrowView setFrame:self.frame];
+        [arrowView setNeedsDisplay:YES];
     }
-    
 }
 
 #pragma mark - Arrows
 
-#define ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH 0.2;
-
-- (void)drawArrowFrom:(Square)from to:(Square)to
-{
-    NSLog(@"Drawing arrow from %s to %s", square_to_string(from).c_str(), square_to_string(to).c_str());
-    CGFloat arrowLineWidth = squareSideLength * ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH;
-    
-    CGPoint fromPoint = [self coordinatesForSquare:from leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
-    CGPoint toPoint = [self coordinatesForSquare:to leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
-    
-    NSBezierPath *path = [[NSBezierPath alloc] init];
-    
-    // The from point is pretty simple
-    [path moveToPoint:NSMakePoint(fromPoint.x - 0.5 * arrowLineWidth, fromPoint.y)];
-    [path lineToPoint:NSMakePoint(fromPoint.x + 0.5 * arrowLineWidth, fromPoint.y)];
-    
-    // TODO bug: horizontal lines are invisible
-    [path lineToPoint:NSMakePoint(toPoint.x + 0.5 * arrowLineWidth, toPoint.y)];
-    [path lineToPoint:NSMakePoint(toPoint.x - 0.5 * arrowLineWidth, toPoint.y)];
-    [path closePath];
-    [path fill];
-
-}
-
 - (void)clearArrows
 {
     [self.arrows removeAllObjects];
-    [self setNeedsDisplay:YES];
+    [self updateArrowViews];
 }
 - (void)addArrowFrom:(Square)from to:(Square)to
 {
-    NSLog(@"Adding arrow");
-    Arrow a;
-    a.fromSquare = from;
-    a.toSquare = to;
-    [self.arrows addObject:[NSValue valueWithBytes:&a objCType:@encode(Arrow)]];
-    [self setNeedsDisplay:YES];
+    SFMArrowView *arrowView = [[SFMArrowView alloc] init];
+    arrowView.fromSquare = from;
+    arrowView.toSquare = to;
+    [self.arrows addObject:arrowView];
+    [self updateArrowViews];
 }
 
 #pragma mark - Helper methods
