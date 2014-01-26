@@ -52,7 +52,6 @@ CGFloat squareSideLength;
     // Invalidate pieces array
     self.pieces = [NSMutableArray new];
     // Remove subviews
-    NSLog(@"Removing subviews");
     [self setSubviews:[NSArray new]];
     
     for (Square sq = SQ_A1; sq <= SQ_H8; sq++) {
@@ -79,8 +78,14 @@ CGFloat squareSideLength;
     }
     for (SFMArrowView *arrowView in self.arrows) {
         [self addSubview:arrowView];
+        
+        arrowView.fromPoint = [self coordinatesForSquare:arrowView.fromSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+        arrowView.toPoint = [self coordinatesForSquare:arrowView.toSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
+        arrowView.squareSideLength = squareSideLength;
+        
+        [arrowView setFrame:self.bounds];
+        [arrowView setNeedsDisplay:YES];
     }
-    [self setNeedsDisplay:YES];
 }
 
 - (void)setBoardIsFlipped:(BOOL)boardIsFlipped
@@ -265,7 +270,6 @@ CGFloat squareSideLength;
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    NSLog(@"Mouse down");
     hasDragged = NO;
     
     // Figure out which square you clicked on
@@ -312,7 +316,6 @@ CGFloat squareSideLength;
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    NSLog(@"mouse dragged");
     hasDragged = YES;
     
     // Make the dragged piece follow the mouse
@@ -329,7 +332,6 @@ CGFloat squareSideLength;
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    NSLog(@"Mouse up");
     // Figure out which square you let go on
     NSPoint upLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     toSquare = [self squareForCoordinates:upLocation leftOffset:leftInset topOffset:topInset sideLength:squareSideLength];

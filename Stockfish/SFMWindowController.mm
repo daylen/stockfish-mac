@@ -404,7 +404,6 @@ using namespace Chess;
     
     // And now, we add the arrow to the board
     Move firstMove = ((SFMChessMove *)[pvMacMoveObjects firstObject]).move;
-    NSLog(@"%s", move_to_string(firstMove).c_str());
     [self.boardView clearArrows];
     [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
     

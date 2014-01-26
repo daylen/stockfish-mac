@@ -34,6 +34,7 @@
 		770506DA187CE52D00BA4635 /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 770506CA187CE52D00BA4635 /* value.cpp */; };
 		770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.mm */; };
 		7734B674189506F500FC4D79 /* SFMArrowView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7734B673189506F500FC4D79 /* SFMArrowView.mm */; };
+		7734B677189596B200FC4D79 /* NSBezierPath+Arrowhead.m in Sources */ = {isa = PBXBuildFile; fileRef = 7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */; };
 		773DE96F18822DD0009156C3 /* SFMPieceView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 773DE96E18822DD0009156C3 /* SFMPieceView.mm */; };
 		773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97118822DF8009156C3 /* bishop_b.pdf */; };
 		773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 773DE97218822DF8009156C3 /* bishop_w.pdf */; };
@@ -139,6 +140,8 @@
 		770506DF187CF2B100BA4635 /* SFMWindowController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = SFMWindowController.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7734B672189506F500FC4D79 /* SFMArrowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMArrowView.h; path = Stockfish/SFMArrowView.h; sourceTree = "<group>"; };
 		7734B673189506F500FC4D79 /* SFMArrowView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMArrowView.mm; path = Stockfish/SFMArrowView.mm; sourceTree = "<group>"; };
+		7734B675189596B200FC4D79 /* NSBezierPath+Arrowhead.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSBezierPath+Arrowhead.h"; path = "Stockfish/NSBezierPath+Arrowhead.h"; sourceTree = "<group>"; };
+		7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSBezierPath+Arrowhead.m"; path = "Stockfish/NSBezierPath+Arrowhead.m"; sourceTree = "<group>"; };
 		773DE96D18822DD0009156C3 /* SFMPieceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPieceView.h; path = Stockfish/SFMPieceView.h; sourceTree = "<group>"; };
 		773DE96E18822DD0009156C3 /* SFMPieceView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = SFMPieceView.mm; path = Stockfish/SFMPieceView.mm; sourceTree = "<group>"; };
 		773DE97118822DF8009156C3 /* bishop_b.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = bishop_b.pdf; sourceTree = "<group>"; };
@@ -217,6 +220,8 @@
 		77050665187CE43300BA4635 = {
 			isa = PBXGroup;
 			children = (
+				7734B675189596B200FC4D79 /* NSBezierPath+Arrowhead.h */,
+				7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */,
 				7748D07D18868CA0009E021E /* Engine Binaries */,
 				77924AF8187E57740019C56E /* Constants.h */,
 				779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */,
@@ -568,6 +573,7 @@
 				770506E0187CF2B100BA4635 /* SFMWindowController.mm in Sources */,
 				77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */,
 				770506D3187CE52D00BA4635 /* movegen.cpp in Sources */,
+				7734B677189596B200FC4D79 /* NSBezierPath+Arrowhead.m in Sources */,
 				7734B674189506F500FC4D79 /* SFMArrowView.mm in Sources */,
 				770506CD187CE52D00BA4635 /* book.cpp in Sources */,
 				77924AFD187E72940019C56E /* SFMParser.mm in Sources */,

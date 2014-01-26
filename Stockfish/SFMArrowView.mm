@@ -7,6 +7,7 @@
 //
 
 #import "SFMArrowView.h"
+#import "NSBezierPath+Arrowhead.h"
 
 @interface SFMArrowView()
 
@@ -18,23 +19,12 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    // TODO color
-    [[NSColor redColor] set];
+    [[NSColor colorWithRed:1 green:0 blue:0 alpha:0.5] set];
     
     CGFloat arrowLineWidth = self.squareSideLength * ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH;
     
-    NSBezierPath *path = [[NSBezierPath alloc] init];
+    NSBezierPath *path = [NSBezierPath bezierPathWithArrowFromPoint:self.fromPoint toPoint:self.toPoint tailWidth:arrowLineWidth headWidth:2.5 * arrowLineWidth headLength:2.5 * arrowLineWidth];
     
-    // The from point is pretty simple
-    [path moveToPoint:NSMakePoint(self.fromPoint.x - 0.5 * arrowLineWidth, self.fromPoint.y)];
-    [path lineToPoint:NSMakePoint(self.fromPoint.x + 0.5 * arrowLineWidth, self.fromPoint.y)];
-    
-    // TODO bug: horizontal lines are invisible
-    // TODO bug: bring to front
-    // TODO add arrow tip
-    [path lineToPoint:NSMakePoint(self.toPoint.x + 0.5 * arrowLineWidth, self.toPoint.y)];
-    [path lineToPoint:NSMakePoint(self.toPoint.x - 0.5 * arrowLineWidth, self.toPoint.y)];
-    [path closePath];
     [path fill];
 }
 
