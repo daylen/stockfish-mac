@@ -44,11 +44,6 @@
     
     [path moveToPoint:points[0]];
     for (int i = 0; i < kArrowPointCount; i++) {
-        if (isnan(points[i].x) || isnan(points[i].y)) {
-            // we have a problem.
-            NSLog(@"Returning empty bezier path");
-            return [NSBezierPath bezierPath];
-        }
         [path lineToPoint:points[i]];
     }
     

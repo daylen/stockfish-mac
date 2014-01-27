@@ -19,6 +19,10 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
+    if (self.fromSquare == self.toSquare) {
+        return;
+    }
+    
     [[NSColor colorWithRed:1 green:0 blue:0 alpha:0.5] set];
     
     CGFloat arrowLineWidth = self.squareSideLength * ARROW_LINE_WIDTH_AS_PERCENT_OF_SQUARE_WIDTH;
