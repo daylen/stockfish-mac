@@ -64,7 +64,7 @@
 
 - (void)testParseMoves
 {
-    NSString *fiveMoves = @"1. e4 e5 2. Nf3 Nc6 3. Bb5";
+    NSString *fiveMoves = @"1. e4\ne5 2.\rNf3 Nc6\r\n3. Bb5";
     NSArray *fiveMovesParsed = [SFMParser parseMoves:fiveMoves];
     NSArray *fiveMovesExpect = @[@"e4", @"e5", @"Nf3", @"Nc6", @"Bb5"];
     XCTAssertEqualObjects(fiveMovesParsed, fiveMovesExpect, @"Parse failure for 5 moves");
