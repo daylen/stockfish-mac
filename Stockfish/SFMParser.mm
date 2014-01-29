@@ -23,7 +23,8 @@ using namespace Chess;
 {
     NSMutableArray *games = [NSMutableArray new];
     
-    NSArray *lines = [str componentsSeparatedByString:@"\n"];
+    NSArray *lines = [str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    
     NSMutableDictionary *tags;
     NSMutableString *moves;
     BOOL readingTags = NO;
@@ -53,7 +54,7 @@ using namespace Chess;
                 readingTags = NO;
             }
             
-            [moves appendString:line];
+            [moves appendFormat:@"%@ ", line];
         }
     }
     // Upon reaching the end of the file we need to add the last game
