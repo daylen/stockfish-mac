@@ -228,7 +228,18 @@ using namespace Chess;
     [self stopAnalysis];
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
-    [self.currentGame populateMovesFromMoveText];
+    @try {
+        [self.currentGame populateMovesFromMoveText];
+    }
+    @catch (NSException *exception) {
+        [self close];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The game is not valid."];
+        [alert runModal];
+    }
+    @finally {
+        
+    }
+    //[self.currentGame populateMovesFromMoveText];
     [self syncModelWithView];
 }
 
