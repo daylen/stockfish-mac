@@ -33,15 +33,9 @@
     MovePicker::init_phase_table();
 }
 
-- (void)tearDown
-{
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
-
 - (void)testParseGamesFromString
 {
-    NSString *fakepgn = @"[tag \"whoa\"]\n[another \"yay\"]\n\n1. e4 e5 2. Nf3\n\n[tag \"whoa\"]\n\n1. e4\n";
+    NSString *fakepgn = @"[tag \"whoa\"]\r\n[another \"yay\"]\n\n1. e4\re5 2. Nf3\n\n[tag \"whoa\"]\n\n1. e4\n";
     NSMutableArray *games = [SFMParser parseGamesFromString:fakepgn];
     XCTAssertEqual([games count], 2, @"Wrong count");
     SFMChessGame *first = games[0];
