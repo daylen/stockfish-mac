@@ -105,8 +105,8 @@
     for (NSString *moveToken in movesAsText) {
         Move m = move_from_san(*self.currPosition, [moveToken UTF8String]);
         if (m == MOVE_NONE) {
-            NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Could not parse move" userInfo:nil];
-            @throw e;
+            NSString *reason = [NSString stringWithFormat:@"The move %@ is invalid.", moveToken];
+            @throw [NSException exceptionWithName:@"BadMoveException" reason:reason userInfo:nil];
         } else {
             UndoInfo u;
             //NSLog(@"Calling do_move from SFMChessGame convertToChessMoveObjects");

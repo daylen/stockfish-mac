@@ -230,17 +230,15 @@ using namespace Chess;
     self.currentGame = self.pgnFile.games[index];
     @try {
         [self.currentGame populateMovesFromMoveText];
+        [self syncModelWithView];
     }
     @catch (NSException *exception) {
         [self close];
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The game is not valid."];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:exception.reason];
         [alert runModal];
     }
-    @finally {
-        
-    }
-    //[self.currentGame populateMovesFromMoveText];
-    [self syncModelWithView];
+    
+    
 }
 
 #pragma mark - Menu items
@@ -405,7 +403,8 @@ using namespace Chess;
         }
         if ([fromTo length] < 4) {
             // This should not even happen, but sometimes it does. Weird.
-            @throw [NSException exceptionWithName:@"Bad Move Exception" reason:[NSString stringWithFormat:@"%@ is not a move", fromTo] userInfo:nil];
+            NSString *reason = [NSString stringWithFormat:@"The move %@ is invalid.", fromTo];
+            @throw [NSException exceptionWithName:@"BadMoveException" reason:reason userInfo:nil];
         }
         Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
         UndoInfo u;

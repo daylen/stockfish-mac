@@ -33,7 +33,7 @@ using namespace Chess;
         if ([line length] == 0) {
             continue;
         }
-        if ([line characterAtIndex:0] == '[') {
+        if ([line characterAtIndex:0] == '[' && [line characterAtIndex:[line length] - 1] == ']') {
             // This is a tag
             if (!readingTags) {
                 readingTags = YES;
@@ -71,7 +71,7 @@ using namespace Chess;
  */
 + (NSArray *)parseMoves:(NSString *)moves
 {
-    // Strip the period, space, and new line characters
+// Strip the period, space, and new line characters
     NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
     [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
@@ -84,36 +84,37 @@ using namespace Chess;
         if ([token length] == 0) {
             continue;
         }
-        BOOL foundBracket = NO;
-        if ([token rangeOfString:@"{"].location != NSNotFound) {
-            depth++;
-            foundBracket = YES;
-        }
-        if ([token rangeOfString:@"("].location != NSNotFound) {
-            depth++;
-            foundBracket = YES;
-        }
-        if ([token rangeOfString:@"}"].location != NSNotFound) {
-            depth--;
-            foundBracket = YES;
-        }
-        if ([token rangeOfString:@")"].location != NSNotFound) {
-            depth--;
-            foundBracket = YES;
-        }
+        int delta = [SFMParser depthDeltaForString:token];
+        depth += delta;
         
         if (depth < 0) {
-            NSException *e = [NSException exceptionWithName:@"ParseErrorException" reason:@"Depth is negative" userInfo:nil];
-            @throw e;
+            @throw [NSException exceptionWithName:@"ParseException" reason:@"A set of parentheses or brackets in the move text don't match." userInfo:nil];
         }
         
-        if (depth == 0 && [self isLetter:[token characterAtIndex:0]] && !foundBracket) {
+        if (depth == 0 && [self isLetter:[token characterAtIndex:0]] && delta == 0) {
             [moveTokens addObject:token];
         }
     }
     
     return [moveTokens copy];
     
+}
+
+/*
+ Get the "depth delta" by counting parentheses.
+ */
++ (int)depthDeltaForString:(NSString *)string
+{
+    int delta = 0;
+    char ch;
+    for (int i = 0; i < [string length]; i++) {
+        ch = [string characterAtIndex:i];
+        delta += (ch == '{');
+        delta += (ch == '(');
+        delta -= (ch == ')');
+        delta -= (ch == '}');
+    }
+    return delta;
 }
 
 
