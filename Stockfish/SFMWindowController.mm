@@ -234,7 +234,7 @@ using namespace Chess;
     }
     @catch (NSException *exception) {
         [self close];
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:exception.reason];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", exception.reason];
         [alert runModal];
     }
     
