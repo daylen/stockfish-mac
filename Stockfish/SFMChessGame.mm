@@ -167,6 +167,10 @@
 {
     [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
 }
+- (void)doMove:(Chess::Move)move
+{
+    [self doMoveFrom:move_from(move) to:move_to(move) promotion:move_promotion(move)];
+}
 
 #pragma mark - Navigation
 

@@ -32,6 +32,7 @@ using namespace Chess;
 #pragma mark - Doing Moves
 - (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType;
 - (void)doMoveFrom:(Square)fromSquare to:(Square)toSquare;
+- (void)doMove:(Move)move;
 
 #pragma mark - Navigation
 - (BOOL)atBeginning;

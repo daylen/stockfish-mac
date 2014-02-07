@@ -121,6 +121,21 @@ using namespace Chess;
         [self sendPositionToEngine];
     }
 }
+- (IBAction)doBestMove:(id)sender
+{
+    if (self.engine.isAnalyzing) {
+        // Get the best move
+        NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
+        Move m = [self firstMoveFromPV:pv];
+        [self doMove:m];
+        // This only updates the model. Also need update the view
+        [self.boardView setPosition:self.currentGame.currPosition];
+        [self.boardView updatePieceViews];
+        
+    } else {
+        NSLog(@"Engine is not analyzing!");
+    }
+}
 #pragma mark - Helper methods
 - (void)syncModelWithView
 {
@@ -422,10 +437,36 @@ using namespace Chess;
 
 }
 
+- (Move)firstMoveFromPV:(NSString *)pvAsText
+{
+    NSArray *pvFromToText = [pvAsText componentsSeparatedByString:@" "];
+    Position *tmpPos = new Position;
+    tmpPos->copy(*self.currentGame.currPosition);
+    for (NSString *fromTo in pvFromToText) {
+        if ([fromTo length] == 0) {
+            continue;
+        }
+        if ([fromTo length] < 4) {
+            // This should not even happen, but sometimes it does. Weird.
+            NSString *reason = [NSString stringWithFormat:@"The move %@ is invalid.", fromTo];
+            @throw [NSException exceptionWithName:@"BadMoveException" reason:reason userInfo:nil];
+        }
+        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
+        return m;
+    }
+    return MOVE_NONE;
+    
+}
+
 
 
 #pragma mark - SFMBoardViewDelegate
 
+- (void)doMove:(Chess::Move)move
+{
+    [self doMoveFrom:move_from(move) to:move_to(move) promotion:move_promotion(move)];
+    
+}
 - (Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare
 {
     return [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
