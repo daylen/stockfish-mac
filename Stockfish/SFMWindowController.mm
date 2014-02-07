@@ -129,8 +129,7 @@ using namespace Chess;
         Move m = [self firstMoveFromPV:pv];
         [self doMove:m];
         // This only updates the model. Also need update the view
-        [self.boardView setPosition:self.currentGame.currPosition];
-        [self.boardView updatePieceViews];
+        [self syncModelWithView];
         
     } else {
         NSLog(@"Engine is not analyzing!");
