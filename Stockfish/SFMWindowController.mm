@@ -138,6 +138,9 @@ using namespace Chess;
 #pragma mark - Helper methods
 - (void)syncModelWithView
 {
+    if (self.currentGame.currPosition == NULL) {
+        @throw [NSException exceptionWithName:@"NullPositionException" reason:@"Position is null." userInfo:nil];
+    }
     self.boardView.position->copy(*self.currentGame.currPosition);
     [self.boardView updatePieceViews];
     [self.boardView clearArrows];
