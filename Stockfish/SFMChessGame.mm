@@ -27,7 +27,7 @@
 {
     self = [super init];
     if (self) {
-        NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:NSCalendarUnitYear|NSCalendarUnitDay|NSCalendarUnitMonth fromDate:[NSDate new]];
+        NSDateComponents *dateComponents = [[NSCalendar currentCalendar] components:kCFCalendarUnitYear|kCFCalendarUnitDay|kCFCalendarUnitMonth fromDate:[NSDate new]];
         NSString *dateStr = [NSString stringWithFormat:@"%ld.%02ld.%02ld", (long)dateComponents.year, (long)dateComponents.month, (long)dateComponents.day];
         NSDictionary *defaultTags = @{@"Event": @"Casual Game",
                                       @"Site": @"Earth",

@@ -182,11 +182,11 @@ using namespace Chess;
     if (self.currentGame.currPosition->is_mate()) {
         NSString *resultText = (self.currentGame.currPosition->side_to_move() == WHITE) ? @"0-1" : @"1-0";
         NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:(self.currentGame.currPosition->side_to_move() == WHITE) ? @"Black wins." : @"White wins."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
         self.currentGame.tags[@"Result"] = resultText;
     } else if (self.currentGame.currPosition->is_immediate_draw()) {
         NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
+        [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
         self.currentGame.tags[@"Result"] = @"1/2-1/2";
     }
 }
@@ -431,7 +431,7 @@ using namespace Chess;
     }
     
     // And now, we add the arrow to the board
-    Move firstMove = ((SFMChessMove *)[pvMacMoveObjects firstObject]).move;
+    Move firstMove = ((SFMChessMove *) pvMacMoveObjects[0]).move;
     [self.boardView clearArrows];
     [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
     

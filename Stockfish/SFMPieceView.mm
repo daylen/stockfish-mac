@@ -29,7 +29,7 @@
         
         NSShadow *shadow = [NSShadow new];
         [shadow setShadowBlurRadius:PIECE_SHADOW_BLUR_RADIUS];
-        [shadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.5]]; // Gray
+        [shadow setShadowColor:[NSColor colorWithGenericGamma22White:0 alpha:0.5]]; // Gray
         [self setShadow:shadow];
     }
     return self;

@@ -114,11 +114,11 @@ CGFloat squareSideLength;
         self.lightSquareColor = [NSColor whiteColor];
         self.darkSquareColor = [NSColor brownColor];
         self.fontColor = [NSColor whiteColor];
-        self.highlightColor = [NSColor colorWithRed:1 green:1 blue:0 alpha:0.7];
+        self.highlightColor = [NSColor colorWithSRGBRed:1 green:1 blue:0 alpha:0.7];
         
         self.boardShadow = [NSShadow new];
         [self.boardShadow setShadowBlurRadius:BOARD_SHADOW_BLUR_RADIUS];
-        [self.boardShadow setShadowColor:[NSColor colorWithWhite:0 alpha:0.75]]; // Gray
+        [self.boardShadow setShadowColor:[NSColor colorWithGenericGamma22White:0 alpha:0.75]]; // Gray
         
         self.position = new Position([FEN_START_POSITION UTF8String]);
         
