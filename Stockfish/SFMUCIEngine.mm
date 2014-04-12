@@ -165,32 +165,47 @@
  */
 - (id)initStockfish
 {
-    if ([self hasAdvancedCPU]) {
-        //NSLog(@"Detected POPCNT");
+    int cpuRating = [SFMUCIEngine cpuRating];
+    
+    if (cpuRating == 2) {
+        return [self initWithPathToEngine:[[NSBundle mainBundle]
+                                           pathForResource:@"stockfish-bmi2" ofType:@""]];
+        
+    } else if (cpuRating == 1) {
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-sse42" ofType:@""]];
+        
     } else {
-        //NSLog(@"No POPCNT");
         return [self initWithPathToEngine:[[NSBundle mainBundle]
                                            pathForResource:@"stockfish-64" ofType:@""]];
+        
     }
 }
 
 /*
- Returns true if the CPU supports POPCNT.
+ 0 - basic CPU
+ 1 - has POPCNT
+ 2 - has POPCNT and BMI2
  */
-- (BOOL)hasAdvancedCPU
++ (int)cpuRating
 {
     NSPipe *outputPipe = [[NSPipe alloc] init];
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/usr/sbin/sysctl"];
     [task setStandardOutput:outputPipe];
-    [task setArguments:@[@"-n", @"machdep.cpu.features"]];
+    [task setArguments:@[@"-n", @"machdep.cpu"]];
     [task launch];
     [task waitUntilExit];
     NSData *data = [[outputPipe fileHandleForReading] availableData];
     NSString *cpuCapabilities = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    return [cpuCapabilities rangeOfString:@"POPCNT"].location != NSNotFound;
+    int cpuRating = 0;
+    if ([cpuCapabilities rangeOfString:@"POPCNT"].location != NSNotFound) {
+        cpuRating++;
+    }
+    if ([cpuCapabilities rangeOfString:@"BMI2"].location != NSNotFound) {
+        cpuRating++;
+    }
+    return cpuRating;
 }
 
 #pragma mark - Using the engine

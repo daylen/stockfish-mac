@@ -65,6 +65,7 @@
 		77924AFF187E77770019C56E /* SFMParserTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFE187E77770019C56E /* SFMParserTest.mm */; };
 		779925D9188273C800EAAEDD /* SFMChessGameTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.mm */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
+		77B7335618F9F9E6007FD666 /* stockfish-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = 77B7335518F9F9E6007FD666 /* stockfish-bmi2 */; };
 		77C1BD7A187E7DB500FB2EF9 /* PositionTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
@@ -186,6 +187,7 @@
 		779925D8188273C800EAAEDD /* SFMChessGameTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SFMChessGameTest.mm; sourceTree = "<group>"; };
 		779925DA18828B6B00EAAEDD /* SFMBoardViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardViewDelegate.h; path = Stockfish/SFMBoardViewDelegate.h; sourceTree = "<group>"; };
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		77B7335518F9F9E6007FD666 /* stockfish-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-bmi2"; path = "Stockfish/stockfish-bmi2"; sourceTree = "<group>"; };
 		77C1BD79187E7DB500FB2EF9 /* PositionTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PositionTest.mm; sourceTree = "<group>"; };
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 			isa = PBXGroup;
 			children = (
 				778A271B188A1E4300F57827 /* stockfish-64 */,
+				77B7335518F9F9E6007FD666 /* stockfish-bmi2 */,
 				778A271C188A1E4300F57827 /* stockfish-sse42 */,
 			);
 			name = "Engine Binaries";
@@ -533,6 +536,7 @@
 				778A271D188A1E4300F57827 /* stockfish-64 in Resources */,
 				77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */,
 				778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */,
+				77B7335618F9F9E6007FD666 /* stockfish-bmi2 in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
