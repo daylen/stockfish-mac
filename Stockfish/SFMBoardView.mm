@@ -169,7 +169,7 @@ CGFloat squareSideLength;
     }
     
     // Draw coordinates
-    NSString *str = [NSString new];
+    NSString *str;
     NSMutableParagraphStyle *pStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
     [pStyle setAlignment:NSCenterTextAlignment];
     
