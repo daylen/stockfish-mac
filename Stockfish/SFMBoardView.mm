@@ -593,7 +593,7 @@ CGFloat squareSideLength;
 
 - (void)dealloc
 {
-//    delete self.position;
+    delete self.position;
 }
 
 - (BOOL)isFlipped
