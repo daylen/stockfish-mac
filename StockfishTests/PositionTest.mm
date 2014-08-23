@@ -47,4 +47,22 @@ using namespace Chess;
     XCTAssertTrue(p->is_ok(), @"You probably didn't do chess init");
 }
 
+- (void)testValidFen
+{
+    NSString *fen = @"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3";
+    XCTAssertTrue(Position::is_valid_fen([fen UTF8String]));
+}
+
+- (void)testValidFenNoEp
+{
+    NSString *fen = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq";
+    XCTAssertTrue(Position::is_valid_fen([fen UTF8String]));
+}
+
+- (void)testValidFenNoCastlingRights
+{
+    NSString *fen = @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w";
+    XCTAssertTrue(Position::is_valid_fen([fen UTF8String]));
+}
+
 @end
