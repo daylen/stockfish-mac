@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>15EB9F2C-8716-4559-BBC7-2E2526DA012B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Stockfish</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>BA25F01F-E9E5-4DB9-9C95-ADBC4ACC29E1</key>
+		<string>https://github.com/maxgillett/stockfish-mac.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Stockfish.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>BA25F01F-E9E5-4DB9-9C95-ADBC4ACC29E1</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/maxgillett/stockfish-mac.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>BA25F01F-E9E5-4DB9-9C95-ADBC4ACC29E1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>BA25F01F-E9E5-4DB9-9C95-ADBC4ACC29E1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>stockfish-mac</string>
+		</dict>
+	</array>
+</dict>
+</plist>
