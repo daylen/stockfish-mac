@@ -114,6 +114,14 @@ using namespace Chess;
     [self.currentGame goToEnd];
     [self syncModelWithView];
 }
+- (IBAction)undoLastMove:(id)sender {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
+    [self.currentGame undoLastMove];
+    [self syncModelWithView];
+}
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
         [self stopAnalysis];

@@ -222,6 +222,18 @@
         [self goForwardOneMove];
     }
 }
+- (void)undoLastMove
+{
+    if ([self.moves lastObject]) {
+        [self goToEnd];
+        SFMChessMove *chessMove = [self.moves lastObject];
+        Move move = chessMove.move;
+        UndoInfo undoInfo = chessMove.undoInfo;
+        self.currPosition->undo_move(move, undoInfo);
+        self.currentMoveIndex = (int)[self.moves count] - 1;
+        [self.moves removeLastObject];
+    }
+}
 
 #pragma mark - Export
 
