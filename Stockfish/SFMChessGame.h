@@ -42,6 +42,7 @@ using namespace Chess;
 - (void)goToBeginning;
 - (void)goToEnd;
 - (void)goToPly:(int)ply;
+- (void)undoLastMove;
 
 #pragma mark - Export
 - (NSString *)pgnString; // Includes PGN tags, e.g. "[Event ..."
