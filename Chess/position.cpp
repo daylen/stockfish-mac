@@ -2354,23 +2354,25 @@ bool Position::is_valid_fen(const std::string &fen) {
    std::istringstream iss(fen);
    std::string board, side, castleRights, ep;
 
-   if (!iss) return false;
-
    iss >> board;
 
-   if (!iss) return false;
+   if (board.empty()) return false;
 
    iss >> side;
 
-   if (!iss) {
-      castleRights = "-";
-      ep = "-";
+   if (side.empty()) return false;
+
+   iss >> castleRights;
+
+   if (castleRights.empty()) {
+     castleRights = "-";
+     ep = "-";
    } else {
-      iss >> castleRights;
-      if (iss)
-         iss >> ep;
-      else
-         ep = "-";
+     iss >> ep;
+
+     if (ep.empty()) {
+       ep = "-";
+     }
    }
 
    // Let's check that all components of the supposed FEN are OK.
