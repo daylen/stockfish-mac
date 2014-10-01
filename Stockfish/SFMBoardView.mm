@@ -15,7 +15,6 @@
 
 @interface SFMBoardView()
 
-@property NSColor *feltBackground;
 @property NSColor *boardColor;
 @property NSColor *lightSquareColor;
 @property NSColor *darkSquareColor;
@@ -108,8 +107,6 @@ CGFloat squareSideLength;
         
         self.boardIsFlipped = NO;
         
-        self.feltBackground = [NSColor colorWithPatternImage:[NSImage imageNamed:@"Felt"]];
-        
         self.boardColor = [NSColor blackColor];
         self.lightSquareColor = [NSColor whiteColor];
         self.darkSquareColor = [NSColor brownColor];
@@ -131,12 +128,6 @@ CGFloat squareSideLength;
 #pragma mark - Draw
 - (void)drawRect:(NSRect)dirtyRect
 {
-    // Draw a felt background
-    NSGraphicsContext *context = [NSGraphicsContext currentContext];
-    [context saveGraphicsState];
-    [self.feltBackground set];
-    NSRectFill([self bounds]);
-    [context restoreGraphicsState];
     
     // Draw the big square
     CGFloat height = self.bounds.size.height;
