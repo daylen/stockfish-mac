@@ -62,6 +62,7 @@ using namespace Chess;
     
     // Fetch from clipboard
     NSString *fen = [[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString];
+    fen = [fen stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
     // Validate the FEN string and throw a modal if invalid
     if (!Position::is_valid_fen([fen UTF8String])) {
