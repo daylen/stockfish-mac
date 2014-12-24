@@ -11,14 +11,15 @@
 
 #define FEN_START_POSITION @"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
+// Errors
+#define POSITION_ERROR_DOMAIN @"SFMPositionErrorDomain"
+#define PARSE_ERROR_CODE 0
+#define ILLEGAL_MOVE_CODE 1
+
 // For the board view
 #define EXTERIOR_BOARD_MARGIN 40
 #define INTERIOR_BOARD_MARGIN 20
-#define BOARD_SHADOW_BLUR_RADIUS 30
 #define FONT_SIZE 12
-
-// For the piece view
-#define PIECE_SHADOW_BLUR_RADIUS 5
 
 // Notifications
 #define ENGINE_NAME_AVAILABLE_NOTIFICATION @"EngNameAvail"
@@ -33,6 +34,7 @@
 #define HASH_SIZE_SETTING @"Memory2"
 
 // For the hardware detector
+// TODO remove min/max constants
 #define MIN_SUPPORTED_THREADS 1
 #define MIN_MEMORY_POWER 5
 #define MAX_MEMORY_POWER 14

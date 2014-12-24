@@ -11,11 +11,8 @@
 #import "SFMChessGame.h"
 #import "SFMUCIEngine.h"
 #import "Constants.h"
-#import "SFMChessMove.h"
 #import "SFMFormatter.h"
-
-#include "../Chess/san.h"
-#include "../Chess/position.h"
+#import "SFMMove.h"
 
 @interface SFMWindowController ()
 
@@ -38,15 +35,13 @@
 
 @end
 
-using namespace Chess;
-
 @implementation SFMWindowController
 
 #pragma mark - Target/Action
 - (IBAction)copyFenString:(id)sender
 {
-    NSMutableString *fen = [[NSString stringWithCString:self.currentGame.currPosition->to_fen().c_str() encoding:NSUTF8StringEncoding] mutableCopy];
-    [fen appendFormat:@" %d %d", self.currentGame.currentMoveIndex, self.currentGame.currentMoveIndex / 2 + 1];
+    NSMutableString *fen = [self.currentGame.position.fen mutableCopy];
+    [fen appendFormat:@" %lu %lu", (unsigned long)self.currentGame.currentMoveIndex, self.currentGame.currentMoveIndex / 2 + 1];
     [[NSPasteboard generalPasteboard] declareTypes:@[NSPasteboardTypeString] owner:nil];
     [[NSPasteboard generalPasteboard] setString:[fen copy] forType:NSPasteboardTypeString];
     
@@ -65,15 +60,15 @@ using namespace Chess;
     fen = [fen stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
     // Validate the FEN string and throw a modal if invalid
-    if (!Position::is_valid_fen([fen UTF8String])) {
+    if (![SFMPosition isValidFen:fen]) {
         NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The FEN string is not valid."];
         [alert runModal];
         return;
     }
 
-    // Basically insert a new game and reload
+    // Insert a new game and reload
     [self.pgnFile.games removeAllObjects];
-    [self.pgnFile.games addObject:[[SFMChessGame alloc] initWithWhite:[SFMPlayer new] andBlack:[SFMPlayer new] andFen:fen]];
+    [self.pgnFile.games addObject:[[SFMChessGame alloc] initWithFen:fen]];
     self.currentGame = nil;
     [self loadGameAtIndex:0];
     
@@ -116,12 +111,14 @@ using namespace Chess;
     [self syncModelWithView];
 }
 - (IBAction)undoLastMove:(id)sender {
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
-    [self.currentGame undoLastMove];
-    [self syncModelWithView];
+    // TODO real undo support
+    
+//    if (self.engine.isAnalyzing) {
+//        [self stopAnalysis];
+//        self.wantsAnalysis = YES;
+//    }
+//    [self.currentGame undoLastMove];
+//    [self syncModelWithView];
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
@@ -135,8 +132,8 @@ using namespace Chess;
     if (self.engine.isAnalyzing) {
         // Get the best move
         NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
-        Move m = [self firstMoveFromPV:pv];
-        [self doMove:m];
+        SFMMove *m = [self firstMoveFromPV:pv];
+        [self.currentGame doMove:m error:nil];
         // This only updates the model. Also need update the view
         [self syncModelWithView];
         
@@ -147,11 +144,8 @@ using namespace Chess;
 #pragma mark - Helper methods
 - (void)syncModelWithView
 {
-    if (self.currentGame.currPosition == NULL) {
-        @throw [NSException exceptionWithName:@"NullPositionException" reason:@"Position is null." userInfo:nil];
-    }
-    self.boardView.position->copy(*self.currentGame.currPosition);
-    [self.boardView updatePieceViews];
+    self.boardView.position = [self.currentGame.position copy];
+    [self.boardView updatePieceViews]; // TODO setting the position should update the views
     [self.boardView clearArrows];
     [self updateNotationView];
 }
@@ -159,7 +153,7 @@ using namespace Chess;
 {
     self.lineTextView.string = @"";
     [self.engine stopSearch];
-    [self.engine sendCommandToEngine:self.currentGame.uciPositionString];
+    [self.engine sendCommandToEngine:self.currentGame.uciString];
     [self.engine startInfiniteAnalysis];
     self.goStopButton.title = @"Stop";
 }
@@ -170,38 +164,26 @@ using namespace Chess;
     [self.engine stopSearch];
 }
 
-// TODO move to formatter
-- (NSString *)movesArrayAsString:(NSArray *)movesArray
-{
-    Move line[800];
-    int i = 0;
-    
-    for (SFMChessMove *move in movesArray) {
-        line[i++] = move.move;
-    }
-    line[i] = MOVE_NONE;
-    
-    return [NSString stringWithUTF8String:line_to_san(*self.currentGame.currPosition, line, 0, false, self.currentGame.currentMoveIndex / 2 + 1).c_str()];
-}
-/*
+/*!
  Check if the current position is a checkmate or a draw, and display an alert if so.
  */
 - (void)checkIfGameOver
 {
-    if (self.currentGame.currPosition->is_mate()) {
-        NSString *resultText = (self.currentGame.currPosition->side_to_move() == WHITE) ? @"0-1" : @"1-0";
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:(self.currentGame.currPosition->side_to_move() == WHITE) ? @"Black wins." : @"White wins."];
+    if ([self.currentGame.position isMate]) {
+        BOOL isWhite = [self.currentGame.position sideToMove] == WHITE;
+        NSString *resultText = isWhite ? @"0-1" : @"1-0";
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat: isWhite ? @"Black wins." : @"White wins."];
         [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
-        self.currentGame.tags[@"Result"] = resultText;
-    } else if (self.currentGame.currPosition->is_immediate_draw()) {
+        [self.currentGame setResult:resultText];
+    } else if ([self.currentGame.position isImmediateDraw]) {
         NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
         [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
-        self.currentGame.tags[@"Result"] = @"1/2-1/2";
+        [self.currentGame setResult:@"1/2-1/2"];
     }
 }
 - (void)updateNotationView
 {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame movesArrayAsHtmlString] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame moveTextString:YES] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
     [str enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, str.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
         NSFont *currFont = (NSFont *) value;
         if ([[currFont fontDescriptor] symbolicTraits] & NSFontBoldTrait) {
@@ -218,7 +200,8 @@ using namespace Chess;
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    [self.boardView setDelegate:self];
+    // TODO delegate
+//    [self.boardView setDelegate:self];
     [self loadGameAtIndex:0];
     
     // Decide whether to show or hide the game sidebar
@@ -254,16 +237,15 @@ using namespace Chess;
     [self stopAnalysis];
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
-    @try {
-        [self.currentGame populateMovesFromMoveText];
-        [self syncModelWithView];
-    }
-    @catch (NSException *exception) {
+    NSError *error = nil;
+    [self.currentGame parseMoveText:&error];
+    if (error) {
         [self close];
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", exception.reason];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [error description]];
         [alert runModal];
     }
     
+    [self syncModelWithView];
     
 }
 
@@ -309,18 +291,18 @@ using namespace Chess;
     [statusText appendFormat:@"/%d    ", [latestPV[@"seldepth"] intValue]];
     
     // The current move
-    if ([self.engine.currentInfo objectForKey:@"currmove"]) {
-        Position *tmpPos = new Position;
-        tmpPos->copy(*self.currentGame.currPosition);
-        Move mlist[500];
-        int numLegalMoves = tmpPos->all_legal_moves(mlist);
+    if (self.engine.currentInfo[@"currmove"]) {
+        int numLegalMoves = self.currentGame.position.numLegalMoves;
         
-        Move m = move_from_string(*tmpPos, [self.engine.currentInfo[@"currmove"] UTF8String]);
-        UndoInfo u;
-        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
-        NSString *niceOutput = [self movesArrayAsString:@[moveObject]];
+        NSError *error = nil;
+        NSArray *moves = [self.currentGame.position movesArrayForUci:@[self.engine.currentInfo[@"currmove"]]];
         
-        [statusText appendFormat:@"%@(%@/%d)    ", niceOutput, self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
+        if (error) {
+            NSLog(@"%@", [error description]);
+            return;
+        }
+        
+        [statusText appendFormat:@"%@(%@/%d)    ", [self.currentGame.position sanForMovesArray:moves html:NO breakLines:NO startNum:(int) self.currentGame.currentMoveIndex / 2 + 1], self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
     }
     
     // The speed
@@ -338,14 +320,14 @@ using namespace Chess;
     if ([pv objectForKey:@"cp"]) {
         int score = [pv[@"cp"] intValue];
         
-        NSString *theScore = [SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
+        NSString *theScore = [SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
         
         return theScore;
         
     } else if ([pv objectForKey:@"mate"]) {
         int score = [pv[@"mate"] intValue];
         
-        NSString *theScore = [SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.currPosition->side_to_move() == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
+        NSString *theScore = [SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
         
         return theScore;
     } else {
@@ -410,91 +392,54 @@ using namespace Chess;
 }
 
 
-// TODO move to formatter
-/*
- Input: something like "d2d4 d7d5 g1f3 g8f6 b1c3"
- Output: something like "1. d4 d5 2. Nf3 Nf6 3. Nc3"
- */
-- (NSString *)prettyPV:(NSString *)pvAsText
+- (NSString *)prettyPV:(NSString *)pv
 {
-    NSArray *pvFromToText = [pvAsText componentsSeparatedByString:@" "];
-    NSMutableArray *pvMacMoveObjects = [NSMutableArray new];
+    NSArray *tokens = [pv componentsSeparatedByString:@" "];
+
+    return [self.currentGame.position sanForMovesArray:[self.currentGame.position movesArrayForUci:tokens] html:NO breakLines:NO startNum:(int) self.currentGame.currentMoveIndex / 2 + 1];
     
-    Position *tmpPos = new Position;
-    tmpPos->copy(*self.currentGame.currPosition);
-    
-    for (NSString *fromTo in pvFromToText) {
-        if ([fromTo length] == 0) {
-            continue;
-        }
-        if ([fromTo length] < 4) {
-            // This should not even happen, but sometimes it does. Weird.
-            NSString *reason = [NSString stringWithFormat:@"The move %@ is invalid.", fromTo];
-            @throw [NSException exceptionWithName:@"BadMoveException" reason:reason userInfo:nil];
-        }
-        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
-        UndoInfo u;
-        SFMChessMove *moveObject = [[SFMChessMove alloc] initWithMove:m undoInfo:u];
-        tmpPos->do_move(m, u);
-        [pvMacMoveObjects addObject:moveObject];
-    }
-    
-    // And now, we add the arrow to the board
-    Move firstMove = ((SFMChessMove *) pvMacMoveObjects[0]).move;
-    [self.boardView clearArrows];
-    [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
-    
-    return [self movesArrayAsString:pvMacMoveObjects];
+//    
+//    // And now, we add the arrow to the board
+//    Move firstMove = ((SFMChessMove *) pvMacMoveObjects[0]).move;
+//    [self.boardView clearArrows];
+//    [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
+//    
+//    return [self movesArrayAsString:pvMacMoveObjects];
 
 }
 
-- (Move)firstMoveFromPV:(NSString *)pvAsText
+- (SFMMove *)firstMoveFromPV:(NSString *)pv
 {
-    NSArray *pvFromToText = [pvAsText componentsSeparatedByString:@" "];
-    Position *tmpPos = new Position;
-    tmpPos->copy(*self.currentGame.currPosition);
-    for (NSString *fromTo in pvFromToText) {
-        if ([fromTo length] == 0) {
-            continue;
-        }
-        if ([fromTo length] < 4) {
-            // This should not even happen, but sometimes it does. Weird.
-            NSString *reason = [NSString stringWithFormat:@"The move %@ is invalid.", fromTo];
-            @throw [NSException exceptionWithName:@"BadMoveException" reason:reason userInfo:nil];
-        }
-        Move m = move_from_string(*tmpPos, [fromTo UTF8String]);
-        return m;
-    }
-    return MOVE_NONE;
-    
+    return [[self.currentGame.position movesArrayForUci:[pv componentsSeparatedByString:@" "]] firstObject];
 }
-
-
 
 #pragma mark - SFMBoardViewDelegate
 
-- (void)doMove:(Chess::Move)move
-{
-    [self doMoveFrom:move_from(move) to:move_to(move) promotion:move_promotion(move)];
-    
-}
-- (Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare
-{
-    return [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
-}
+// TODO revamped delegate later
 
-- (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
-{
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
-    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
-    [self checkIfGameOver];
-    [self.document updateChangeCount:NSChangeDone];
-    [self updateNotationView];
-    return m;
-}
+//
+//- (void)doMove:(Chess::Move)move
+//{
+//    [self doMoveFrom:move_from(move) to:move_to(move) promotion:move_promotion(move)];
+//    
+//}
+//- (Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare
+//{
+//    return [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
+//}
+//
+//- (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
+//{
+//    if (self.engine.isAnalyzing) {
+//        [self stopAnalysis];
+//        self.wantsAnalysis = YES;
+//    }
+//    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
+//    [self checkIfGameOver];
+//    [self.document updateChangeCount:NSChangeDone];
+//    [self updateNotationView];
+//    return m;
+//}
 
 #pragma mark - Table View Delegate Methods
 
@@ -531,7 +476,6 @@ using namespace Chess;
 }
 - (void)dealloc
 {
-    //NSLog(@"Deallocating controller");
     self.engine = nil;
 }
 

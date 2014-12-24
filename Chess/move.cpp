@@ -1,6 +1,6 @@
 /*
   Stockfish, a chess program for iOS.
-  Copyright (C) 2004-2013 Tord Romstad, Marco Costalba, Joona Kiiski.
+  Copyright (C) 2004-2014 Tord Romstad, Marco Costalba, Joona Kiiski.
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -97,6 +97,55 @@ Move move_from_string(const Position &pos, const std::string &str) {
   }
 
   return make_move(from, to);
+}
+
+
+/// safe_move_from_string is like move_from_string, except that it is robust.
+/// If the string does not represent an unambiguous legal move, MOVE_NONE is
+/// returned.
+
+Move safe_move_from_string(const Position &pos, const std::string &str) {
+
+   // Valid move strings must have length >= 4
+   if (str.length() < 4) {
+      return MOVE_NONE;
+   }
+
+   // Source and destination squares must be valid:
+   Square from = square_from_string(str.substr(0, 2));
+   Square to = square_from_string(str.substr(2, 2));
+   if (!(square_is_ok(from) && square_is_ok(to))) {
+      return MOVE_NONE;
+   }
+
+   // Source square must be occupied by a piece of the right color:
+   if (pos.color_of_piece_on(from) != pos.side_to_move()) {
+      return MOVE_NONE;
+   }
+
+   // HACK: Change destination square for castling moves:
+   if (pos.type_of_piece_on(from) == KING && to - from == DELTA_E + DELTA_E) {
+      to = make_square(FILE_H, square_rank(from));
+   } else if (pos.type_of_piece_on(from) == KING && to - from == DELTA_W + DELTA_W) {
+      to = make_square(FILE_A, square_rank(from));
+   }
+
+   // Generate moves and look for those with valid 'to' squares:
+   Move mlist[32];
+   int n = pos.moves_from(from, mlist);
+   if (n == 0) {
+      return MOVE_NONE;
+   }
+   PieceType prom = str.length() >= 5 ? piece_type_from_char(str[4]) : NO_PIECE_TYPE;
+   Move m = MOVE_NONE;
+   for (int i = 0; i < n; i++) {
+      if (move_from(mlist[i]) == from && move_to(mlist[i]) == to
+            && move_promotion(mlist[i]) == prom) {
+         m = mlist[i];
+         break;
+      }
+   }
+   return m;
 }
 
 

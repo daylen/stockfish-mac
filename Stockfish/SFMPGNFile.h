@@ -6,18 +6,31 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface SFMPGNFile : NSObject
 
 #pragma mark - Properties
-@property NSMutableArray *games;
+
+@property NSMutableArray /* of SFMChessGame */ *games;
 
 #pragma mark - Init
-- (id)init; // Init a blank PGN
-- (id)initWithString:(NSString *)str; // Init with given PGN
+
+/*!
+ Create a PGN with one game.
+ */
+- (instancetype)init;
+
+/*!
+ Create the given PGN.
+ @param str
+ */
+- (instancetype)initWithString:(NSString *)str;
 
 #pragma mark - Export
-- (NSData *)data; // Returns the PGN
+
+/*!
+ Export the PGN file.
+ @return The PGN file as an NSData blob.
+ */
+- (NSData *)data;
 
 @end

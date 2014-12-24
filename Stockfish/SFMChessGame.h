@@ -6,33 +6,57 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "SFMPlayer.h"
+#import "SFMPosition.h"
+#import "SFMMove.h"
 
-#include "../Chess/position.h"
-
-using namespace Chess;
-
+/*!
+ SFMChessGame contains PGN metadata and move history for a game.
+ */
 @interface SFMChessGame : NSObject
 
 #pragma mark - Properties
-@property NSMutableDictionary *tags;
-@property NSMutableArray *moves; // Lazy
-@property NSString *moveText;
-@property Position *startPosition;
-@property Position *currPosition;
-@property (readonly) int currentMoveIndex;
 
-#pragma mark - Init and Set Up
-- (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2;
-- (id)initWithWhite:(SFMPlayer *)p1 andBlack:(SFMPlayer *)p2 andFen:(NSString *)fen;
-- (id)initWithTags:(NSDictionary *)tags andMoves:(NSString *)moves; // Saves the tags and move text
-- (void)populateMovesFromMoveText; // Actually load the game
+@property (nonatomic) NSDictionary *tags;
+@property (nonatomic, readonly) SFMPosition *position;
+@property (readonly) NSUInteger currentMoveIndex;
 
-#pragma mark - Doing Moves
-- (Move)doMoveFrom:(Square)fromSquare to:(Square)toSquare promotion:(PieceType)desiredPieceType;
-- (void)doMoveFrom:(Square)fromSquare to:(Square)toSquare;
-- (void)doMove:(Move)move;
+#pragma mark - Init
+
+/*!
+ Creates a game from the starting position.
+ */
+- (instancetype)init;
+
+/*!
+ Creates a game from the specified FEN.
+ @param fen
+ */
+- (instancetype)initWithFen:(NSString *)fen;
+
+/*!
+ Creates a game from the given PGN tags and move text.
+ */
+- (instancetype)initWithTags:(NSDictionary *)tags moveText:(NSString *)moveText;
+
+/*!
+ If the game was created using move text, call this before calling any other methods.
+ @param error
+ */
+- (void)parseMoveText:(NSError * __autoreleasing *)error;
+
+#pragma mark - State Modification
+
+/*!
+ @param move The move to perform.
+ @param error
+ */
+- (void)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error;
+
+/*!
+ Set the result of the game.
+ @param result
+ */
+- (void)setResult:(NSString *)result;
 
 #pragma mark - Navigation
 - (BOOL)atBeginning;
@@ -41,13 +65,23 @@ using namespace Chess;
 - (void)goForwardOneMove;
 - (void)goToBeginning;
 - (void)goToEnd;
-- (void)goToPly:(int)ply;
-- (void)undoLastMove;
+- (void)goToPly:(NSUInteger)ply;
 
 #pragma mark - Export
-- (NSString *)pgnString; // Includes PGN tags, e.g. "[Event ..."
-- (NSString *)movesArrayAsString:(BOOL)breakLines; // The SAN, e.g. "1. e2 e4 ..."
-- (NSString *)movesArrayAsHtmlString;
-- (NSString *)uciPositionString; // For the engine, e.g. "position startpos..."
+/*!
+ @return A string containing the PGN tags and move text.
+ */
+- (NSString *)pgnString;
+
+/*!
+ @param html YES to return HTML.
+ @return A string containing the move text.
+ */
+- (NSString *)moveTextString:(BOOL)html;
+
+/*!
+ @return The moves in the game in UCI format.
+ */
+- (NSString *)uciString;
 
 @end

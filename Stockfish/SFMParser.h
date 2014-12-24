@@ -10,8 +10,18 @@
 
 @interface SFMParser : NSObject
 
+/*!
+ Parses chess games from a PGN string.
+ @param str The full PGN string as read from disk.
+ @return A mutable array of SFMChessGame objects.
+ */
 + (NSMutableArray *)parseGamesFromString:(NSString *)str;
-+ (NSArray *)parseMoves:(NSString *)moves;
-+ (BOOL)isLetter:(char)c;
+
+/*!
+ Tokenizes move text.
+ @param moves A string such as: "1. e4 e5 2. Nf3 Nc6" and so on
+ @return A tokenized array such as: "["e4", "e5", "Nf3", "Nc6"] and so on
+ */
++ (NSArray *)tokenizeMoveText:(NSString *)moveText;
 
 @end

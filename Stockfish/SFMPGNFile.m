@@ -8,31 +8,23 @@
 
 #import "SFMPGNFile.h"
 #import "SFMChessGame.h"
-#import "SFMPlayer.h"
 #import "SFMParser.h"
 
 @implementation SFMPGNFile
 
 #pragma mark - Init
-- (id)init
+- (instancetype)init
 {
-    self = [super init];
-    if (self) {
-        self.games = [NSMutableArray new];
-        
-        // Create a new game
-        SFMPlayer *white = [SFMPlayer new];
-        SFMPlayer *black = [SFMPlayer new];
-        SFMChessGame *game = [[SFMChessGame alloc] initWithWhite:white andBlack:black];
-        [self.games addObject:game];
+    if (self = [super init]) {
+        _games = [NSMutableArray new];
+        [_games addObject:[[SFMChessGame alloc] init]];
     }
     return self;
 }
-- (id)initWithString:(NSString *)str
+- (instancetype)initWithString:(NSString *)str
 {
-    self = [super init];
-    if (self) {
-        self.games = [SFMParser parseGamesFromString:str];
+    if (self = [super init]) {
+        _games = [SFMParser parseGamesFromString:str];
     }
     return self;
 }

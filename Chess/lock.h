@@ -1,6 +1,6 @@
 /*
   Stockfish, a chess program for iOS.
-  Copyright (C) 2004-2013 Tord Romstad, Marco Costalba, Joona Kiiski.
+  Copyright (C) 2004-2014 Tord Romstad, Marco Costalba, Joona Kiiski.
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

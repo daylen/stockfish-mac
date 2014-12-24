@@ -1,6 +1,6 @@
 /*
   Stockfish, a chess program for iOS.
-  Copyright (C) 2004-2013 Tord Romstad, Marco Costalba, Joona Kiiski.
+  Copyright (C) 2004-2014 Tord Romstad, Marco Costalba, Joona Kiiski.
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -106,6 +106,7 @@ inline Move make_ep_move(Square from, Square to) {
 
 extern std::ostream &operator << (std::ostream &os, Move m);
 extern Move move_from_string(const Position &pos, const std::string &str);
+extern Move safe_move_from_string(const Position &pos, const std::string &str);
 extern const std::string move_to_string(Move m);
 extern bool move_is_ok(Move m);
 

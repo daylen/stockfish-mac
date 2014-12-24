@@ -10,14 +10,6 @@
 #import "SFMWindowController.h"
 #import "SFMPGNFile.h"
 
-#include "../Chess/position.h"
-#include "../Chess/bitboard.h"
-#include "../Chess/direction.h"
-#include "../Chess/mersenne.h"
-#include "../Chess/movepick.h"
-
-using namespace Chess;
-
 @interface SFMDocument()
 
 @property SFMPGNFile *pgnFile;
@@ -25,23 +17,6 @@ using namespace Chess;
 @end
 
 @implementation SFMDocument
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        // We have to call all these init methods, or else Chess::Position
-        // might crash
-        
-        init_mersenne();
-        init_direction_table();
-        init_bitboards();
-        Position::init_zobrist();
-        Position::init_piece_square_tables();
-        MovePicker::init_phase_table();
-    }
-    return self;
-}
 
 - (id)initWithType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {

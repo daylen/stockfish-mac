@@ -1,6 +1,6 @@
 /*
   Stockfish, a chess program for iOS.
-  Copyright (C) 2004-2013 Tord Romstad, Marco Costalba, Joona Kiiski.
+  Copyright (C) 2004-2014 Tord Romstad, Marco Costalba, Joona Kiiski.
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -2218,19 +2218,19 @@ int Position::all_legal_moves(Move mlist[]) const {
 /// This is meant to be helpful when debugging.
 
 bool Position::is_ok(bool slow) const {
-    
-    // What features of the position should be verified?
-    static const bool debugBitboards = false;
-    static const bool debugKingCount = false;
-    static const bool debugKingCapture = false;
-    static const bool debugCheckerCount = false;
-    static const bool debugKey = false;
-    static const bool debugMaterialKey = false;
-    static const bool debugPawnKey = false;
-    static const bool debugIncrementalEval = false;
-    static const bool debugNonPawnMaterial = false;
-    static const bool debugPieceCounts = false;
-    static const bool debugPieceList = false;
+
+  // What features of the position should be verified?
+  static const bool debugBitboards = false;
+  static const bool debugKingCount = false;
+  static const bool debugKingCapture = false;
+  static const bool debugCheckerCount = false;
+  static const bool debugKey = false;
+  static const bool debugMaterialKey = false;
+  static const bool debugPawnKey = false;
+  static const bool debugIncrementalEval = false;
+  static const bool debugNonPawnMaterial = false;
+  static const bool debugPieceCounts = false;
+  static const bool debugPieceList = false;
 
   // Side to move OK?
   if(!color_is_ok(this->side_to_move()))
@@ -2354,25 +2354,23 @@ bool Position::is_valid_fen(const std::string &fen) {
    std::istringstream iss(fen);
    std::string board, side, castleRights, ep;
 
+   if (!iss) return false;
+
    iss >> board;
 
-   if (board.empty()) return false;
+   if (!iss) return false;
 
    iss >> side;
 
-   if (side.empty()) return false;
-
-   iss >> castleRights;
-
-   if (castleRights.empty()) {
-     castleRights = "-";
-     ep = "-";
+   if (!iss) {
+      castleRights = "-";
+      ep = "-";
    } else {
-     iss >> ep;
-
-     if (ep.empty()) {
-       ep = "-";
-     }
+      iss >> castleRights;
+      if (iss)
+         iss >> ep;
+      else
+         ep = "-";
    }
 
    // Let's check that all components of the supposed FEN are OK.

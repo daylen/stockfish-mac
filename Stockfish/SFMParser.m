@@ -9,19 +9,11 @@
 #import "SFMParser.h"
 #import "SFMChessGame.h"
 
-
-using namespace Chess;
-
 @implementation SFMParser
 
-/*
- * Parses chess games from a PGN string.
- * Input: The full PGN string as read from disk.
- * Output: A mutable array of SFMChessGame objects.
- */
 + (NSMutableArray *)parseGamesFromString:(NSString *)str
 {
-    NSMutableArray *games = [NSMutableArray new];
+    NSMutableArray *games = [[NSMutableArray alloc] init];
     
     NSArray *lines = [str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     
@@ -38,8 +30,7 @@ using namespace Chess;
             if (!readingTags) {
                 readingTags = YES;
                 if (tags && moves) {
-                    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] andMoves:[moves copy]];
-                    [games addObject:game];
+                    [games addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
                 }
                 tags = [NSMutableDictionary new];
                 moves = [NSMutableString new];
@@ -58,24 +49,19 @@ using namespace Chess;
         }
     }
     // Upon reaching the end of the file we need to add the last game
-    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] andMoves:[moves copy]];
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]];
     [games addObject:game];
     return games;
     
 }
 
-/*
- * Parses moves out of a string.
- * Input: A string such as: "1. e4 e5 2. Nf3 Nc6" and so on
- * Output: A tokenized array such as: "["e4", "e5", "Nf3", "Nc6"] and so on
- */
-+ (NSArray *)parseMoves:(NSString *)moves
++ (NSArray *)tokenizeMoveText:(NSString *)moveText
 {
 // Strip the period, space, and new line characters
     NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
     [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-    NSArray *allTokens = [moves componentsSeparatedByCharactersInSet:cSet];
+    NSArray *allTokens = [moveText componentsSeparatedByCharactersInSet:cSet];
     
     // Eliminate all non-move tokens, such as move numbers, annotations, and variations
     int depth = 0;
@@ -100,7 +86,9 @@ using namespace Chess;
     
 }
 
-/*
+# pragma mark - Private
+
+/*!
  Get the "depth delta" by counting parentheses.
  */
 + (int)depthDeltaForString:(NSString *)string
@@ -118,8 +106,8 @@ using namespace Chess;
 }
 
 
-/*
- * Returns whether the character is a lower or upper-case letter.
+/*!
+ @return YES if the character is a lower or upper-case letter.
  */
 + (BOOL)isLetter:(char)c
 {
