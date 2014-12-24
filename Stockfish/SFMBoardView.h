@@ -6,21 +6,54 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-#import "SFMBoardViewDelegate.h"
+@class SFMPosition;
+@class SFMBoardView;
+@class SFMMove;
 
-#include "../Chess/position.h"
+#include "SFMPiece.h"
 
-using namespace Chess;
+@protocol SFMBoardViewDelegate <NSObject>
+
+/*!
+ Called when the user moves a piece in the board view.
+ 
+ @param boardView
+ @param move
+ */
+- (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move;
+
+@end
+
+@protocol SFMBoardViewDataSource <NSObject>
+
+/*!
+ Called when the user is about to perform a promotion.
+ 
+ @param boardView
+ @return The piece the user wants to promote to.
+ */
+- (SFMPieceType)promotionPieceTypeForBoardView:(SFMBoardView *)boardView;
+
+@end
 
 @interface SFMBoardView : NSView
 
-@property (nonatomic) BOOL boardIsFlipped;
-@property (nonatomic) Position *position;
-@property (nonatomic, weak) id <SFMBoardViewDelegate> delegate;
+@property (weak, nonatomic) id<SFMBoardViewDelegate> delegate;
+@property (weak, nonatomic) id<SFMBoardViewDataSource> dataSource;
 
-- (void)updatePieceViews; // If you change the position, you must call this
-- (void)clearArrows;
-- (void)addArrowFrom:(Square)from to:(Square)to;
+/*!
+ YES if the board is flipped (black pieces on the bottom); NO otherwise.
+ */
+@property (assign, nonatomic) BOOL boardIsFlipped;
+
+/*!
+ The position to display.
+ */
+@property (nonatomic) SFMPosition *position;
+
+/*!
+ The arrows to display.
+ */
+@property (nonatomic) NSArray /* of SFMMove */ *arrows;
 
 @end

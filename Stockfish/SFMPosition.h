@@ -6,10 +6,11 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import "SFMMove.h"
 #import "SFMPiece.h"
 #import "SFMSquare.h"
 #import "SFMColor.h"
+
+@class SFMMove;
 
 @interface SFMPosition : NSObject <NSCopying>
 
@@ -84,6 +85,15 @@
 
 # pragma mark - Getters
 - (SFMPiece)pieceOnSquare:(SFMSquare)square;
+/*!
+ Get an array of legal destination squares for the given square.
+ @param square
+ @return An array of legal destination squares. The type of the objects is NSNumber, which wrap
+ SFMSquare enums.
+ */
+- (NSArray* /* of NSNumber */)legalSquaresFromSquare:(SFMSquare)square;
+
+- (BOOL)isPromotion:(SFMMove *)move;
 
 @property (copy, nonatomic, readonly) NSString *fen;
 @property (assign, readonly) BOOL isMate;

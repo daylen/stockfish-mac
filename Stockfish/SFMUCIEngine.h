@@ -6,8 +6,6 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface SFMUCIEngine : NSObject
 
 #pragma mark - Properties
@@ -17,8 +15,8 @@
 @property BOOL isAnalyzing;
 
 #pragma mark - Init
-- (id)initWithPathToEngine:(NSString *)path;
-- (id)initStockfish; // Special init for Stockfish
+- (instancetype)initWithPathToEngine:(NSString *)path;
+- (instancetype)initStockfish; // Special init for Stockfish
 
 #pragma mark - Using the engine
 - (void)startInfiniteAnalysis;

@@ -6,16 +6,12 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-
-#include "../Chess/square.h"
-
-using namespace Chess;
+#import "SFMSquare.h"
 
 @interface SFMArrowView : NSView
 
-@property Square fromSquare;
-@property Square toSquare;
+@property SFMSquare fromSquare;
+@property SFMSquare toSquare;
 
 @property CGPoint fromPoint;
 @property CGPoint toPoint;

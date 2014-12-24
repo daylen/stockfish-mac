@@ -6,20 +6,15 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
-#import "SFMBoardView.h"
-
-#include "../Chess/position.h"
-#include "../Chess/square.h"
-
-using namespace Chess;
+#import "SFMSquare.h"
+#import "SFMPiece.h"
 
 @interface SFMPieceView : NSImageView
 
-@property Square square;
+@property SFMSquare square;
 
-- (id)initWithPieceType:(Piece)pieceType
-               onSquare:(Square)square;
+- (id)initWithPiece:(SFMPiece)pieceType
+           onSquare:(SFMSquare)square;
 - (void)moveTo:(NSPoint)point;
 
 @end

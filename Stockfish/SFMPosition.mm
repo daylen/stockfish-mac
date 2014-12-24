@@ -8,6 +8,7 @@
 
 #import "SFMPosition.h"
 #import "Constants.h"
+#import "SFMMove.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -196,6 +197,52 @@ using namespace Chess;
 
 - (SFMPiece)pieceOnSquare:(SFMSquare)square {
     return SFMPiece(_position->piece_on(Square(square)));
+}
+
+- (NSArray* /* of NSNumber */)legalSquaresFromSquare:(SFMSquare)square {
+    Move mlist[32];
+    Square s = Square(square);
+    int total = self.position->moves_from(s, mlist);
+    
+    NSMutableArray *legalSquares = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < total; i++) {
+        // Only include non-promotions and queen promotions, in order to avoid
+        // having the same destination squares multiple times in the array.
+
+        if (!move_promotion(mlist[i]) || move_promotion(mlist[i]) == PieceType::QUEEN) {
+            // For castling moves, adjust the destination square so that it displays
+            // correctly when squares are highlighted in the GUI.
+            SFMSquare s;
+            if (move_is_long_castle(mlist[i]))
+                s = SFMSquare(move_to(mlist[i]) + 2);
+            else if (move_is_short_castle(mlist[i]))
+                s = SFMSquare(move_to(mlist[i]) - 1);
+            else
+                s = SFMSquare(move_to(mlist[i]));
+            [legalSquares addObject:[NSNumber numberWithInteger:s]];
+        }
+    }
+    
+    return legalSquares;
+}
+
+- (BOOL)isPromotion:(SFMMove *)move {
+    Move mlist[32];
+    Square s = Square(move.from);
+    int total = self.position->moves_from(s, mlist);
+    
+    // It is a promotion if there are multiple instances of the destination square
+    
+    int count = 0;
+    
+    for (int i = 0; i < total; i++) {
+        if (move_to(mlist[i]) == Square(move.to)) {
+            count++;
+        }
+    }
+    
+    return count > 1;
 }
 
 - (NSString *)fen {

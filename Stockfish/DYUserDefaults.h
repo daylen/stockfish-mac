@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+// TODO remove this class
 
 @interface DYUserDefaults : NSObject
 

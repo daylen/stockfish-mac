@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+// TODO deprecate this class
 
 @interface SFMHardwareDetector : NSObject
 

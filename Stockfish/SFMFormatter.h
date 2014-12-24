@@ -6,8 +6,6 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 @interface SFMFormatter : NSObject
 
 + (NSString *)scoreAsText:(int)score
@@ -15,7 +13,9 @@
             isWhiteToMove:(BOOL)whiteToMove
              isLowerBound:(BOOL)isLowerBound
              isUpperBound:(BOOL)isUpperBound;
+
 + (NSString *)nodesAsText:(NSString *)nodes;
+
 + (NSString *)millisecondsToClock:(unsigned long long)milliseconds; // 0:00:00
 
 @end

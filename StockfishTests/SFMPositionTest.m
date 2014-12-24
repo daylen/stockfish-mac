@@ -99,4 +99,17 @@
     XCTAssertEqualObjects(uci, @"d2d4 e7e5 d4e5 ");
 }
 
+- (void)testPieceOnSquare {
+    SFMPosition *p = [[SFMPosition alloc] init];
+    XCTAssert([p pieceOnSquare:SQ_E2] == PAWN);
+}
+
+- (void)testLegalSquaresFromSquare {
+    SFMPosition *p = [[SFMPosition alloc] init];
+    NSArray *legalSquares = [p legalSquaresFromSquare:SQ_E2];
+    XCTAssert([legalSquares count] == 2);
+    legalSquares = [p legalSquaresFromSquare:SQ_G1];
+    XCTAssert([legalSquares count] == 2);
+}
+
 @end

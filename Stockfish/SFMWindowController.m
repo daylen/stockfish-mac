@@ -145,8 +145,7 @@
 - (void)syncModelWithView
 {
     self.boardView.position = [self.currentGame.position copy];
-    [self.boardView updatePieceViews]; // TODO setting the position should update the views
-    [self.boardView clearArrows];
+    self.boardView.arrows = @[];
     [self updateNotationView];
 }
 - (void)sendPositionToEngine
@@ -356,6 +355,7 @@
     NSAttributedString *pvBold;
     
     // Use a try catch since there might be an exception
+    // TODO remove try catch
     @try {
        pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
     }
