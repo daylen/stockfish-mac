@@ -13,6 +13,10 @@
 #import "SFMArrowView.h"
 #import "SFMMove.h"
 #import "NSColor+ColorUtils.h"
+#import "SFMItertools.h"
+#import "SFMSquareUtils.h"
+
+@import QuartzCore;
 
 @interface SFMBoardView()
 
@@ -26,10 +30,10 @@
 
 #pragma mark - State
 
-@property (nonatomic) NSMutableDictionary /* <NSNumber, SFMPieceView> */ *pieceViews;
+@property (nonatomic) NSMutableDictionary /* <NSNumber(SFMSquare), SFMPieceView> */ *pieceViews;
 @property (nonatomic) NSMutableDictionary /* <SFMMove, SFMArrowView> */ *arrowViews;
 
-@property (nonatomic) NSArray /* of NSNumber */ *highlightedSquares;
+@property (nonatomic) NSArray /* of NSNumber(SFMSquare) */ *highlightedSquares;
 
 @property (assign, nonatomic) BOOL isDragging;
 @property (nonatomic) SFMSquare fromSquare;
@@ -72,25 +76,12 @@
     [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
 }
 
-- (void)setPosition:(SFMPosition *)position {
-    _position = position;
+- (void)setPosition:(SFMPosition *)newPosition {
+    SFMPosition *oldPosition = _position;
+    _position = newPosition;
     
-    [self.pieceViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        [obj removeFromSuperview];
-    }];
-    [self.pieceViews removeAllObjects];
+    [self magicMoveFrom:oldPosition to:newPosition];
     
-    for (SFMSquare s = SQ_A1; s <= SQ_H8; s++) {
-        SFMPiece piece = [self.position pieceOnSquare:s];
-        if (piece != NO_PIECE && piece != EMPTY) {
-            SFMPieceView *view = [[SFMPieceView alloc] init];
-            view.piece = piece;
-            self.pieceViews[@(s)] = view;
-            [self addSubview:view];
-        }
-    }
-    
-    [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
 }
 
 - (void)setArrows:(NSArray *)arrows {
@@ -102,6 +93,11 @@
     [self.arrowViews removeAllObjects];
     
     for (SFMMove *move in _arrows) {
+        if (move.from == move.to) {
+            NSLog(@"Yikes! The from and to for this arrow is the same.");
+            continue;
+        }
+        
         SFMArrowView *view = [[SFMArrowView alloc] initWithFrame:self.bounds];
         self.arrowViews[move] = view;
         [self addSubview:view];
@@ -367,7 +363,7 @@
             castle = YES;
         }
         
-        self.highlightedSquares = @[];
+        self.highlightedSquares = nil;
         
         SFMMove *move;
         if (pieceType != NO_PIECE_TYPE) {
@@ -377,6 +373,10 @@
             move = [[SFMMove alloc] initWithFrom:self.fromSquare to:self.toSquare];
             if (castle) {
                 move.isCastle = YES;
+            } else if (self.toSquare == [self.position enPassantSquare] &&
+                       ([self.position pieceOnSquare:self.fromSquare] == WP ||
+                        [self.position pieceOnSquare:self.fromSquare] == BP)) {
+                move.isEp = YES;
             }
         }
         
@@ -394,94 +394,183 @@
     
 }
 
-// TODO delete this
+#pragma mark - Animation
 
-// Sets the piece view's square property and executes an animated move
-//- (void)movePieceView:(SFMPieceView *)pieceView toSquare:(SFMSquare)square
-//{
-//    pieceView.square = square;
-//    [pieceView moveTo:[self coordinatesForSquare:square leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength]];
-//}
-//
-//- (void)animatePieceOnSquare:(SFMSquare)fromSquare
-//                          to:(SFMSquare)toSquare
-//                   promotion:(SFMPieceType)desiredPromotionPiece
-//                shouldCastle:(BOOL)shouldCastle
-//{
-//    
-//    // Find the piece(s)
-//    SFMPieceView *thePiece = [self pieceViewOnSquare:fromSquare];
-//    SFMPieceView *capturedPiece = [self pieceViewOnSquare:toSquare];
-//    
-//    if (shouldCastle) {
-//        // Castle
-//        if (toSquare == SQ_H1) {
-//            // White kingside
-//            [self movePieceView:[self pieceViewOnSquare:SQ_H1] toSquare:SQ_F1]; // Rook
-//            [self movePieceView:thePiece toSquare:SQ_G1]; // King
-//            
-//        } else if (toSquare == SQ_A1) {
-//            // White queenside
-//            [self movePieceView:[self pieceViewOnSquare:SQ_A1] toSquare:SQ_D1]; // Rook
-//            [self movePieceView:thePiece toSquare:SQ_C1]; // King
-//            
-//        } else if (toSquare == SQ_H8) {
-//            // Black kingside
-//            [self movePieceView:[self pieceViewOnSquare:SQ_H8] toSquare:SQ_F8]; // Rook
-//            [self movePieceView:thePiece toSquare:SQ_G8]; // King
-//            
-//        } else {
-//            // Black queenside
-//            [self movePieceView:[self pieceViewOnSquare:SQ_A8] toSquare:SQ_D8]; // Rook
-//            [self movePieceView:thePiece toSquare:SQ_C8]; // King
-//            
-//        }
-//    } else if (desiredPromotionPiece != NO_PIECE_TYPE) {
-//        // Promotion
-//        
-//        // Remove all relevant pieces
-//        [thePiece removeFromSuperview];
-//        [self.pieces removeObject:thePiece];
-//        
-//        if (capturedPiece) {
-//            // You could capture while promoting
-//            [capturedPiece removeFromSuperview];
-//            [self.pieces removeObject:capturedPiece];
-//        }
-//        
-//        // Create a new piece view and add it
-//        SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPieceType:piece_of_color_and_type(self.position->side_to_move(), desiredPromotionPiece) onSquare:toSquare];
-//        [self addSubview:pieceView];
-//        [self.pieces addObject:pieceView];
-//    } else if (capturedPiece) {
-//        // Capture
-//        
-//        // Remove the captured piece
-//        [capturedPiece removeFromSuperview];
-//        [self.pieces removeObject:capturedPiece];
-//        
-//        // Do a normal move
-//        [self movePieceView:thePiece toSquare:toSquare];
-//    } else if (type_of_piece(self.position->piece_on(fromSquare)) == PAWN &&
-//               square_file(fromSquare) != square_file(toSquare)) {
-//        // En passant
-//        
-//        // Find the en passant square
-//        Square enPassantSquare = toSquare - pawn_push(self.position->side_to_move());
-//        
-//        // Remove the piece on that square
-//        SFMPieceView *toRemove = [self pieceViewOnSquare:enPassantSquare];
-//        [toRemove removeFromSuperview];
-//        [self.pieces removeObject:toRemove];
-//        
-//        // Do a normal move
-//        [self movePieceView:thePiece toSquare:toSquare];
-//    } else {
-//        // Normal move
-//        [self movePieceView:thePiece toSquare:toSquare];
-//    }
-//    
-//}
+#define kBoardMoveAnimationDuration 0.3
+
+- (void)magicMoveFrom:(SFMPosition *)from to:(SFMPosition *)to {
+    
+    // Find all the squares that differ
+    
+    NSMutableArray /* of NSNumber(SFMSquare) */ *changedSquares = [[NSMutableArray alloc] init];
+    for (SFMSquare s = SQ_A1; s <= SQ_H8; s++) {
+        if ([from pieceOnSquare:s] != [to pieceOnSquare:s]) {
+            [changedSquares addObject:@(s)];
+        }
+    }
+    
+    // Build piece to square dictionaries for all changed squares
+    
+    NSMutableDictionary /* <NSNumber(SFMPiece), [NSNumber(SFMSquare)]> */ *fromDict =
+    [[NSMutableDictionary alloc] init];
+    NSMutableDictionary /* <NSNumber(SFMPiece), [NSNumber(SFMSquare)]> */ *toDict =
+    [[NSMutableDictionary alloc] init];
+    
+    for (NSNumber *square in changedSquares) {
+        SFMSquare s = square.integerValue;
+        SFMPiece fromPiece = [from pieceOnSquare:s];
+        SFMPiece toPiece = [to pieceOnSquare:s];
+        if (fromPiece != NO_PIECE && fromPiece != EMPTY) {
+            if (fromDict[@(fromPiece)]) {
+                [fromDict[@(fromPiece)] addObject:@(s)];
+            } else {
+                fromDict[@(fromPiece)] = [[NSMutableArray alloc] initWithObjects:@(s), nil];
+            }
+        }
+        if (toPiece != NO_PIECE && toPiece != EMPTY) {
+            if (toDict[@(toPiece)]) {
+                [toDict[@(toPiece)] addObject:@(s)];
+            } else {
+                toDict[@(toPiece)] = [[NSMutableArray alloc] initWithObjects:@(s), nil];
+            }
+        }
+    }
+    
+    // Find piece types that exist between the old and new boards
+    
+    NSMutableSet *sharedPieces = [NSMutableSet setWithArray:[fromDict allKeys]];
+    [sharedPieces intersectSet:[NSSet setWithArray:[toDict allKeys]]];
+    
+    // Add movements between these old and new pieces to an "all paths" dictionary
+    
+    NSMutableDictionary /* <NSNumber(SFMSquare), NSNumber(SFMSquare)> */ *allPaths = [[NSMutableDictionary alloc] init];
+
+    for (NSNumber *piece in sharedPieces) {
+        NSArray *pathsForThisPiece = [SFMBoardView shortestPathsFrom:fromDict[piece] to:toDict[piece]];
+        
+        for (SFMMove *path in pathsForThisPiece) {
+            allPaths[@(path.from)] = @(path.to);
+            [fromDict[piece] removeObject:@(path.from)];
+            [toDict[piece] removeObject:@(path.to)];
+        }
+    }
+    
+    // Also add removals to the "all paths" dictionary as a mapping from some square to no square
+    
+    [fromDict enumerateKeysAndObjectsUsingBlock:^(NSNumber *key, NSArray *squares, BOOL *stop) {
+        [squares enumerateObjectsUsingBlock:^(NSNumber *square, NSUInteger idx, BOOL *stop) {
+            allPaths[square] = @(SQ_NONE);
+        }];
+    }];
+    
+    // Execute movement and removal paths
+    
+    NSMutableDictionary *newPieceViews = [[NSMutableDictionary alloc] init];
+    
+    [self.pieceViews enumerateKeysAndObjectsUsingBlock:^(id key, SFMPieceView *obj, BOOL *stop) {
+        if (allPaths[key]) {
+            if (((NSNumber *)allPaths[key]).integerValue == SQ_NONE) {
+                // Removal required
+                [NSAnimationContext beginGrouping];
+                [[NSAnimationContext currentContext] setDuration:kBoardMoveAnimationDuration];
+                
+                [[obj animator] removeFromSuperview];
+                
+                [NSAnimationContext endGrouping];
+            } else {
+            
+                // Movement required
+                newPieceViews[allPaths[key]] = self.pieceViews[key];
+                
+                [NSAnimationContext beginGrouping];
+                [[NSAnimationContext currentContext] setDuration:kBoardMoveAnimationDuration];
+                
+                [[obj animator] setFrameOrigin:[self coordinatesForSquare:((NSNumber *)allPaths[key]).integerValue leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength]];
+                
+                [NSAnimationContext endGrouping];
+            }
+            
+        } else {
+            // No path
+            newPieceViews[key] = obj;
+        }
+    }];
+    
+    // Execute addition paths
+    
+    [toDict enumerateKeysAndObjectsUsingBlock:^(NSNumber *key, NSArray *squares, BOOL *stop) {
+        [squares enumerateObjectsUsingBlock:^(NSNumber *square, NSUInteger idx, BOOL *stop) {
+            SFMPieceView *view = [[SFMPieceView alloc] init];
+            view.piece = key.integerValue;
+            newPieceViews[square] = view;
+            [NSAnimationContext beginGrouping];
+            [[NSAnimationContext currentContext] setDuration:kBoardMoveAnimationDuration];
+            [[self animator] addSubview:view];
+            [NSAnimationContext endGrouping];
+        }];
+    }];
+
+    // Set the piece views dictionary to the new one
+    
+    self.pieceViews = newPieceViews;
+    
+}
+
++ (NSArray* /* of SFMMove */)shortestPathsFrom:(NSArray* /* of NSNumber(SFMSquare) */)from to:(NSArray* /* of NSNumber(SFMSquare) */)to {
+    
+    int size = (int) MIN([from count], [to count]);
+    
+    NSArray* /* of NSArray[SFMMove] */ candidates = [SFMBoardView generateConfigurationsWithSize:size from:from to:to];
+    
+    double minDist = DBL_MAX;
+    NSArray* /* of SFMMove */ bestConfiguration;
+    
+    for (NSArray *cand in candidates) {
+        double dist = [SFMBoardView distanceForConfiguration:cand];
+        if (dist < minDist) {
+            minDist = dist;
+            bestConfiguration = cand;
+        }
+    }
+    
+    return bestConfiguration;
+}
+
++ (NSArray* /* of NSArray[SFMMove] */)generateConfigurationsWithSize:(int)size from:(NSArray *)from to:(NSArray *)to {
+    NSMutableArray *configs = [[NSMutableArray alloc] init];
+    
+    if ([from count] >= [to count]) {
+        for (NSArray *x in [SFMItertools permutations:from length:(int) [to count]]) {
+            NSMutableArray *moves = [[NSMutableArray alloc] init];
+            for (int i = 0; i < [x count]; i++) {
+                [moves addObject:[[SFMMove alloc] initWithFrom:((NSNumber *)x[i]).integerValue to:((NSNumber *)to[i]).integerValue]];
+            }
+            [configs addObject:moves];
+        }
+    } else {
+        for (NSArray *x in [SFMItertools permutations:to length:(int) [from count]]) {
+            NSMutableArray *moves = [[NSMutableArray alloc] init];
+            for (int i = 0; i < [x count]; i++) {
+                [moves addObject:[[SFMMove alloc] initWithFrom:((NSNumber *)from[i]).integerValue to:((NSNumber *)x[i]).integerValue]];
+            }
+            [configs addObject:moves];
+        }
+    }
+    
+    return configs;
+}
+
++ (double)distanceForConfiguration:(NSArray* /* of SFMMove */)config {
+    double dist = 0.0;
+    
+    for (SFMMove *move in config) {
+        dist += [SFMSquareUtils distanceFrom:move.from to:move.to];
+    }
+    
+    return dist;
+}
+
+
 
 #pragma mark - Misc
 

@@ -90,7 +90,6 @@
         // Process the PV
         NSRange range = [str rangeOfString:@" pv "];
         if (range.location == NSNotFound) {
-            //NSLog(@"Somehow this is a multipv without a pv");
             return;
         }
         line[@"pv"] = [str substringFromIndex:range.location + range.length];
@@ -244,7 +243,6 @@
 
 - (void)dealloc
 {
-    //NSLog(@"Deallocating engine");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self stopSearch];
     [self sendCommandToEngine:@"quit"];

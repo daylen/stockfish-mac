@@ -7,6 +7,7 @@
 //
 
 #import "SFMMove.h"
+#import "SFMSquareUtils.h"
 
 @implementation SFMMove
 
@@ -45,5 +46,20 @@
     new.isEp = self.isEp;
     return new;
 }
+
+- (NSUInteger)hash {
+    return self.from ^ self.to ^ self.promotion;
+}
+
+- (BOOL)isEqual:(id)object {
+    SFMMove *m2 = object;
+    return self.from == m2.from && self.to == m2.to && self.promotion == m2.promotion && self.isPromotion == m2.isPromotion && self.isCastle == m2.isCastle && self.isEp == m2.isEp;
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@->%@", [SFMSquareUtils description:self.from], [SFMSquareUtils description:self.to]];
+}
+
+
 
 @end

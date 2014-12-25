@@ -127,6 +127,7 @@
         NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
         SFMMove *m = [self firstMoveFromPV:pv];
         [self.currentGame doMove:m error:nil];
+        [self checkIfGameOver];
         [self syncModelWithView];
     }
 }

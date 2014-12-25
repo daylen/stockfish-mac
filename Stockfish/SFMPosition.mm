@@ -202,7 +202,7 @@ using namespace Chess;
     return SFMPiece(_position->piece_on(Square(square)));
 }
 
-- (NSArray* /* of NSNumber */)legalSquaresFromSquare:(SFMSquare)square {
+- (NSArray* /* of NSNumber(SFMSquare) */)legalSquaresFromSquare:(SFMSquare)square {
     Move mlist[32];
     Square s = Square(square);
     int total = self.position->moves_from(s, mlist);
@@ -262,6 +262,10 @@ using namespace Chess;
 
 - (SFMColor)sideToMove {
     return SFMColor(_position->side_to_move());
+}
+
+- (SFMSquare)enPassantSquare {
+    return SFMSquare(self.position->ep_square());
 }
 
 - (int)numLegalMoves {

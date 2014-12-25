@@ -92,7 +92,7 @@
  @return An array of legal destination squares. The type of the objects is NSNumber, which wrap
  SFMSquare enums.
  */
-- (NSArray* /* of NSNumber */)legalSquaresFromSquare:(SFMSquare)square;
+- (NSArray* /* of NSNumber(SFMSquare) */)legalSquaresFromSquare:(SFMSquare)square;
 
 - (BOOL)isPromotion:(SFMMove *)move;
 
@@ -100,6 +100,7 @@
 @property (assign, readonly) BOOL isMate;
 @property (assign, readonly) BOOL isImmediateDraw;
 @property (assign, readonly) SFMColor sideToMove;
+@property (assign, readonly) SFMSquare enPassantSquare;
 @property (assign, readonly) int numLegalMoves;
 
 @end
