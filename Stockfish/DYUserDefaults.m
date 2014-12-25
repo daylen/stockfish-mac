@@ -14,8 +14,8 @@
 
 + (NSDictionary *)defaultSettings
 {
-    return @{NUM_THREADS_SETTING: [NSNumber numberWithInt:[SFMHardwareDetector minimumSupportedThreads]],
-             HASH_SIZE_SETTING: [NSNumber numberWithInt:(int) pow(2, [SFMHardwareDetector minimumMemoryPower])]};
+    return @{NUM_THREADS_SETTING: @([SFMHardwareDetector minimumSupportedThreads]),
+             HASH_SIZE_SETTING: @((int) pow(2, [SFMHardwareDetector minimumMemoryPower]))};
 }
 + (NSDictionary *)getSettings
 {
@@ -34,7 +34,7 @@
 }
 + (id)getSettingForKey:(id)key
 {
-    id setting = [[DYUserDefaults getSettings] objectForKey:key];
+    id setting = [DYUserDefaults getSettings][key];
     if (setting == nil) {
         [self setSettingForKey:key value:[self defaultSettings][key]];
         return [self getSettingForKey:key];

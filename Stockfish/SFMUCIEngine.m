@@ -98,11 +98,11 @@
         // Check for upper/lower bounds
         range = [str rangeOfString:@"upperbound"];
         if (range.location != NSNotFound) {
-            line[@"upperbound"] = [NSNumber numberWithBool:YES];
+            line[@"upperbound"] = @YES;
         }
         range = [str rangeOfString:@"lowerbound"];
         if (range.location != NSNotFound) {
-            line[@"lowerbound"] = [NSNumber numberWithBool:YES];
+            line[@"lowerbound"] = @YES;
         }
         
         // Add the line to the line history
@@ -122,7 +122,7 @@
 
 #pragma mark - Init
 
-- (id)initWithPathToEngine:(NSString *)path
+- (instancetype)initWithPathToEngine:(NSString *)path
 {
     self = [super init];
     if (self) {
@@ -163,7 +163,7 @@
  Detects whether the CPU supports POPCNT and loads the appropriate version
  of Stockfish.
  */
-- (id)initStockfish
+- (instancetype)initStockfish
 {
     int cpuRating = [SFMUCIEngine cpuRating];
     

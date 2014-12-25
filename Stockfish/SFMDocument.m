@@ -18,7 +18,7 @@
 
 @implementation SFMDocument
 
-- (id)initWithType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
+- (instancetype)initWithType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
     self = [self init];
     if (self) {

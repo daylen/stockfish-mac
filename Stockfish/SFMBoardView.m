@@ -85,7 +85,7 @@
         if (piece != NO_PIECE && piece != EMPTY) {
             SFMPieceView *view = [[SFMPieceView alloc] init];
             view.piece = piece;
-            self.pieceViews[[NSNumber numberWithInteger:s]] = view;
+            self.pieceViews[@(s)] = view;
             [self addSubview:view];
         }
     }
@@ -289,7 +289,7 @@
     } else {
         // Is it possible to move to the square you clicked on?
         BOOL isValidMove = [self.highlightedSquares containsObject:
-                            [NSNumber numberWithInteger:clickedSquare]];
+                            @(clickedSquare)];
         
         if (!isValidMove) {
             // If it's not a valid move, cancel the highlight
@@ -313,7 +313,7 @@
     mouseLocation.x -= self.squareSideLength / 2;
     mouseLocation.y -= self.squareSideLength / 2;
     
-    NSView *draggedPiece = self.pieceViews[[NSNumber numberWithInteger:self.fromSquare]];
+    NSView *draggedPiece = self.pieceViews[@(self.fromSquare)];
     [draggedPiece setFrameOrigin:mouseLocation];
 }
 
@@ -328,7 +328,7 @@
     
     // Is it possible to move to the square you clicked on?
     BOOL isValidMove = [self.highlightedSquares
-                        containsObject:[NSNumber numberWithInteger:_toSquare]];
+                        containsObject:@(_toSquare)];
     
     if (isValidMove) {
         self.isDragging = NO;

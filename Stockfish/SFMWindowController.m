@@ -270,7 +270,7 @@
     [statusText appendString:@"    Depth="];
     
     // The depth
-    if ([self.engine.currentInfo objectForKey:@"depth"]) {
+    if ((self.engine.currentInfo)[@"depth"]) {
         [statusText appendFormat:@"%d", [self.engine.currentInfo[@"depth"] intValue]];
     } else {
         [statusText appendFormat:@"%d", [latestPV[@"depth"] intValue]];
@@ -301,18 +301,18 @@
 
 - (NSString *)scoreForPV:(NSDictionary *)pv
 {
-    BOOL isLowerBound = [pv objectForKey:@"lowerbound"] != nil;
-    BOOL isUpperBound = [pv objectForKey:@"upperbound"] != nil;
+    BOOL isLowerBound = pv[@"lowerbound"] != nil;
+    BOOL isUpperBound = pv[@"upperbound"] != nil;
     
     // The score
-    if ([pv objectForKey:@"cp"]) {
+    if (pv[@"cp"]) {
         int score = [pv[@"cp"] intValue];
         
         NSString *theScore = [SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
         
         return theScore;
         
-    } else if ([pv objectForKey:@"mate"]) {
+    } else if (pv[@"mate"]) {
         int score = [pv[@"mate"] intValue];
         
         NSString *theScore = [SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];

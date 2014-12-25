@@ -129,11 +129,9 @@ using namespace Chess;
     SFMPosition *copy = [self copy];
     
     if (html) {
-        return [NSString stringWithUTF8String:
-                line_to_html(*copy.position, line, num, false).c_str()];
+        return @(line_to_html(*copy.position, line, num, false).c_str());
     } else {
-        return [NSString stringWithUTF8String:
-                line_to_san(*copy.position, line, 0, breakLines, num).c_str()];
+        return @(line_to_san(*copy.position, line, 0, breakLines, num).c_str());
     }
     
 }
@@ -158,7 +156,7 @@ using namespace Chess;
     
     for (SFMMove *move in movesArray) {
         Move m = [[self class] libMoveFromMoveObj:move];
-        [uci appendFormat:@"%@ ", [NSString stringWithUTF8String:move_to_string(m).c_str()]];
+        [uci appendFormat:@"%@ ", @(move_to_string(m).c_str())];
     }
     
     return uci;
@@ -225,7 +223,7 @@ using namespace Chess;
                 s = SFMSquare(move_to(mlist[i]) - 1);
             else
                 s = SFMSquare(move_to(mlist[i]));
-            [legalSquares addObject:[NSNumber numberWithInteger:s]];
+            [legalSquares addObject:@(s)];
         }
     }
     
@@ -251,7 +249,7 @@ using namespace Chess;
 }
 
 - (NSString *)fen {
-    return [NSString stringWithUTF8String:_position->to_fen().c_str()];
+    return @(_position->to_fen().c_str());
 }
 
 - (BOOL)isMate {

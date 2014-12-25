@@ -59,8 +59,8 @@
 - (void)setResult:(NSString *)result;
 
 #pragma mark - Navigation
-- (BOOL)atBeginning;
-- (BOOL)atEnd;
+@property (nonatomic, readonly) BOOL atBeginning;
+@property (nonatomic, readonly) BOOL atEnd;
 - (void)goBackOneMove;
 - (void)goForwardOneMove;
 - (void)goToBeginning;
@@ -71,7 +71,7 @@
 /*!
  @return A string containing the PGN tags and move text.
  */
-- (NSString *)pgnString;
+@property (nonatomic, readonly, copy) NSString *pgnString;
 
 /*!
  @param html YES to return HTML.
@@ -83,6 +83,6 @@
 /*!
  @return The moves in the game in UCI format.
  */
-- (NSString *)uciString;
+@property (nonatomic, readonly, copy) NSString *uciString;
 
 @end

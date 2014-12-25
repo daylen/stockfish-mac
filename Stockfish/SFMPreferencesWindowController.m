@@ -22,8 +22,8 @@
     int threads = [SFMHardwareDetector minimumSupportedThreads];
     int memory = (int) pow(2, [SFMHardwareDetector minimumMemoryPower]);
     
-    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
-    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
+    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:@(threads)];
+    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:@(memory)];
     
     [self updateViewFromSettings];
 }
@@ -31,8 +31,8 @@
     int threads = [SFMHardwareDetector maximumSupportedThreads];
     int memory = (int) pow(2, [SFMHardwareDetector maximumMemoryPower]);
     
-    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
-    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
+    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:@(threads)];
+    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:@(memory)];
     
     [self updateViewFromSettings];
 }
@@ -69,8 +69,8 @@
     int memoryPower = (int) [self.memoryChooser indexOfSelectedItem] + [SFMHardwareDetector minimumMemoryPower];
     int memory = (int) pow(2, memoryPower);
         
-    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:[NSNumber numberWithInt:threads]];
-    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:[NSNumber numberWithInt:memory]];
+    [DYUserDefaults setSettingForKey:NUM_THREADS_SETTING value:@(threads)];
+    [DYUserDefaults setSettingForKey:HASH_SIZE_SETTING value:@(memory)];
 }
 
 

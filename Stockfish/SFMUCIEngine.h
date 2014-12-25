@@ -15,7 +15,7 @@
 @property BOOL isAnalyzing;
 
 #pragma mark - Init
-- (instancetype)initWithPathToEngine:(NSString *)path;
+- (instancetype)initWithPathToEngine:(NSString *)path NS_DESIGNATED_INITIALIZER;
 - (instancetype)initStockfish; // Special init for Stockfish
 
 #pragma mark - Using the engine

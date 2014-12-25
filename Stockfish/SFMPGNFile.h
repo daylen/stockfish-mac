@@ -17,13 +17,13 @@
 /*!
  Create a PGN with one game.
  */
-- (instancetype)init;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /*!
  Create the given PGN.
  @param str
  */
-- (instancetype)initWithString:(NSString *)str;
+- (instancetype)initWithString:(NSString *)str NS_DESIGNATED_INITIALIZER;
 
 #pragma mark - Export
 
@@ -31,6 +31,6 @@
  Export the PGN file.
  @return The PGN file as an NSData blob.
  */
-- (NSData *)data;
+@property (nonatomic, readonly, copy) NSData *data;
 
 @end
