@@ -75,9 +75,10 @@
 
 /*!
  @param html YES to return HTML.
+ @param num
  @return A string containing the move text.
  */
-- (NSString *)moveTextString:(BOOL)html;
+- (NSString *)moveTextString:(BOOL)html num:(int)num;
 
 /*!
  @return The moves in the game in UCI format.

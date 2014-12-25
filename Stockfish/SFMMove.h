@@ -9,7 +9,7 @@
 #import "SFMPiece.h"
 #import "SFMSquare.h"
 
-@interface SFMMove : NSObject
+@interface SFMMove : NSObject <NSCopying>
 
 @property SFMSquare from;
 @property SFMSquare to;

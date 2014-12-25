@@ -12,6 +12,7 @@
 #import "SFMPieceView.h"
 #import "SFMArrowView.h"
 #import "SFMMove.h"
+#import "NSColor+ColorUtils.h"
 
 @interface SFMBoardView()
 
@@ -23,83 +24,26 @@
 @property NSColor *fontColor;
 @property NSColor *highlightColor;
 
-#pragma mark -
+#pragma mark - State
 
-@property (nonatomic) NSMutableArray /* of SFMPieceView */ *pieceViews;
-@property (nonatomic) NSMutableArray /* of SFMArrowView */ *arrowViews;
+@property (nonatomic) NSMutableDictionary /* <NSNumber, SFMPieceView> */ *pieceViews;
+@property (nonatomic) NSMutableDictionary /* <SFMMove, SFMArrowView> */ *arrowViews;
+
 @property (nonatomic) NSArray /* of NSNumber */ *highlightedSquares;
-@property (assign, nonatomic) BOOL hasDragged;
+
+@property (assign, nonatomic) BOOL isDragging;
 @property (nonatomic) SFMSquare fromSquare;
 @property (nonatomic) SFMSquare toSquare;
-@property (assign, nonatomic) CGFloat leftInset;
-@property (assign, nonatomic) CGFloat topInset;
-@property (assign, nonatomic) CGFloat squareSideLength;
+
+#pragma mark - Metrics
+
+@property (readonly, assign, nonatomic) CGFloat leftInset;
+@property (readonly, assign, nonatomic) CGFloat topInset;
+@property (readonly, assign, nonatomic) CGFloat squareSideLength;
 
 @end
 
 @implementation SFMBoardView
-
-#pragma mark - Setters
-
-//- (void)updatePieceViews // and the arrow views too!
-//{
-//    numHighlightedSquares = 0;
-//    
-////    assert(self.position->is_ok());
-//    
-//    // Invalidate pieces array
-//    self.pieces = [NSMutableArray new];
-//    // Remove subviews
-//    [self setSubviews:[NSArray new]];
-//    
-//    for (SFMSquare sq = SQ_A1; sq <= SQ_H8; sq++) {
-//        SFMPiece piece = [self.position pieceOnSquare:sq];
-//        if (piece != EMPTY) {
-//            SFMPieceView *pieceView = [[SFMPieceView alloc] initWithPiece:piece onSquare:sq];
-//            [self addSubview:pieceView];
-//            [self.pieces addObject:pieceView];
-//        }
-//    }
-//    
-//    // Now for the arrows
-//    [self updateArrowViews];
-//    
-//    [self setNeedsDisplay:YES];
-//}
-
-//- (void)updateArrowViews
-//{
-//    for (NSView *view in self.subviews) {
-//        if ([view isKindOfClass:[SFMArrowView class]]) {
-//            [view removeFromSuperview];
-//        }
-//    }
-//    for (SFMArrowView *arrowView in self.arrows) {
-//        [self addSubview:arrowView];
-//        
-//        arrowView.fromPoint = [self coordinatesForSquare:arrowView.fromSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
-//        arrowView.toPoint = [self coordinatesForSquare:arrowView.toSquare leftOffset:leftInset + squareSideLength / 2 topOffset:topInset + squareSideLength / 2 sideLength:squareSideLength];
-//        arrowView.squareSideLength = squareSideLength;
-//        
-//        [arrowView setFrame:self.bounds];
-//        [arrowView setNeedsDisplay:YES];
-//    }
-//}
-
-- (void)setBoardIsFlipped:(BOOL)boardIsFlipped {
-    _boardIsFlipped = boardIsFlipped;
-    [self setNeedsDisplay:YES];
-}
-
-- (void)setPosition:(SFMPosition *)position {
-    _position = position;
-    [self setNeedsDisplay:YES];
-}
-
-- (void)setArrows:(NSArray *)arrows {
-    _arrows = arrows;
-    [self setNeedsDisplay:YES];
-}
 
 #pragma mark - Init
 - (id)initWithFrame:(NSRect)frame {
@@ -107,38 +51,96 @@
         self.wantsLayer = YES;
         _boardIsFlipped = NO;
         
-        _boardColor = [NSColor blackColor];
-        _lightSquareColor = [NSColor whiteColor];
-        _darkSquareColor = [NSColor brownColor];
+        _boardColor = [NSColor colorWithRed:0.25 green:0.25 blue:0.25 alpha:1];
+        _lightSquareColor = [NSColor colorWithHex:0xf6fbf8 alpha:1];
+        _darkSquareColor = [NSColor colorWithHex:0x8bcea3 alpha:1];
         _fontColor = [NSColor whiteColor];
         _highlightColor = [NSColor colorWithSRGBRed:1 green:1 blue:0 alpha:0.7];
         
-        _pieceViews = [[NSMutableArray alloc] init];
-        _arrowViews = [[NSMutableArray alloc] init];
+        _pieceViews = [[NSMutableDictionary alloc] init];
+        _arrowViews = [[NSMutableDictionary alloc] init];
         _highlightedSquares = [[NSMutableArray alloc] init];
     }
     return self;
 }
 
-#pragma mark - Draw
+#pragma mark - Setters
+
+- (void)setBoardIsFlipped:(BOOL)boardIsFlipped {
+    _boardIsFlipped = boardIsFlipped;
+    [self setNeedsDisplay:YES];
+    [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
+}
+
+- (void)setPosition:(SFMPosition *)position {
+    _position = position;
+    
+    [self.pieceViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [obj removeFromSuperview];
+    }];
+    [self.pieceViews removeAllObjects];
+    
+    for (SFMSquare s = SQ_A1; s <= SQ_H8; s++) {
+        SFMPiece piece = [self.position pieceOnSquare:s];
+        if (piece != NO_PIECE && piece != EMPTY) {
+            SFMPieceView *view = [[SFMPieceView alloc] init];
+            view.piece = piece;
+            self.pieceViews[[NSNumber numberWithInteger:s]] = view;
+            [self addSubview:view];
+        }
+    }
+    
+    [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
+}
+
+- (void)setArrows:(NSArray *)arrows {
+    _arrows = arrows;
+
+    [self.arrowViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [obj removeFromSuperview];
+    }];
+    [self.arrowViews removeAllObjects];
+    
+    for (SFMMove *move in _arrows) {
+        SFMArrowView *view = [[SFMArrowView alloc] initWithFrame:self.bounds];
+        self.arrowViews[move] = view;
+        [self addSubview:view];
+    }
+    
+    [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
+}
+
+#pragma mark - Drawing
+
+- (void)resizeSubviewsWithOldSize:(NSSize)oldSize {
+    if (!self.isDragging) {
+        [self.pieceViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+            SFMSquare s = ((NSNumber *)key).integerValue;
+            NSView *view = obj;
+            CGPoint coordinate = [self coordinatesForSquare:s leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength];
+            view.frame = NSMakeRect(coordinate.x, coordinate.y, self.squareSideLength, self.squareSideLength);
+        }];
+    }
+    [self.arrowViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        SFMMove *move = key;
+        SFMArrowView *view = obj;
+        view.fromPoint = [self coordinatesForSquare:move.from leftOffset:self.leftInset + self.squareSideLength / 2 topOffset:self.topInset + self.squareSideLength / 2 sideLength:self.squareSideLength];
+        view.toPoint = [self coordinatesForSquare:move.to leftOffset:self.leftInset + self.squareSideLength / 2 topOffset:self.topInset + self.squareSideLength / 2 sideLength:self.squareSideLength];
+        view.squareSideLength = self.squareSideLength;
+        [view setNeedsDisplay:YES];
+    }];
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     
-    // Draw the big square
+    // Draw the border
     CGFloat height = self.bounds.size.height;
     CGFloat width = self.bounds.size.width;
     CGFloat boardSideLength = MIN(height, width) - EXTERIOR_BOARD_MARGIN * 2;
-    
     [self.boardColor set];
-    
     CGFloat left = (width - boardSideLength) / 2;
     CGFloat top = (height - boardSideLength) / 2;
-    
     NSRectFill(NSMakeRect(left, top, boardSideLength, boardSideLength));
-    [[NSShadow new] set];
-    
-    _leftInset = left + INTERIOR_BOARD_MARGIN;
-    _topInset = top + INTERIOR_BOARD_MARGIN;
-    _squareSideLength = (boardSideLength - 2 * INTERIOR_BOARD_MARGIN) / 8;
     
     // Draw 64 squares
     for (int i = 0; i < 8; i++) {
@@ -148,7 +150,7 @@
             } else {
                 [self.darkSquareColor set];
             }
-            NSRectFill(NSMakeRect(_leftInset + i * _squareSideLength, _topInset + j * _squareSideLength, _squareSideLength, _squareSideLength));
+            NSRectFill(NSMakeRect(self.leftInset + i * self.squareSideLength, self.topInset + j * self.squareSideLength, self.squareSideLength, self.squareSideLength));
         }
     }
     
@@ -156,51 +158,52 @@
     NSString *str;
     NSMutableParagraphStyle *pStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
     [pStyle setAlignment:NSCenterTextAlignment];
-    
     for (int i = 0; i < 8; i++) {
         // Down
         str = [NSString stringWithFormat:@"%d", self.boardIsFlipped ? (i + 1) : (8 - i)];
-        [str drawInRect:NSMakeRect(left, _topInset + _squareSideLength / 2 - FONT_SIZE / 2 + i * _squareSideLength, INTERIOR_BOARD_MARGIN, _squareSideLength) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
+        [str drawInRect:NSMakeRect(left, self.topInset + self.squareSideLength / 2 - FONT_SIZE / 2 + i * self.squareSideLength, INTERIOR_BOARD_MARGIN, self.squareSideLength) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
         // Across
         str = [NSString stringWithFormat:@"%c", self.boardIsFlipped ? ('h' - i) : ('a' + i)];
-        [str drawInRect:NSMakeRect(_leftInset + i * _squareSideLength, _topInset + 8 * _squareSideLength, _squareSideLength, INTERIOR_BOARD_MARGIN) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
+        [str drawInRect:NSMakeRect(self.leftInset + i * self.squareSideLength, self.topInset + 8 * self.squareSideLength, self.squareSideLength, INTERIOR_BOARD_MARGIN) withAttributes:@{NSParagraphStyleAttributeName: pStyle, NSForegroundColorAttributeName: self.fontColor}];
     }
     
-    // Draw pieces
-    
-    // TODO pieces
-    
-//    for (SFMPieceView *pieceView in self.pieces) {
-//        CGPoint coordinate = [self coordinatesForSquare:pieceView.square leftOffset:_leftInset topOffset:_topInset sideLength:_squareSideLength];
-//        [pieceView setFrame:NSMakeRect(coordinate.x, coordinate.y, squareSideLength, _squareSideLength)];
-//        [pieceView setNeedsDisplay:YES];
-//        
-//    }
-    
-    // Draw highlights
-    [self.highlightColor set]; // Highlight color
-    
-    // TODO highlights
-    
-//    
-//    for (int i = 0; i < numHighlightedSquares; i++) {
-//        CGPoint coordinate = [self coordinatesForSquare:_highlightedSquares[i] leftOffset:_leftInset topOffset:_topInset sideLength:_squareSideLength];
-//        [NSBezierPath fillRect:NSMakeRect(coordinate.x, coordinate.y, _squareSideLength, _squareSideLength)];
-//    }
-    
-    // Draw arrows
-    for (SFMArrowView *arrowView in self.arrows) {
-        
-        arrowView.fromPoint = [self coordinatesForSquare:arrowView.fromSquare leftOffset:_leftInset + _squareSideLength / 2 topOffset:_topInset + _squareSideLength / 2 sideLength:_squareSideLength];
-        arrowView.toPoint = [self coordinatesForSquare:arrowView.toSquare leftOffset:_leftInset + _squareSideLength / 2 topOffset:_topInset + _squareSideLength / 2 sideLength:_squareSideLength];
-        arrowView.squareSideLength = _squareSideLength;
-
-        [arrowView setFrame:self.bounds];
-        [arrowView setNeedsDisplay:YES];
+    // Draw highlighted squares
+    [self.highlightColor set];
+    for (NSNumber *num in self.highlightedSquares) {
+        SFMSquare square = num.integerValue;
+        CGPoint coordinate = [self coordinatesForSquare:square leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength];
+        [NSBezierPath fillRect:NSMakeRect(coordinate.x, coordinate.y, self.squareSideLength, self.squareSideLength)];
     }
+    
 }
 
-#pragma mark - Helper methods
+#pragma mark - Getters
+
+- (CGFloat)topInset {
+    CGFloat height = self.bounds.size.height;
+    CGFloat width = self.bounds.size.width;
+    CGFloat boardSideLength = MIN(height, width) - EXTERIOR_BOARD_MARGIN * 2;
+    
+    return (height - boardSideLength) / 2 + INTERIOR_BOARD_MARGIN;
+}
+
+- (CGFloat)leftInset {
+    CGFloat height = self.bounds.size.height;
+    CGFloat width = self.bounds.size.width;
+    CGFloat boardSideLength = MIN(height, width) - EXTERIOR_BOARD_MARGIN * 2;
+    
+    return (width - boardSideLength) / 2 + INTERIOR_BOARD_MARGIN;
+}
+
+- (CGFloat)squareSideLength {
+    CGFloat height = self.bounds.size.height;
+    CGFloat width = self.bounds.size.width;
+    CGFloat boardSideLength = MIN(height, width) - EXTERIOR_BOARD_MARGIN * 2;
+    
+    return (boardSideLength - 2 * INTERIOR_BOARD_MARGIN) / 8;
+}
+
+#pragma mark - Conversions
 
 - (CGPoint)coordinatesForSquare:(SFMSquare)sq
                      leftOffset:(CGFloat)left
@@ -244,16 +247,16 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    _hasDragged = NO;
+    self.isDragging = NO;
     
     // Figure out which square you clicked on
     NSPoint clickLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    SFMSquare clickedSquare = [self squareForCoordinates:clickLocation leftOffset:_leftInset topOffset:_topInset sideLength:_squareSideLength];
+    SFMSquare clickedSquare = [self squareForCoordinates:clickLocation leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength];
     
     if ([self.highlightedSquares count] == 0) {
         // You haven't selected a valid piece, since there are no highlighted squares on the board.
         if (clickedSquare != SQ_NONE) {
-            _fromSquare = clickedSquare;
+            self.fromSquare = clickedSquare;
             self.highlightedSquares = [self.position legalSquaresFromSquare:clickedSquare];
         }
     } else {
@@ -262,9 +265,10 @@
         
         if (!isValidMove) {
             // If it's not a valid move, cancel the highlight
-            self.highlightedSquares = @[];
-            _fromSquare = SQ_NONE;
+            self.highlightedSquares = nil;
+            self.fromSquare = SQ_NONE;
         }
+
     }
     
     [self setNeedsDisplay:YES];
@@ -273,30 +277,31 @@
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    _hasDragged = YES;
+    self.isDragging = YES;
     
     // Make the dragged piece follow the mouse
     NSPoint mouseLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     // Center the piece
-    mouseLocation.x -= _squareSideLength / 2;
-    mouseLocation.y -= _squareSideLength / 2;
+    mouseLocation.x -= self.squareSideLength / 2;
+    mouseLocation.y -= self.squareSideLength / 2;
     
-    SFMPieceView *draggedPiece = [self pieceViewOnSquare:_fromSquare];
+    NSView *draggedPiece = self.pieceViews[[NSNumber numberWithInteger:self.fromSquare]];
     [draggedPiece setFrameOrigin:mouseLocation];
-    [draggedPiece setNeedsDisplay:YES];
-    
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
     // Figure out which square you let go on
     NSPoint upLocation = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    _toSquare = [self squareForCoordinates:upLocation leftOffset:_leftInset topOffset:_topInset sideLength:_squareSideLength];
+    self.toSquare = [self squareForCoordinates:upLocation leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength];
     
     // Is it possible to move to the square you clicked on?
     BOOL isValidMove = [self.highlightedSquares containsObject:[NSNumber numberWithInteger:_toSquare]];
     
     if (isValidMove) {
+        self.isDragging = NO;
+        
+        
         // You previously selected a valid piece, and now you're trying to move it
         
         SFMPieceType pieceType = NO_PIECE_TYPE;
@@ -337,40 +342,38 @@
             move = [[SFMMove alloc] initWithFrom:self.fromSquare to:self.toSquare promotion:pieceType];
         } else {
             move = [[SFMMove alloc] initWithFrom:self.fromSquare to:self.toSquare];
+            if (castle) {
+                move.isCastle = YES;
+            }
         }
         
         [self.delegate boardView:self userDidMove:move];
     } else {
-        // TODO don't need this?
-        // Not a valid move, slide it back
-        SFMPieceView *piece = [self pieceViewOnSquare:self.fromSquare];
-        [piece moveTo:[self coordinatesForSquare:piece.square leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength]];
-    }
-    
-    if (self.hasDragged) {
-        self.highlightedSquares = @[];
+        
+        if (self.isDragging) {
+            // Invalid move
+            self.isDragging = NO;
+            self.highlightedSquares = nil;
+            self.fromSquare = SQ_NONE;
+            self.toSquare = SQ_NONE;
+        } else {
+            // This is the mouse up from the first click
+            
+        }
     }
     
     [self setNeedsDisplay:YES];
+    [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
     
 }
 
-- (SFMPieceView *)pieceViewOnSquare:(SFMSquare)square
-{
-    for (SFMPieceView *pieceView in self.pieceViews) {
-        if (pieceView.square == square) {
-            return pieceView;
-        }
-    }
-    return nil;
-}
 
 // Sets the piece view's square property and executes an animated move
-- (void)movePieceView:(SFMPieceView *)pieceView toSquare:(SFMSquare)square
-{
-    pieceView.square = square;
-    [pieceView moveTo:[self coordinatesForSquare:square leftOffset:_leftInset topOffset:_topInset sideLength:_squareSideLength]];
-}
+//- (void)movePieceView:(SFMPieceView *)pieceView toSquare:(SFMSquare)square
+//{
+//    pieceView.square = square;
+//    [pieceView moveTo:[self coordinatesForSquare:square leftOffset:self.leftInset topOffset:self.topInset sideLength:self.squareSideLength]];
+//}
 //
 //- (void)animatePieceOnSquare:(SFMSquare)fromSquare
 //                          to:(SFMSquare)toSquare
@@ -451,36 +454,6 @@
 //    }
 //    
 //}
-
-//#pragma mark - Promotion
-//
-//// TODO move this to delegate
-//
-//- (SFMPieceType)getDesiredPromotionPiece
-//{    
-//    NSAlert *alert = [[NSAlert alloc] init];
-//    [alert addButtonWithTitle:@"Queen"];
-//    [alert addButtonWithTitle:@"Rook"];
-//    [alert addButtonWithTitle:@"Bishop"];
-//    [alert addButtonWithTitle:@"Knight"];
-//    [alert setMessageText:@"Pawn Promotion"];
-//    [alert setInformativeText:@"What would you like to promote your pawn to?"];
-//    [alert setAlertStyle:NSWarningAlertStyle];
-//    NSInteger choice = [alert runModal];
-//    switch (choice) {
-//        case 1000:
-//            return QUEEN;
-//        case 1001:
-//            return ROOK;
-//        case 1002:
-//            return BISHOP;
-//        case 1003:
-//            return KNIGHT;
-//        default:
-//            return NO_PIECE_TYPE;
-//    }
-//}
-
 
 #pragma mark - Misc
 

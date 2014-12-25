@@ -58,13 +58,14 @@
  @param movesArray An array of SFMMove objects
  @param html YES for an HTML string
  @param breakLines YES to insert line breaks after 80 characters
- @param startNum An integer specifying which number to start at
+ @param num If using HTML, this is the move that is bolded. If not using HTML, this is the number
+ used to start numbering.
  @return A string in Standard Algebraic Notation. Example: "1. e4 e5 2. Nf3 Nc6"
  */
 - (NSString *)sanForMovesArray:(NSArray* /* of SFMMove */)movesArray
                           html:(BOOL)html
                     breakLines:(BOOL)breakLines
-                      startNum:(int)startNum;
+                           num:(int)num;
 
 /*!
  Converts an array of move text in UCI format into an array of SFMMove objects. The moves will

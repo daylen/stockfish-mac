@@ -7,7 +7,6 @@
 //
 
 #import "SFMWindowController.h"
-#import "SFMBoardView.h"
 #import "SFMChessGame.h"
 #import "SFMUCIEngine.h"
 #import "Constants.h"
@@ -112,13 +111,6 @@
 }
 - (IBAction)undoLastMove:(id)sender {
     // TODO real undo support
-    
-//    if (self.engine.isAnalyzing) {
-//        [self stopAnalysis];
-//        self.wantsAnalysis = YES;
-//    }
-//    [self.currentGame undoLastMove];
-//    [self syncModelWithView];
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
@@ -130,22 +122,19 @@
 - (IBAction)doBestMove:(id)sender
 {
     if (self.engine.isAnalyzing) {
-        // Get the best move
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
         NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
         SFMMove *m = [self firstMoveFromPV:pv];
         [self.currentGame doMove:m error:nil];
-        // This only updates the model. Also need update the view
         [self syncModelWithView];
-        
-    } else {
-        NSLog(@"Engine is not analyzing!");
     }
 }
 #pragma mark - Helper methods
 - (void)syncModelWithView
 {
     self.boardView.position = [self.currentGame.position copy];
-    self.boardView.arrows = @[];
+    self.boardView.arrows = nil;
     [self updateNotationView];
 }
 - (void)sendPositionToEngine
@@ -182,7 +171,7 @@
 }
 - (void)updateNotationView
 {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame moveTextString:YES] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame moveTextString:YES num:(int) self.currentGame.currentMoveIndex] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
     [str enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, str.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
         NSFont *currFont = (NSFont *) value;
         if ([[currFont fontDescriptor] symbolicTraits] & NSFontBoldTrait) {
@@ -199,8 +188,8 @@
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    // TODO delegate
-//    [self.boardView setDelegate:self];
+    self.boardView.delegate = self;
+    self.boardView.dataSource = self;
     [self loadGameAtIndex:0];
     
     // Decide whether to show or hide the game sidebar
@@ -301,7 +290,7 @@
             return;
         }
         
-        [statusText appendFormat:@"%@(%@/%d)    ", [self.currentGame.position sanForMovesArray:moves html:NO breakLines:NO startNum:(int) self.currentGame.currentMoveIndex / 2 + 1], self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
+        [statusText appendFormat:@"%@(%@/%d)    ", [self.currentGame.position sanForMovesArray:moves html:NO breakLines:NO num:(int) self.currentGame.currentMoveIndex / 2 + 1], self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
     }
     
     // The speed
@@ -352,21 +341,15 @@
     NSMutableAttributedString *viewText = [self.lineTextView.attributedString mutableCopy];
     [viewText addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, viewText.length)];
     
-    NSAttributedString *pvBold;
+    NSAttributedString *pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
     
-    // Use a try catch since there might be an exception
-    // TODO remove try catch
-    @try {
-       pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
-    }
-    @catch (NSException *exception) {
-        return;
-    }
     [viewText appendAttributedString:pvBold];
     [viewText appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
     
-    // Second line of text
+    // Also we want to add an arrow to the board
+    self.boardView.arrows = @[[self firstMoveFromPV:data[@"pv"]]];
     
+    // Second line of text
     NSString *score = [self scoreForPV:data];
     NSString *depth = [NSString stringWithFormat:@"%d/%d", [data[@"depth"] intValue], [data[@"seldepth"] intValue]];
     NSString *time = [SFMFormatter millisecondsToClock:[data[@"time"] longLongValue]];
@@ -396,16 +379,7 @@
 {
     NSArray *tokens = [pv componentsSeparatedByString:@" "];
 
-    return [self.currentGame.position sanForMovesArray:[self.currentGame.position movesArrayForUci:tokens] html:NO breakLines:NO startNum:(int) self.currentGame.currentMoveIndex / 2 + 1];
-    
-//    
-//    // And now, we add the arrow to the board
-//    Move firstMove = ((SFMChessMove *) pvMacMoveObjects[0]).move;
-//    [self.boardView clearArrows];
-//    [self.boardView addArrowFrom:move_from(firstMove) to:move_to(firstMove)];
-//    
-//    return [self movesArrayAsString:pvMacMoveObjects];
-
+    return [self.currentGame.position sanForMovesArray:[self.currentGame.position movesArrayForUci:tokens] html:NO breakLines:NO num:(int) self.currentGame.currentMoveIndex / 2 + 1];
 }
 
 - (SFMMove *)firstMoveFromPV:(NSString *)pv
@@ -415,31 +389,53 @@
 
 #pragma mark - SFMBoardViewDelegate
 
-// TODO revamped delegate later
+- (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move {
+    if (self.engine.isAnalyzing) {
+        [self stopAnalysis];
+        self.wantsAnalysis = YES;
+    }
+    
+    NSError *error = nil;
+    [self.currentGame doMove:move error:&error];
+    if (error) {
+        NSLog(@"%@", [error description]);
+        return;
+    }
+    
+    self.boardView.position = [self.currentGame.position copy];
+    [self checkIfGameOver];
+    [self.document updateChangeCount:NSChangeDone];
+    [self updateNotationView];
+    
+    
+}
 
-//
-//- (void)doMove:(Chess::Move)move
-//{
-//    [self doMoveFrom:move_from(move) to:move_to(move) promotion:move_promotion(move)];
-//    
-//}
-//- (Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare
-//{
-//    return [self doMoveFrom:fromSquare to:toSquare promotion:NO_PIECE_TYPE];
-//}
-//
-//- (Chess::Move)doMoveFrom:(Chess::Square)fromSquare to:(Chess::Square)toSquare promotion:(Chess::PieceType)desiredPieceType
-//{
-//    if (self.engine.isAnalyzing) {
-//        [self stopAnalysis];
-//        self.wantsAnalysis = YES;
-//    }
-//    Move m = [self.currentGame doMoveFrom:fromSquare to:toSquare promotion:desiredPieceType];
-//    [self checkIfGameOver];
-//    [self.document updateChangeCount:NSChangeDone];
-//    [self updateNotationView];
-//    return m;
-//}
+#pragma mark - SFMBoardViewDataSource
+
+- (SFMPieceType)promotionPieceTypeForBoardView:(SFMBoardView *)boardView
+{
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"Queen"];
+    [alert addButtonWithTitle:@"Rook"];
+    [alert addButtonWithTitle:@"Bishop"];
+    [alert addButtonWithTitle:@"Knight"];
+    [alert setMessageText:@"Pawn Promotion"];
+    [alert setInformativeText:@"What would you like to promote your pawn to?"];
+    [alert setAlertStyle:NSWarningAlertStyle];
+    NSInteger choice = [alert runModal];
+    switch (choice) {
+        case 1000:
+            return QUEEN;
+        case 1001:
+            return ROOK;
+        case 1002:
+            return BISHOP;
+        case 1003:
+            return KNIGHT;
+        default:
+            return NO_PIECE_TYPE;
+    }
+}
 
 #pragma mark - Table View Delegate Methods
 

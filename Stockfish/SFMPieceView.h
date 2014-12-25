@@ -6,15 +6,10 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import "SFMSquare.h"
 #import "SFMPiece.h"
 
 @interface SFMPieceView : NSImageView
 
-@property SFMSquare square;
-
-- (id)initWithPiece:(SFMPiece)pieceType
-           onSquare:(SFMSquare)square;
-- (void)moveTo:(NSPoint)point;
+@property (nonatomic) SFMPiece piece;
 
 @end

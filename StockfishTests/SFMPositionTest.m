@@ -81,7 +81,7 @@
     SFMMove *m1 = [[SFMMove alloc] initWithFrom:SQ_D2 to:SQ_D4];
     SFMMove *m2 = [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5];
     SFMMove *m3 = [[SFMMove alloc] initWithFrom:SQ_D4 to:SQ_E5];
-    NSString *san = [p sanForMovesArray:@[m1, m2, m3] html:NO breakLines:NO startNum:1];
+    NSString *san = [p sanForMovesArray:@[m1, m2, m3] html:NO breakLines:NO num:1];
     XCTAssertEqualObjects(san, @"1. d4 e5 2. dxe5 ");
 }
 

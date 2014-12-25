@@ -6,12 +6,7 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import "SFMSquare.h"
-
 @interface SFMArrowView : NSView
-
-@property SFMSquare fromSquare;
-@property SFMSquare toSquare;
 
 @property CGPoint fromPoint;
 @property CGPoint toPoint;

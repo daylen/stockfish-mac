@@ -35,4 +35,15 @@
     return self;
 }
 
+- (id)copyWithZone:(NSZone *)zone {
+    SFMMove *new = [[SFMMove alloc] init];
+    new.from = self.from;
+    new.to = self.to;
+    new.promotion = self.promotion;
+    new.isPromotion = self.isPromotion;
+    new.isCastle = self.isCastle;
+    new.isEp = self.isEp;
+    return new;
+}
+
 @end

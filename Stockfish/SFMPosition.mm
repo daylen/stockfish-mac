@@ -86,7 +86,7 @@ using namespace Chess;
     }
     
     if (!foundLegalMove) {
-        *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:ILLEGAL_MOVE_CODE userInfo:nil];
+        if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:ILLEGAL_MOVE_CODE userInfo:nil];
     }
 }
 
@@ -101,7 +101,7 @@ using namespace Chess;
         Move m = move_from_san(*current.position, [text UTF8String]);
         if (m == MOVE_NONE) {
             // Error
-            *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:PARSE_ERROR_CODE userInfo:nil];
+            if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:PARSE_ERROR_CODE userInfo:nil];
             return nil;
         } else {
             [moves addObject:[[self class] moveObjFromLibMove:m]];
@@ -115,7 +115,7 @@ using namespace Chess;
 - (NSString *)sanForMovesArray:(NSArray* /* of SFMMove */)movesArray
                           html:(BOOL)html
                     breakLines:(BOOL)breakLines
-                      startNum:(int)startNum {
+                           num:(int)num {
     Move line[800];
     int i = 0;
     
@@ -127,9 +127,9 @@ using namespace Chess;
     SFMPosition *copy = [self copy];
     
     if (html) {
-        return [NSString stringWithUTF8String:line_to_html(*copy.position, line, startNum, false).c_str()];
+        return [NSString stringWithUTF8String:line_to_html(*copy.position, line, num, false).c_str()];
     } else {
-        return [NSString stringWithUTF8String:line_to_san(*copy.position, line, 0, breakLines, startNum).c_str()];
+        return [NSString stringWithUTF8String:line_to_san(*copy.position, line, 0, breakLines, num).c_str()];
     }
     
 }

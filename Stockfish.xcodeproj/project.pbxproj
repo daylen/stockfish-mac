@@ -19,6 +19,7 @@
 		77050695187CE43400BA4635 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050671187CE43300BA4635 /* Cocoa.framework */; };
 		7705069D187CE43400BA4635 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7705069B187CE43400BA4635 /* InfoPlist.strings */; };
 		770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.m */; };
+		7716E40E1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7716E40D1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m */; };
 		7734B674189506F500FC4D79 /* SFMArrowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7734B673189506F500FC4D79 /* SFMArrowView.m */; };
 		7734B677189596B200FC4D79 /* NSBezierPath+Arrowhead.m in Sources */ = {isa = PBXBuildFile; fileRef = 7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */; };
 		773DE96F18822DD0009156C3 /* SFMPieceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 773DE96E18822DD0009156C3 /* SFMPieceView.m */; };
@@ -105,6 +106,8 @@
 		7705069C187CE43400BA4635 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		770506DE187CF2B100BA4635 /* SFMWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMWindowController.h; sourceTree = "<group>"; };
 		770506DF187CF2B100BA4635 /* SFMWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SFMWindowController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		7716E40C1A4B5BBB00C52FB2 /* NSColor+ColorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSColor+ColorUtils.h"; path = "Stockfish/NSColor+ColorUtils.h"; sourceTree = "<group>"; };
+		7716E40D1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSColor+ColorUtils.m"; path = "Stockfish/NSColor+ColorUtils.m"; sourceTree = "<group>"; };
 		7734B672189506F500FC4D79 /* SFMArrowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMArrowView.h; path = Stockfish/SFMArrowView.h; sourceTree = "<group>"; };
 		7734B673189506F500FC4D79 /* SFMArrowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMArrowView.m; path = Stockfish/SFMArrowView.m; sourceTree = "<group>"; };
 		7734B675189596B200FC4D79 /* NSBezierPath+Arrowhead.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSBezierPath+Arrowhead.h"; path = "Stockfish/NSBezierPath+Arrowhead.h"; sourceTree = "<group>"; };
@@ -444,10 +447,12 @@
 			children = (
 				7734B675189596B200FC4D79 /* NSBezierPath+Arrowhead.h */,
 				7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */,
-				7734B672189506F500FC4D79 /* SFMArrowView.h */,
-				7734B673189506F500FC4D79 /* SFMArrowView.m */,
+				7716E40C1A4B5BBB00C52FB2 /* NSColor+ColorUtils.h */,
+				7716E40D1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m */,
 				7752FF4518810B30003E82B3 /* SFMBoardView.h */,
 				7752FF4618810B30003E82B3 /* SFMBoardView.m */,
+				7734B672189506F500FC4D79 /* SFMArrowView.h */,
+				7734B673189506F500FC4D79 /* SFMArrowView.m */,
 				773DE96D18822DD0009156C3 /* SFMPieceView.h */,
 				773DE96E18822DD0009156C3 /* SFMPieceView.m */,
 			);
@@ -579,6 +584,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7716E40E1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m in Sources */,
 				7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */,
 				7744CCAD1A49EA54009D349D /* square.cpp in Sources */,
 				7744CCA81A49EA54009D349D /* movegen.cpp in Sources */,
@@ -719,7 +725,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -751,7 +757,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -770,7 +776,7 @@
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -793,7 +799,7 @@
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -874,7 +880,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -894,7 +900,7 @@
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;

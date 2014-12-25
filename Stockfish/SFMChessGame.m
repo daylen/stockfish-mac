@@ -167,7 +167,7 @@
         [str appendString:self.moveText];
     } else {
         [str appendString:@"\n"];
-        [str appendString:[self moveTextString:NO]];
+        [str appendString:[self moveTextString:NO num:1]];
         [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
     }
     
@@ -180,8 +180,8 @@
     return s;
 }
 
-- (NSString *)moveTextString:(BOOL)html {
-    return [self.startPosition sanForMovesArray:self.moves html:html breakLines:NO startNum:1];
+- (NSString *)moveTextString:(BOOL)html num:(int)num {
+    return [self.startPosition sanForMovesArray:self.moves html:html breakLines:NO num:num];
 }
 
 - (NSString *)uciString
