@@ -29,5 +29,4 @@
 - (void)setValue:(NSString *)value forOption:(NSString *)key;
 - (void)setThreadsAndHashFromPrefs:(NSNotification *)notification;
 
-
 @end

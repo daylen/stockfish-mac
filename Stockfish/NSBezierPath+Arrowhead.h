@@ -8,7 +8,6 @@
 
 @interface NSBezierPath (Arrowhead)
 
-
 + (NSBezierPath *)bezierPathWithArrowFromPoint:(CGPoint)startPoint
                                        toPoint:(CGPoint)endPoint
                                      tailWidth:(CGFloat)tailWidth

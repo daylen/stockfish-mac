@@ -86,7 +86,8 @@ using namespace Chess;
     }
     
     if (!foundLegalMove) {
-        if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:ILLEGAL_MOVE_CODE userInfo:nil];
+        if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
+                                                        code:ILLEGAL_MOVE_CODE userInfo:nil];
     }
 }
 
@@ -101,7 +102,8 @@ using namespace Chess;
         Move m = move_from_san(*current.position, [text UTF8String]);
         if (m == MOVE_NONE) {
             // Error
-            if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN code:PARSE_ERROR_CODE userInfo:nil];
+            if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
+                                                            code:PARSE_ERROR_CODE userInfo:nil];
             return nil;
         } else {
             [moves addObject:[[self class] moveObjFromLibMove:m]];
@@ -127,9 +129,11 @@ using namespace Chess;
     SFMPosition *copy = [self copy];
     
     if (html) {
-        return [NSString stringWithUTF8String:line_to_html(*copy.position, line, num, false).c_str()];
+        return [NSString stringWithUTF8String:
+                line_to_html(*copy.position, line, num, false).c_str()];
     } else {
-        return [NSString stringWithUTF8String:line_to_san(*copy.position, line, 0, breakLines, num).c_str()];
+        return [NSString stringWithUTF8String:
+                line_to_san(*copy.position, line, 0, breakLines, num).c_str()];
     }
     
 }
@@ -164,7 +168,8 @@ using namespace Chess;
 
 + (Move)libMoveFromMoveObj:(SFMMove *)moveObj {
     if (moveObj.isPromotion) {
-        return make_promotion_move(Square(moveObj.from), Square(moveObj.to), PieceType(moveObj.promotion));
+        return make_promotion_move(Square(moveObj.from), Square(moveObj.to),
+                                   PieceType(moveObj.promotion));
     } else if (moveObj.isCastle) {
         return make_castle_move(Square(moveObj.from), Square(moveObj.to));
     } else if (moveObj.isEp) {

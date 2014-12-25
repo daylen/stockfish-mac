@@ -406,8 +406,6 @@
     [self checkIfGameOver];
     [self.document updateChangeCount:NSChangeDone];
     [self updateNotationView];
-    
-    
 }
 
 #pragma mark - SFMBoardViewDataSource
