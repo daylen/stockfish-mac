@@ -8,8 +8,9 @@
 
 #import "SFMPGNFile.h"
 #import "SFMBoardView.h"
+#import "SFMUCIEngine.h"
 
-@interface SFMWindowController : NSWindowController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate, SFMBoardViewDataSource, SFMBoardViewDelegate>
+@interface SFMWindowController : NSWindowController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate, SFMBoardViewDataSource, SFMBoardViewDelegate, SFMUCIEngineDelegate>
 
 @property SFMPGNFile *pgnFile;
 

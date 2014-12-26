@@ -6,27 +6,30 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
+@class SFMMove;
+@class SFMUCIEngine;
+@class SFMUCILine;
+@class SFMChessGame;
+
+@protocol SFMUCIEngineDelegate <NSObject>
+
+- (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name;
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth;
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(SFMUCILine *)line;
+
+@end
+
 @interface SFMUCIEngine : NSObject
 
-#pragma mark - Properties
-@property NSString *engineName; // e.g. "Stockfish DD 64 SSE4.2"
-@property NSMutableDictionary *currentInfo;
-@property NSMutableArray *lineHistory;
-@property BOOL isAnalyzing;
+@property (weak, nonatomic) id<SFMUCIEngineDelegate> delegate;
 
-#pragma mark - Init
-- (instancetype)initWithPathToEngine:(NSString *)path NS_DESIGNATED_INITIALIZER;
-- (instancetype)initStockfish; // Special init for Stockfish
+@property (nonatomic) BOOL isAnalyzing;
+@property (nonatomic) SFMChessGame *gameToAnalyze;
 
-#pragma mark - Using the engine
-- (void)startInfiniteAnalysis;
-- (void)stopSearch;
+@property (readonly, nonatomic) SFMUCILine *latestLine;
 
-#pragma mark - Engine communication
-- (void)sendCommandToEngine:(NSString *)string;
+// TODO uci options
 
-#pragma mark - Settings
-- (void)setValue:(NSString *)value forOption:(NSString *)key;
-- (void)setThreadsAndHashFromPrefs:(NSNotification *)notification;
+- (instancetype)initStockfish;
 
 @end

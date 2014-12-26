@@ -12,7 +12,7 @@
 /*!
  SFMChessGame contains PGN metadata and move history for a game.
  */
-@interface SFMChessGame : NSObject
+@interface SFMChessGame : NSObject <NSCopying>
 
 #pragma mark - Properties
 

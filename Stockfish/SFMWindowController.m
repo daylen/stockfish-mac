@@ -8,10 +8,11 @@
 
 #import "SFMWindowController.h"
 #import "SFMChessGame.h"
-#import "SFMUCIEngine.h"
 #import "Constants.h"
 #import "SFMFormatter.h"
 #import "SFMMove.h"
+#import "SFMUCILine.h"
+#import "SFMPosition.h"
 
 @interface SFMWindowController ()
 
@@ -30,7 +31,6 @@
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
 @property SFMUCIEngine *engine;
-@property BOOL wantsAnalysis; // TODO deprecate
 
 @end
 
@@ -50,7 +50,7 @@
     // Don't want to deal with multi-game PGN
     if ([self.pgnFile.games count] > 1) {
         NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Please create a new game first."];
-        [alert runModal];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
         return;
     }
     
@@ -60,8 +60,8 @@
 
     // Validate the FEN string and throw a modal if invalid
     if (![SFMPosition isValidFen:fen]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The FEN string is not valid."];
-        [alert runModal];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The FEN string is not valid. Edit your FEN string and try again."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
         return;
     }
 
@@ -76,80 +76,53 @@
     self.boardView.boardIsFlipped = !self.boardView.boardIsFlipped;
 }
 - (IBAction)previousMove:(id)sender {
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
     [self.currentGame goBackOneMove];
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
 }
 - (IBAction)nextMove:(id)sender {
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
     [self.currentGame goForwardOneMove];
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
 }
-- (IBAction)firstMove:(id)sender
-{
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
+- (IBAction)firstMove:(id)sender {
     [self.currentGame goToBeginning];
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
 }
-- (IBAction)lastMove:(id)sender
-{
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
+- (IBAction)lastMove:(id)sender {
     [self.currentGame goToEnd];
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
 }
 - (IBAction)undoLastMove:(id)sender {
     // TODO real undo support
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
+        self.engine.isAnalyzing = NO;
+        self.goStopButton.title = @"Go";
     } else {
-        [self sendPositionToEngine];
+        self.lineTextView.string = @"";
+        [self syncToViewsAndEngine];
+        self.engine.isAnalyzing = YES;
+        self.goStopButton.title = @"Stop";
     }
 }
 - (IBAction)doBestMove:(id)sender
 {
     if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-        
-        NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
-        SFMMove *m = [self firstMoveFromPV:pv];
-        [self doMoveWithOverwritePrompt:m];
+        [self doMoveWithOverwritePrompt:[self.engine.latestLine.moves firstObject]];
+    } else {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot do best move" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Start Infinite Analysis and then try again."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
     }
 }
 #pragma mark - Helper methods
-- (void)syncModelWithView
+- (void)syncToViewsAndEngine
 {
     self.boardView.position = [self.currentGame.position copy];
     self.boardView.arrows = nil;
+
+    self.engine.gameToAnalyze = [self.currentGame copy];
+
     [self updateNotationView];
-}
-- (void)sendPositionToEngine
-{
-    self.lineTextView.string = @"";
-    [self.engine stopSearch];
-    [self.engine sendCommandToEngine:self.currentGame.uciString];
-    [self.engine startInfiniteAnalysis];
-    self.goStopButton.title = @"Stop";
-}
-- (void)stopAnalysis
-{
-    self.wantsAnalysis = NO;
-    self.goStopButton.title = @"Go";
-    [self.engine stopSearch];
 }
 
 /*!
@@ -190,6 +163,10 @@
     [super windowDidLoad];
     self.boardView.delegate = self;
     self.boardView.dataSource = self;
+    
+    self.engine = [[SFMUCIEngine alloc] initStockfish];
+    self.engine.delegate = self;
+    
     [self loadGameAtIndex:0];
     
     // Decide whether to show or hide the game sidebar
@@ -201,28 +178,10 @@
         [self.mainSplitView.subviews[0] removeFromSuperview];
     }
     
-    // Subscribe to notifications
-    [self subscribeToNotifications:YES];
-    self.wantsAnalysis = NO;
-    self.engine = [[SFMUCIEngine alloc] initStockfish];
-    
-}
-
-- (void)subscribeToNotifications:(BOOL)shouldSubscribe
-{
-    if (shouldSubscribe) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAnalysisLine:) name:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self.engine];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineStatus:) name:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self.engine];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedBestMove:) name:ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION object:self.engine];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateEngineName:) name:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self.engine];
-    } else {
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-    }
 }
 
 - (void)loadGameAtIndex:(int)index
 {
-    [self stopAnalysis];
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
     NSError *error = nil;
@@ -233,7 +192,7 @@
         [alert runModal];
     }
     
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
     
 }
 
@@ -250,129 +209,78 @@
     return YES;
 }
 
+
+#pragma mark - SFMUCIEngineDelegate
+
+- (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name {
+    self.engineTextField.stringValue = name;
+}
+
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth {
+    
+    NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
+    
+    // 1. Score
+    [statusComponents addObject:[SFMFormatter scoreAsText:(int) engine.latestLine.score isMate:engine.latestLine.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:engine.latestLine.scoreIsLowerBound isUpperBound:engine.latestLine.scoreIsUpperBound]];
+    
+    // 2. Depth
+    [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", engine.latestLine.depth, engine.latestLine.selectiveDepth]];
+    
+    // 3. Curr Move
+    if (move) {
+        NSString *san = [engine.gameToAnalyze.position sanForMovesArray:@[move] html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1];
+        [statusComponents addObject:[NSString stringWithFormat:@"%@(%lu/%d)", san, moveNumber, engine.gameToAnalyze.position.numLegalMoves]];
+    }
+    
+    // 4. Speed
+    [statusComponents addObject:[NSString stringWithFormat:@"%@/s", [SFMFormatter nodesAsText:engine.latestLine.nodesPerSecond]]];
+    
+    self.engineStatusTextField.stringValue = [statusComponents componentsJoinedByString:@"    "];
+    
+}
+
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(SFMUCILine *)line {
+    // Update the status text
+    [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:line.depth];
+    
+    // Draw an arrow
+    self.boardView.arrows = @[[line.moves firstObject]];
+    
+    // First line
+    NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
+    
+    // Second line
+    NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
+    
+    // 1. Score
+    [statusComponents addObject:[SFMFormatter scoreAsText:(int) engine.latestLine.score isMate:engine.latestLine.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:engine.latestLine.scoreIsLowerBound isUpperBound:engine.latestLine.scoreIsUpperBound]];
+    
+    // 2. Depth
+    [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", engine.latestLine.depth, engine.latestLine.selectiveDepth]];
+
+    // 3. TB
+    if (engine.latestLine.tbHits) {
+        [statusComponents addObject:[NSString stringWithFormat:@"TB=%lu", engine.latestLine.tbHits]];
+    }
+    
+    // 4. Time
+    [statusComponents addObject:[SFMFormatter millisecondsToClock:engine.latestLine.time]];
+    
+    // 5. Nodes
+    [statusComponents addObject:[SFMFormatter nodesAsText:engine.latestLine.nodes]];
+    
+    NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
+    
+    NSMutableAttributedString *combined = [[NSMutableAttributedString alloc] init];
+    [combined appendAttributedString:boldPv];
+    [combined appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+    [combined appendAttributedString:secondLine];
+    
+    [self.lineTextView.textStorage setAttributedString:combined];
+    
+}
+
 #pragma mark - Notifications
-- (void)updateEngineName:(NSNotification *)notification
-{
-    if (self.engine.engineName != nil && [self.engine.engineName length] > 0) {
-        self.engineTextField.stringValue = self.engine.engineName;
-    }
-}
-- (void)updateEngineStatus:(NSNotification *)notification
-{
-    if (!self.engine.isAnalyzing) {
-        return;
-    }
-    NSMutableString *statusText = [NSMutableString new];
-    NSDictionary *latestPV = [self.engine.lineHistory lastObject];
-    
-    [statusText appendString:[self scoreForPV:latestPV]];
-    
-    [statusText appendString:@"    Depth="];
-    
-    // The depth
-    if ((self.engine.currentInfo)[@"depth"]) {
-        [statusText appendFormat:@"%d", [self.engine.currentInfo[@"depth"] intValue]];
-    } else {
-        [statusText appendFormat:@"%d", [latestPV[@"depth"] intValue]];
-    }
-    // The selective depth
-    [statusText appendFormat:@"/%d    ", [latestPV[@"seldepth"] intValue]];
-    
-    // The current move
-    if (self.engine.currentInfo[@"currmove"]) {
-        int numLegalMoves = self.currentGame.position.numLegalMoves;
-        
-        NSError *error = nil;
-        NSArray *moves = [self.currentGame.position movesArrayForUci:@[self.engine.currentInfo[@"currmove"]]];
-        
-        if (error) {
-            NSLog(@"%@", [error description]);
-            return;
-        }
-        
-        [statusText appendFormat:@"%@(%@/%d)    ", [self.currentGame.position sanForMovesArray:moves html:NO breakLines:NO num:(int) self.currentGame.currentMoveIndex / 2 + 1], self.engine.currentInfo[@"currmovenumber"], numLegalMoves];
-    }
-    
-    // The speed
-    [statusText appendFormat:@"%@/s", [SFMFormatter nodesAsText:latestPV[@"nps"]]];
-    
-    self.engineStatusTextField.stringValue = [statusText copy];
-}
-
-- (NSString *)scoreForPV:(NSDictionary *)pv
-{
-    BOOL isLowerBound = pv[@"lowerbound"] != nil;
-    BOOL isUpperBound = pv[@"upperbound"] != nil;
-    
-    // The score
-    if (pv[@"cp"]) {
-        int score = [pv[@"cp"] intValue];
-        
-        NSString *theScore = [SFMFormatter scoreAsText:score isMate:NO isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
-        
-        return theScore;
-        
-    } else if (pv[@"mate"]) {
-        int score = [pv[@"mate"] intValue];
-        
-        NSString *theScore = [SFMFormatter scoreAsText:score isMate:YES isWhiteToMove:self.currentGame.position.sideToMove == WHITE isLowerBound:isLowerBound isUpperBound:isUpperBound];
-        
-        return theScore;
-    } else {
-        return @""; // this shouldn't be reached anyway
-    }
-}
-
-/*
- Adds an analysis line to the text view. Specifically, adds the PV as SAN and search info.
- */
-- (void)addAnalysisLine:(NSNotification *)notification
-{
-    if (!self.engine.isAnalyzing) {
-        // The engine isn't analyzing, so the view shouldn't be updated
-        return;
-    }
-    // Also update the status text
-    [self updateEngineStatus:nil];
-    
-    NSDictionary *data = [self.engine.lineHistory lastObject];
-    
-    // Get the attributed string out of the view
-    NSMutableAttributedString *viewText = [self.lineTextView.attributedString mutableCopy];
-    [viewText addAttribute:NSForegroundColorAttributeName value:[NSColor grayColor] range:NSMakeRange(0, viewText.length)];
-    
-    NSAttributedString *pvBold = [[NSAttributedString alloc] initWithString:[self prettyPV:data[@"pv"]] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
-    
-    [viewText appendAttributedString:pvBold];
-    [viewText appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-    
-    // Also we want to add an arrow to the board
-    self.boardView.arrows = @[[self firstMoveFromPV:data[@"pv"]]];
-    
-    // Second line of text
-    NSString *score = [self scoreForPV:data];
-    NSString *depth = [NSString stringWithFormat:@"%d/%d", [data[@"depth"] intValue], [data[@"seldepth"] intValue]];
-    NSString *time = [SFMFormatter millisecondsToClock:[data[@"time"] longLongValue]];
-    NSString *nodes = [SFMFormatter nodesAsText:data[@"nodes"]];
-    NSString *secondLine = [NSString stringWithFormat:@"    %@    Depth: %@    %@    %@\n\n",
-                             score,
-                             depth,
-                             time,
-                             nodes];
-    NSAttributedString *secondLineFormatted = [[NSAttributedString alloc] initWithString:secondLine attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
-    [viewText appendAttributedString:secondLineFormatted];
-    
-    [self.lineTextView.textStorage setAttributedString:[viewText copy]];
-    
-    [self.lineTextView scrollToEndOfDocument:self];
-}
-
-- (void)receivedBestMove:(NSNotification *)notification
-{
-    if (self.wantsAnalysis) {
-        [self sendPositionToEngine];
-    }
-}
 
 
 - (NSString *)prettyPV:(NSString *)pv
@@ -390,10 +298,6 @@
 #pragma mark - SFMBoardViewDelegate
 
 - (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move {
-    if (self.engine.isAnalyzing) {
-        [self stopAnalysis];
-        self.wantsAnalysis = YES;
-    }
     [self doMoveWithOverwritePrompt:move];
     
 }
@@ -434,7 +338,7 @@
     
     [self checkIfGameOver];
     [self.document updateChangeCount:NSChangeDone];
-    [self syncModelWithView];
+    [self syncToViewsAndEngine];
 }
 
 #pragma mark - SFMBoardViewDataSource
@@ -490,16 +394,6 @@
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
 {
     [self loadGameAtIndex:(int) self.gameListView.selectedRow];
-}
-
-#pragma mark - Teardown
-- (void)windowWillClose:(NSNotification *)notification
-{
-    [self subscribeToNotifications:NO];
-}
-- (void)dealloc
-{
-    self.engine = nil;
 }
 
 @end

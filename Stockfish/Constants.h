@@ -25,11 +25,7 @@
 #define FONT_SIZE 12
 
 // Notifications
-#define ENGINE_NAME_AVAILABLE_NOTIFICATION @"EngNameAvail"
-#define ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION @"EngNewLineAvail"
-#define ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION @"EngineCurrMoveChanged"
 #define SETTINGS_HAVE_CHANGED_NOTIFICATION @"SettingsChanged"
-#define ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION @"EngBestMoveAvail"
 
 // For the settings
 #define ENGINE_SETTINGS_KEY @"Engine Settings"

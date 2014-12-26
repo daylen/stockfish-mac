@@ -57,7 +57,7 @@
 
 + (NSArray *)tokenizeMoveText:(NSString *)moveText
 {
-// Strip the period, space, and new line characters
+    // Strip the period, space, and new line characters
     NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
     [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];

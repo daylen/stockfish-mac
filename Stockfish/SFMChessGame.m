@@ -224,4 +224,15 @@
     return [str copy];
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    SFMChessGame *copy = [[SFMChessGame alloc] init];
+    copy.tags = [self.tags copy];
+    copy.position = [self.position copy];
+    copy.currentMoveIndex = self.currentMoveIndex;
+    copy.moves = [self.moves mutableCopy];
+    return copy;
+}
+
 @end

@@ -503,9 +503,13 @@
             SFMPieceView *view = [[SFMPieceView alloc] init];
             view.piece = key.integerValue;
             newPieceViews[square] = view;
+            view.alphaValue = 0;
+            [self addSubview:view];
+            // Why not just add the view in the animation context? Because then that would animate
+            // drawRect, and we don't want that.
             [NSAnimationContext beginGrouping];
             [[NSAnimationContext currentContext] setDuration:kBoardMoveAnimationDuration];
-            [[self animator] addSubview:view];
+            [view.animator setAlphaValue:1];
             [NSAnimationContext endGrouping];
         }];
     }];

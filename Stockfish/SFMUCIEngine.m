@@ -9,6 +9,17 @@
 #import "SFMUCIEngine.h"
 #import "Constants.h"
 #import "DYUserDefaults.h"
+#import "NSString+StringUtils.h"
+#import "SFMPosition.h"
+#import "SFMChessGame.h"
+#import "SFMUCILine.h"
+#import "NSArray+ArrayUtils.h"
+
+typedef NS_ENUM(NSInteger, SFMCPURating) {
+    SFMCPURating64Bit,
+    SFMCPURatingSSE42,
+    SFMCPURatingBMI2
+};
 
 @interface SFMUCIEngine()
 
@@ -16,29 +27,85 @@
 @property NSFileHandle *readHandle;
 @property NSFileHandle *writeHandle;
 
+@property (readwrite, nonatomic) SFMUCILine *latestLine;
+
+@property dispatch_group_t analysisGroup;
+
 @end
 
 @implementation SFMUCIEngine
 
+#pragma mark - Setters
+
+- (void)setIsAnalyzing:(BOOL)isAnalyzing {
+    if (_isAnalyzing != isAnalyzing) {
+        _isAnalyzing = isAnalyzing;
+        
+        if (isAnalyzing) {
+            NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
+            [self sendCommandToEngine:[self.gameToAnalyze uciString]];
+            dispatch_group_enter(_analysisGroup);
+            [self sendCommandToEngine:@"go infinite"];
+        } else {
+            [self sendCommandToEngine:@"stop"];
+        }
+    }
+}
+
+- (void)setGameToAnalyze:(SFMChessGame *)gameToAnalyze {
+    if (self.isAnalyzing) {
+        self.isAnalyzing = NO;
+        self.latestLine = nil;
+        NSLog(@"Engine setter called");
+        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSLog(@"Got best move! Now starting analysis again.");
+            _gameToAnalyze = gameToAnalyze;
+            self.isAnalyzing = YES;
+        });
+
+    } else {
+        _gameToAnalyze = gameToAnalyze;
+    }
+}
+
+#pragma mark - Init
+
+- (instancetype)initStockfish
+{
+    SFMCPURating cpuRating = [SFMUCIEngine cpuRating];
+    if (cpuRating == SFMCPURatingBMI2) {
+        return [self initWithPathToEngine:[[NSBundle mainBundle]
+                                           pathForResource:@"stockfish-bmi2" ofType:@""]];
+    } else if (cpuRating == SFMCPURatingSSE42) {
+        return [self initWithPathToEngine:[[NSBundle mainBundle]
+                                           pathForResource:@"stockfish-sse42" ofType:@""]];
+    } else {
+        return [self initWithPathToEngine:[[NSBundle mainBundle]
+                                           pathForResource:@"stockfish-64" ofType:@""]];
+    }
+}
+
 #pragma mark - Engine communication
+
+/*!
+ Writes the string to the engine.
+ 
+ @param string A string that does NOT contain a new line character.
+ */
 - (void)sendCommandToEngine:(NSString *)string
 {
-    assert([string rangeOfString:@"\n"].location == NSNotFound);
+    NSAssert([string sfm_containsString:@"\n"] == NO, @"UCI command contains new line");
     NSString *strWithNewLine = [NSString stringWithFormat:@"%@\n", string];
     [self.writeHandle writeData:[strWithNewLine dataUsingEncoding:NSUTF8StringEncoding]];
-}
-- (NSString *)outputFromEngine
-{
-    return [[NSString alloc] initWithData:[self.readHandle availableData]
-                                 encoding:NSUTF8StringEncoding];
 }
 
 #pragma mark - Handling notifications
 
 - (void)dataIsAvailable:(NSNotification *)notification
 {
-    NSString *output = [self outputFromEngine];
-    if ([output rangeOfString:@"\n"].location != NSNotFound) {
+    NSString *output = [[NSString alloc] initWithData:[self.readHandle availableData]
+                                             encoding:NSUTF8StringEncoding];
+    if ([output sfm_containsString:@"\n"]) {
         NSArray *lines = [output componentsSeparatedByString:@"\n"];
         for (NSString *str in lines) {
             [self processEngineOutput:str];
@@ -50,72 +117,49 @@
     [self.readHandle waitForDataInBackgroundAndNotify];
 }
 
-/*
- Updates the properties on the class based on the output from the engine.
+/*!
+ Processes a single line of output from the engine.
+ 
+ @param str A string that does NOT contain a new line character.
  */
 - (void)processEngineOutput:(NSString *)str
 {
-    // What we want to look for
-    NSArray *statusKeywords = @[@"depth", @"currmove", @"currmovenumber"];
-    NSArray *lineKeywords = @[@"depth", @"seldepth", @"nps", @"cp", @"mate", @"time", @"nodes"];
+    NSAssert([str sfm_containsString:@"\n"] == NO, @"Cannot process output with new line");
     
-    // Tokenize the string
+    if ([str isEqualToString:@""]) {
+        return;
+    }
+    
     NSArray *tokens = [str componentsSeparatedByString:@" "];
     
-    if ([str rangeOfString:@"currmovenumber"].location != NSNotFound) {
-        // Process status update
-        for (int i = 0; i < [tokens count]; i++) {
-            for (NSString *keyword in statusKeywords) {
-                if ([tokens[i] isEqualToString:keyword]) {
-                    self.currentInfo[keyword] = tokens[++i];
-                }
-            }
-        }
+    if ([tokens containsObject:@"currmove"]) {
+        // Current move update
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_CURRENT_MOVE_CHANGED_NOTIFICATION object:self];
-    } else if ([str rangeOfString:@" pv "].location != NSNotFound) {
-        // Process a line of analysis
-        NSMutableDictionary *line = [[NSMutableDictionary alloc] init];
-        for (int i = 0; i < [tokens count]; i++) {
-            if ([tokens[i] isEqualToString:@" pv "]) {
-                break;
-            }
-            for (NSString *keyword in lineKeywords) {
-                if ([tokens[i] isEqualToString:keyword]) {
-                    line[keyword] = tokens[++i];
-                }
-            }
-        }
+        NSString *moveUci = [tokens sfm_objectAfterObject:@"currmove"];
+        SFMMove *move = [[self.gameToAnalyze.position movesArrayForUci:@[moveUci]] firstObject];
+        NSString *moveNumber = [tokens sfm_objectAfterObject:@"currmovenumber"];
+        NSString *depth = [tokens sfm_objectAfterObject:@"depth"];
         
-        // Process the PV
-        NSRange range = [str rangeOfString:@" pv "];
-        if (range.location == NSNotFound) {
-            return;
-        }
-        line[@"pv"] = [str substringFromIndex:range.location + range.length];
+        [self.delegate uciEngine:self
+            didGetNewCurrentMove:move
+                          number:[moveNumber integerValue]
+                           depth:[depth integerValue]];
         
-        // Check for upper/lower bounds
-        range = [str rangeOfString:@"upperbound"];
-        if (range.location != NSNotFound) {
-            line[@"upperbound"] = @YES;
-        }
-        range = [str rangeOfString:@"lowerbound"];
-        if (range.location != NSNotFound) {
-            line[@"lowerbound"] = @YES;
-        }
+    } else if ([tokens containsObject:@"pv"]) {
+        // New line
+        SFMUCILine *line = [[SFMUCILine alloc] initWithTokens:tokens position:self.gameToAnalyze.position];
+        self.latestLine = line;
+        [self.delegate uciEngine:self didGetNewLine:line];
         
-        // Add the line to the line history
-        [self.lineHistory addObject:[line copy]];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_NEW_LINE_AVAILABLE_NOTIFICATION object:self];
-    } else if ([str rangeOfString:@"bestmove"].location != NSNotFound) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_BEST_MOVE_AVAILABLE_NOTIFICATION object:self];
-    } else if ([str rangeOfString:@"id name"].location != NSNotFound) {
-        // Process name
-        NSRange range = [str rangeOfString:@"id name"];
-        self.engineName = [str substringFromIndex:range.length + 1];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:ENGINE_NAME_AVAILABLE_NOTIFICATION object:self];
+    } else if ([tokens containsObject:@"bestmove"]) {
+        // Stopped analysis
+        NSLog(@"Got best move! Leaving dispatch group");
+        dispatch_group_leave(_analysisGroup);
+    } else if ([tokens containsObject:@"id"] && [tokens containsObject:@"name"]) {
+        // Engine ID
+        [self.delegate uciEngine:self didGetEngineName:[str substringFromIndex:[str rangeOfString:@"id name"].length + 1]];
+    } else {
+        NSLog(@"Got unknown engine output: %@", str);
     }
 }
 
@@ -123,70 +167,40 @@
 
 - (instancetype)initWithPathToEngine:(NSString *)path
 {
-    self = [super init];
-    if (self) {
-        // Init stuff
-        self.engineTask = [[NSTask alloc] init];
+    if (self = [super init]) {
+        _engineTask = [[NSTask alloc] init];
         NSPipe *inPipe = [[NSPipe alloc] init];
         NSPipe *outPipe = [[NSPipe alloc] init];
-        self.currentInfo = [[NSMutableDictionary alloc] init];
-        self.lineHistory = [[NSMutableArray alloc] init];
-        self.isAnalyzing = NO;
         
-        // Set properties on task
-        self.engineTask.launchPath = path;
-        self.engineTask.standardInput = inPipe;
-        self.engineTask.standardOutput = outPipe;
+        _engineTask.launchPath = path;
+        _engineTask.standardInput = inPipe;
+        _engineTask.standardOutput = outPipe;
         
-        // More init
-        self.readHandle = [outPipe fileHandleForReading];
-        self.writeHandle = [inPipe fileHandleForWriting];
+        _readHandle = [outPipe fileHandleForReading];
+        _writeHandle = [inPipe fileHandleForWriting];
         
-        // Set up notifications
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setThreadsAndHashFromPrefs:) name:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applyPreferencesToEngine:) name:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
-        [self.readHandle waitForDataInBackgroundAndNotify];
+        [_readHandle waitForDataInBackgroundAndNotify];
         
-        // Launch task
-        [self.engineTask launch];
+        [_engineTask launch];
         
-        // Set options on engine
+        _isAnalyzing = NO;
+        _gameToAnalyze = nil;
+        _analysisGroup = dispatch_group_create();
+        
         [self sendCommandToEngine:@"uci"];
-        [self setThreadsAndHashFromPrefs:nil];
-        
+        [self applyPreferencesToEngine:nil];
     }
     return self;
 }
 
-/*
- Detects whether the CPU supports POPCNT and loads the appropriate version
- of Stockfish.
+/*!
+ Returns the CPU rating of this computer.
+ 
+ @return The CPU rating.
  */
-- (instancetype)initStockfish
-{
-    int cpuRating = [SFMUCIEngine cpuRating];
-    
-    if (cpuRating == 2) {
-        return [self initWithPathToEngine:[[NSBundle mainBundle]
-                                           pathForResource:@"stockfish-bmi2" ofType:@""]];
-        
-    } else if (cpuRating == 1) {
-        return [self initWithPathToEngine:[[NSBundle mainBundle]
-                                           pathForResource:@"stockfish-sse42" ofType:@""]];
-        
-    } else {
-        return [self initWithPathToEngine:[[NSBundle mainBundle]
-                                           pathForResource:@"stockfish-64" ofType:@""]];
-        
-    }
-}
-
-/*
- 0 - basic CPU
- 1 - has POPCNT
- 2 - has POPCNT and BMI2
- */
-+ (int)cpuRating
++ (SFMCPURating)cpuRating
 {
     NSPipe *outputPipe = [[NSPipe alloc] init];
     NSTask *task = [[NSTask alloc] init];
@@ -197,42 +211,27 @@
     [task waitUntilExit];
     NSData *data = [[outputPipe fileHandleForReading] availableData];
     NSString *cpuCapabilities = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    int cpuRating = 0;
-    if ([cpuCapabilities rangeOfString:@"POPCNT"].location != NSNotFound) {
-        cpuRating++;
+    if ([cpuCapabilities sfm_containsString:@"BMI2"]) {
+        return SFMCPURatingBMI2;
+    } else if ([cpuCapabilities sfm_containsString:@"POPCNT"]) {
+        return SFMCPURatingSSE42;
     }
-    if ([cpuCapabilities rangeOfString:@"BMI2"].location != NSNotFound) {
-        cpuRating++;
-    }
-    return cpuRating;
-}
-
-#pragma mark - Using the engine
-
-- (void)startInfiniteAnalysis
-{
-    self.isAnalyzing = YES;
-    self.currentInfo = [NSMutableDictionary new];
-    self.lineHistory = [NSMutableArray new];
-    [self sendCommandToEngine:@"go infinite"];
-}
-
-- (void)stopSearch
-{
-    self.isAnalyzing = NO;
-    [self sendCommandToEngine:@"stop"];
+    return SFMCPURating64Bit;
 }
 
 #pragma mark - Settings
+
+// TODO improve settings
 
 - (void)setValue:(NSString *)value forOption:(NSString *)key
 {
     NSString *str = [NSString stringWithFormat:@"setoption name %@ value %@", key, value];
     [self sendCommandToEngine:str];
 }
-- (void)setThreadsAndHashFromPrefs:(NSNotification *)notification
+- (void)applyPreferencesToEngine:(NSNotification *)notification
 {
     if (self.isAnalyzing) {
+        NSLog(@"Could not apply preferences because engine is analyzing");
         return;
     }
     [self setValue:[NSString stringWithFormat:@"%d", [(NSNumber *) [DYUserDefaults getSettingForKey:NUM_THREADS_SETTING] intValue]] forOption:@"Threads"];
@@ -243,10 +242,13 @@
 
 - (void)dealloc
 {
+    if (self.isAnalyzing) {
+        // Apparently if you don't balance out your dispatch calls, you'll get very weird crashes
+        dispatch_group_leave(_analysisGroup);
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self stopSearch];
-    [self sendCommandToEngine:@"quit"];
-
+    [self.engineTask interrupt];
+    [self.engineTask terminate]; // Just for good measure
 }
 
 @end
