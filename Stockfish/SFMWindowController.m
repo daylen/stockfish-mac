@@ -30,7 +30,7 @@
 @property int currentGameIndex;
 @property SFMChessGame *currentGame;
 @property SFMUCIEngine *engine;
-@property BOOL wantsAnalysis;
+@property BOOL wantsAnalysis; // TODO deprecate
 
 @end
 
@@ -124,11 +124,10 @@
     if (self.engine.isAnalyzing) {
         [self stopAnalysis];
         self.wantsAnalysis = YES;
+        
         NSString *pv = [self.engine.lineHistory lastObject][@"pv"];
         SFMMove *m = [self firstMoveFromPV:pv];
-        [self.currentGame doMove:m error:nil];
-        [self checkIfGameOver];
-        [self syncModelWithView];
+        [self doMoveWithOverwritePrompt:m];
     }
 }
 #pragma mark - Helper methods
@@ -395,18 +394,47 @@
         [self stopAnalysis];
         self.wantsAnalysis = YES;
     }
+    [self doMoveWithOverwritePrompt:move];
     
+}
+
+- (void)doMoveWithOverwritePrompt:(SFMMove *)move {
+    if (![self.currentGame atEnd]) {
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Overwrite game history?" defaultButton:@"Overwrite" alternateButton:@"Cancel" otherButton:@"Duplicate" informativeTextWithFormat:@"You are not at the end of the game. Click Overwrite to replace the remaining game history with this move.\n\nClick Duplicate to make a copy of this game."];
+        [alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode) {
+            switch (returnCode) {
+                case 1:
+                    // Overwrite
+                    [self.currentGame deleteMovesFromPly:self.currentGame.currentMoveIndex];
+                    [self doMoveForced:move];
+                    break;
+                case 0:
+                    // Cancel
+                    break;
+                case -1:
+                    // Duplicate
+                    [self.document duplicateDocument:nil];
+                    // TODO
+                    break;
+            }
+        }];
+    } else {
+        [self doMoveForced:move];
+    }
+}
+
+- (void)doMoveForced:(SFMMove *)move {
     NSError *error = nil;
+
     [self.currentGame doMove:move error:&error];
     if (error) {
         NSLog(@"%@", [error description]);
         return;
     }
     
-    self.boardView.position = [self.currentGame.position copy];
     [self checkIfGameOver];
     [self.document updateChangeCount:NSChangeDone];
-    [self updateNotationView];
+    [self syncModelWithView];
 }
 
 #pragma mark - SFMBoardViewDataSource

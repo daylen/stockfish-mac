@@ -47,10 +47,24 @@
 #pragma mark - State Modification
 
 /*!
- @param move The move to perform.
+ @param move
  @param error
+ @return YES if the move was done.
  */
-- (void)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error;
+- (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error;
+
+/*!
+ @param moves Array of moves.
+ @param error
+ @return YES if the moves were done.
+ */
+- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error;
+
+/*!
+ @param index
+ @return An array of deleted moves.
+ */
+- (NSArray *)deleteMovesFromPly:(NSInteger)index;
 
 /*!
  Set the result of the game.

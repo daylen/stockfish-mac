@@ -82,18 +82,42 @@
 
 #pragma mark - State Modification
 
-- (void)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
+- (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
+    
+    if (![self atEnd]) {
+        *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:NOT_AT_END_CODE userInfo:nil];
+        return NO;
+    }
+    
     NSError *e = nil;
     [self.position doMove:move error:&e];
     if (e) {
         *error = e;
-        return;
+        return NO;
     }
-    if (![self atEnd]) {
-        [self.moves removeObjectsInRange:NSMakeRange(self.currentMoveIndex, [self.moves count] - self.currentMoveIndex)];
-    }
+    
     self.currentMoveIndex++;
     [self.moves addObject:move];
+    return YES;
+}
+
+- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error {
+    NSError *e = nil;
+    for (SFMMove *move in moves) {
+        [self doMove:move error:&e];
+        if (e) {
+            *error = e;
+            return NO;
+        }
+    }
+    return YES;
+}
+
+- (NSArray *)deleteMovesFromPly:(NSInteger)index {
+    NSArray *toDelete = [self.moves subarrayWithRange:NSMakeRange(index, [self.moves count] - index)];
+    [self.moves removeObjectsInRange:NSMakeRange(index, [self.moves count] - index)];
+    [self goToEnd];
+    return toDelete;
 }
 
 - (void)setResult:(NSString *)result {
