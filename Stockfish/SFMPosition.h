@@ -22,7 +22,7 @@
  
  @param fen
  */
-- (instancetype)initWithFen:(NSString *)fen NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithFen:(NSString *)fen;
 
 /*!
  @return YES if the FEN is valid.

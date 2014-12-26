@@ -19,7 +19,7 @@
 @property BOOL isCastle;
 @property BOOL isEp;
 
-- (instancetype)initWithFrom:(SFMSquare)from to:(SFMSquare)to NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWithFrom:(SFMSquare)from to:(SFMSquare)to promotion:(SFMPieceType)promotion NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithFrom:(SFMSquare)from to:(SFMSquare)to;
+- (instancetype)initWithFrom:(SFMSquare)from to:(SFMSquare)to promotion:(SFMPieceType)promotion;
 
 @end

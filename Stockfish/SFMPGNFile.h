@@ -17,13 +17,13 @@
 /*!
  Create a PGN with one game.
  */
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)init;
 
 /*!
  Create the given PGN.
  @param str
  */
-- (instancetype)initWithString:(NSString *)str NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithString:(NSString *)str;
 
 #pragma mark - Export
 

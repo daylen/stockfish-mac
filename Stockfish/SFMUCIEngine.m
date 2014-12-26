@@ -56,9 +56,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
     if (self.isAnalyzing) {
         self.isAnalyzing = NO;
         self.latestLine = nil;
-        NSLog(@"Engine setter called");
         dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSLog(@"Got best move! Now starting analysis again.");
             _gameToAnalyze = gameToAnalyze;
             self.isAnalyzing = YES;
         });
@@ -153,7 +151,6 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
         
     } else if ([tokens containsObject:@"bestmove"]) {
         // Stopped analysis
-        NSLog(@"Got best move! Leaving dispatch group");
         dispatch_group_leave(_analysisGroup);
     } else if ([tokens containsObject:@"id"] && [tokens containsObject:@"name"]) {
         // Engine ID
