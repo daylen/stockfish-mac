@@ -7,47 +7,16 @@
 //
 
 #import "SFMHardwareDetector.h"
-#import "Constants.h"
 
 @implementation SFMHardwareDetector
 
-#pragma mark - Private
-+ (int)cpuCores
++ (int)maxThreads
 {
     return (int) [[NSProcessInfo processInfo] activeProcessorCount];
 }
-+ (int)totalMemory
++ (long)maxMemory
 {
-    return (int) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024);
-}
-+ (int)maximumMemoryPower:(int)totalMemory
-{
-    int power = (int) log2(totalMemory);
-    if (power == log2(totalMemory)) {
-        power--;
-    }
-    return MIN(MAX_MEMORY_POWER, power);
-}
-
-#pragma mark - Public
-
-+ (int)minimumSupportedThreads
-{
-    return MIN_SUPPORTED_THREADS;
-}
-+ (int)minimumMemoryPower
-{
-    return MIN_MEMORY_POWER;
-}
-
-+ (int)maximumSupportedThreads
-{
-    return [self cpuCores];
-}
-
-+ (int)maximumMemoryPower
-{
-    return [self maximumMemoryPower:[self totalMemory]];
+    return (long) ([[NSProcessInfo processInfo] physicalMemory] / 1024 / 1024);
 }
 
 @end

@@ -14,8 +14,12 @@
 @protocol SFMUCIEngineDelegate <NSObject>
 
 - (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name;
-- (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth;
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move
+           number:(NSInteger)moveNumber depth:(NSInteger)depth;
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(SFMUCILine *)line;
+
+@optional
+- (void)uciEngine:(SFMUCIEngine *)engine didGetOptions:(NSArray* /* of SFMUCIOption */)options;
 
 @end
 
@@ -28,8 +32,9 @@
 
 @property (readonly, nonatomic) SFMUCILine *latestLine;
 
-// TODO uci options
-
 - (instancetype)initStockfish;
+- (instancetype)initOptionsProbe;
+
++ (int32_t)instancesAnalyzing;
 
 @end

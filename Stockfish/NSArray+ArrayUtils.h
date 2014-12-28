@@ -8,9 +8,10 @@
 
 @interface NSArray (ArrayUtils)
 
-
 - (id)sfm_objectAfterObject:(id)object;
 
 - (NSArray *)sfm_objectsAfterObject:(id)object;
+
+- (NSArray *)sfm_objectsAfterObject:(id)a beforeObject:(id)b;
 
 @end

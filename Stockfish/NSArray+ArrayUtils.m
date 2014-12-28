@@ -26,4 +26,13 @@
     return [self subarrayWithRange:NSMakeRange(index + 1, [self count] - (index + 1))];
 }
 
+- (NSArray *)sfm_objectsAfterObject:(id)a beforeObject:(id)b {
+    NSInteger idxA = [self indexOfObject:a];
+    NSInteger idxB = [self indexOfObject:b];
+    if (idxA == NSNotFound || idxB == NSNotFound) {
+        return nil;
+    }
+    return [self subarrayWithRange:NSMakeRange(idxA + 1, idxB - idxA - 1)];
+}
+
 @end

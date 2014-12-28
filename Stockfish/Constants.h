@@ -27,15 +27,4 @@
 // Notifications
 #define SETTINGS_HAVE_CHANGED_NOTIFICATION @"SettingsChanged"
 
-// For the settings
-#define ENGINE_SETTINGS_KEY @"Engine Settings"
-#define NUM_THREADS_SETTING @"Threads2"
-#define HASH_SIZE_SETTING @"Memory2"
-
-// For the hardware detector
-// TODO remove min/max constants
-#define MIN_SUPPORTED_THREADS 1
-#define MIN_MEMORY_POWER 5
-#define MAX_MEMORY_POWER 14
-
 #endif

@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import "SFMUCIEngine.h"
 
-@interface SFMPreferencesWindowController : NSWindowController <NSTextFieldDelegate>
+@interface SFMPreferencesWindowController : NSWindowController <NSTextFieldDelegate, SFMUCIEngineDelegate, NSWindowDelegate>
 
 @end
