@@ -61,4 +61,10 @@
     [self.textField setIntegerValue:currValue];
 }
 
+- (void)setEnabled:(BOOL)enabled {
+    _enabled = enabled;
+    [self.slider setEnabled:enabled];
+    [self.textField setEnabled:enabled];
+}
+
 @end

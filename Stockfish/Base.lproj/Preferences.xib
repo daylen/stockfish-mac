@@ -7,9 +7,9 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMPreferencesWindowController">
             <connections>
-                <outlet property="chooseFolderButton" destination="3p8-xF-VYu" id="MCO-vJ-Oeu"/>
                 <outlet property="contemptCell" destination="DSA-DT-rzD" id="bQo-v8-21w"/>
                 <outlet property="hashCell" destination="eUt-OZ-O56" id="c25-Yi-bSV"/>
+                <outlet property="recommendedSettingsButton" destination="3p8-xF-VYu" id="sHs-gj-Osf"/>
                 <outlet property="skillCell" destination="MNQ-R8-9m6" id="2JF-lj-CYs"/>
                 <outlet property="threadsCell" destination="Rz3-9b-duP" id="YcH-Gg-UtY"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="aEU-LR-8KM"/>

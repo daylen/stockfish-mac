@@ -318,7 +318,6 @@
                 case -1:
                     // Duplicate
                     [self.document duplicateDocument:nil];
-                    // TODO
                     break;
             }
         }];

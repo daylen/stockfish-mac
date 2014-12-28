@@ -20,7 +20,7 @@
 @property (weak) IBOutlet SFMPreferenceCellView *hashCell;
 @property (weak) IBOutlet SFMPreferenceCellView *contemptCell;
 @property (weak) IBOutlet SFMPreferenceCellView *skillCell;
-@property (weak) IBOutlet NSButton *chooseFolderButton;
+@property (weak) IBOutlet NSButton *recommendedSettingsButton;
 
 @property (nonatomic) SFMUCIEngine *optionsProbe;
 
@@ -39,6 +39,7 @@
     self.hashCell.hidden = YES;
     self.contemptCell.hidden = YES;
     self.skillCell.hidden = YES;
+    self.recommendedSettingsButton.hidden = YES;
 }
 
 - (void)windowDidLoad {
@@ -47,10 +48,13 @@
     
     // Check if infinite analysis is on
     if ([SFMUCIEngine instancesAnalyzing] != 0) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot change preferences" defaultButton:@"Close" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
-        [alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode) {
-            [self.window close];
-        }];
+        self.threadsCell.enabled = NO;
+        self.hashCell.enabled = NO;
+        self.contemptCell.enabled = NO;
+        self.skillCell.enabled = NO;
+        self.recommendedSettingsButton.enabled = NO;
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot change preferences" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
     }
     
     self.optionsProbe = [[SFMUCIEngine alloc] initOptionsProbe];
@@ -113,6 +117,7 @@
             }
         }
     }
+    self.recommendedSettingsButton.hidden = NO;
 }
 
 

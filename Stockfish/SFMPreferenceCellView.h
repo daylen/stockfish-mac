@@ -20,5 +20,6 @@
 @property (assign, nonatomic) NSInteger min;
 @property (assign, nonatomic) NSInteger max;
 @property (assign, nonatomic) NSInteger currValue;
+@property (assign, nonatomic) BOOL enabled;
 
 @end
