@@ -37,6 +37,7 @@
 @implementation SFMWindowController
 
 #pragma mark - Target/Action
+
 - (IBAction)copyFenString:(id)sender
 {
     NSMutableString *fen = [self.currentGame.position.fen mutableCopy];
@@ -90,9 +91,6 @@
 - (IBAction)lastMove:(id)sender {
     [self.currentGame goToEnd];
     [self syncToViewsAndEngine];
-}
-- (IBAction)undoLastMove:(id)sender {
-    // TODO real undo support
 }
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
@@ -184,11 +182,12 @@
 {
     self.currentGameIndex = index;
     self.currentGame = self.pgnFile.games[index];
+    self.currentGame.delegate = self;
     NSError *error = nil;
     [self.currentGame parseMoveText:&error];
     if (error) {
         [self close];
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [error description]];
+        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Stockfish could not parse the move text. Edit your PGN file and try again."];
         [alert runModal];
     }
     
@@ -295,11 +294,22 @@
     return [[self.currentGame.position movesArrayForUci:[pv componentsSeparatedByString:@" "]] firstObject];
 }
 
+#pragma mark - SFMChessGameDelegate
+
+- (void)chessGameStateDidChange:(SFMChessGame *)chessGame {
+    [self syncToViewsAndEngine];
+}
+
+#pragma mark - NSWindowDelegate
+
+- (NSUndoManager *)windowWillReturnUndoManager:(NSWindow *)window {
+    return self.currentGame.undoManager;
+}
+
 #pragma mark - SFMBoardViewDelegate
 
 - (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move {
     [self doMoveWithOverwritePrompt:move];
-    
 }
 
 - (void)doMoveWithOverwritePrompt:(SFMMove *)move {
@@ -309,7 +319,7 @@
             switch (returnCode) {
                 case 1:
                     // Overwrite
-                    [self.currentGame deleteMovesFromPly:self.currentGame.currentMoveIndex];
+                    [self.currentGame deleteMovesFromPly:@(self.currentGame.currentMoveIndex)];
                     [self doMoveForced:move];
                     break;
                 case 0:

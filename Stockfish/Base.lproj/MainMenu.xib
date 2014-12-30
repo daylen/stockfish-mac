@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="14A329r" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6254" systemVersion="14C81f" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment defaultVersion="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6254"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMApplication"/>
@@ -117,7 +117,12 @@
                         <items>
                             <menuItem title="Undo" keyEquivalent="z" id="5ci-kw-TuF">
                                 <connections>
-                                    <action selector="undoLastMove:" target="-1" id="sGd-qq-xhV"/>
+                                    <action selector="undo:" target="-1" id="Qqx-dG-bUW"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Redo" keyEquivalent="Z" id="AG5-uF-MgE">
+                                <connections>
+                                    <action selector="redo:" target="-1" id="sxc-px-OiJ"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="ocq-4a-j2L"/>

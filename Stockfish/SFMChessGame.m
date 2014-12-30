@@ -38,6 +38,7 @@
         _moves = [[NSMutableArray alloc] init];
         _currentMoveIndex = 0;
         _position = [[SFMPosition alloc] init];
+        _undoManager = [[NSUndoManager alloc] init];
     }
     return self;
 }
@@ -58,6 +59,7 @@
         _moveText = moveText;
         _currentMoveIndex = 0;
         _position = [[SFMPosition alloc] initWithFen:_tags[@"FEN"] ? _tags[@"FEN"] : FEN_START_POSITION];
+        _undoManager = [[NSUndoManager alloc] init];
     }
     return self;
 }
@@ -83,6 +85,9 @@
 #pragma mark - State Modification
 
 - (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
+    NSAssert(move, @"Move is nil");
+    
+    [self.undoManager registerUndoWithTarget:self selector:@selector(deleteMovesFromPly:) object:@(self.currentMoveIndex)];
     
     if (![self atEnd]) {
         *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:NOT_AT_END_CODE userInfo:nil];
@@ -98,10 +103,16 @@
     
     self.currentMoveIndex++;
     [self.moves addObject:move];
+    
+    [self.delegate chessGameStateDidChange:self];
     return YES;
 }
 
 - (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error {
+    NSAssert(moves && [moves count] > 0, @"Moves array is nil or has nothing");
+    
+    [self.undoManager registerUndoWithTarget:self selector:@selector(deleteMovesFromPly:) object:@(self.currentMoveIndex)];
+    
     NSError *e = nil;
     for (SFMMove *move in moves) {
         [self doMove:move error:&e];
@@ -110,13 +121,23 @@
             return NO;
         }
     }
+    
+    [self.delegate chessGameStateDidChange:self];
     return YES;
 }
 
-- (NSArray *)deleteMovesFromPly:(NSInteger)index {
+- (NSArray *)deleteMovesFromPly:(NSNumber *)idx {
+    NSUInteger index = [idx integerValue];
     NSArray *toDelete = [self.moves subarrayWithRange:NSMakeRange(index, [self.moves count] - index)];
+    if (!toDelete || [toDelete count] == 0) {
+        return nil;
+    }
+    
+    [[self.undoManager prepareWithInvocationTarget:self] doMoves:toDelete error:nil];
     [self.moves removeObjectsInRange:NSMakeRange(index, [self.moves count] - index)];
     [self goToEnd];
+    
+    [self.delegate chessGameStateDidChange:self];
     return toDelete;
 }
 

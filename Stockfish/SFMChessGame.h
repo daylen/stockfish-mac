@@ -9,6 +9,14 @@
 #import "SFMPosition.h"
 #import "SFMMove.h"
 
+@class SFMChessGame;
+
+@protocol SFMChessGameDelegate <NSObject>
+
+- (void)chessGameStateDidChange:(SFMChessGame *)chessGame;
+
+@end
+
 /*!
  SFMChessGame contains PGN metadata and move history for a game.
  */
@@ -16,9 +24,12 @@
 
 #pragma mark - Properties
 
+@property (nonatomic) id<SFMChessGameDelegate> delegate;
+
 @property (nonatomic) NSDictionary *tags;
 @property (nonatomic, readonly) SFMPosition *position;
 @property (readonly) NSUInteger currentMoveIndex;
+@property (nonatomic) NSUndoManager *undoManager;
 
 #pragma mark - Init
 
@@ -64,7 +75,7 @@
  @param index
  @return An array of deleted moves.
  */
-- (NSArray *)deleteMovesFromPly:(NSInteger)index;
+- (NSArray *)deleteMovesFromPly:(NSNumber *)index;
 
 /*!
  Set the result of the game.

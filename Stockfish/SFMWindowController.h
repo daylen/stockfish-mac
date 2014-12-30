@@ -9,8 +9,9 @@
 #import "SFMPGNFile.h"
 #import "SFMBoardView.h"
 #import "SFMUCIEngine.h"
+#import "SFMChessGame.h"
 
-@interface SFMWindowController : NSWindowController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate, SFMBoardViewDataSource, SFMBoardViewDelegate, SFMUCIEngineDelegate>
+@interface SFMWindowController : NSWindowController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate, SFMBoardViewDataSource, SFMBoardViewDelegate, SFMUCIEngineDelegate, SFMChessGameDelegate>
 
 @property SFMPGNFile *pgnFile;
 
