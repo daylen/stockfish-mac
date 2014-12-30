@@ -28,6 +28,8 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 @property NSFileHandle *readHandle;
 @property NSFileHandle *writeHandle;
 
+@property (nonatomic) NSURL *bookmarkUrl;
+
 @property (readwrite, nonatomic) SFMUCILine *latestLine;
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
@@ -50,9 +52,11 @@ static volatile int32_t instancesAnalyzing = 0;
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);
             OSAtomicIncrement32(&instancesAnalyzing);
+            [self.bookmarkUrl startAccessingSecurityScopedResource];
             [self sendCommandToEngine:@"go infinite"];
         } else {
             [self sendCommandToEngine:@"stop"];
+            [self.bookmarkUrl stopAccessingSecurityScopedResource];
         }
     }
 }
@@ -267,7 +271,26 @@ static volatile int32_t instancesAnalyzing = 0;
     [self setUciOption:@"Hash" integerValue:[SFMUserDefaults hashValue]];
     [self setUciOption:@"Contempt" integerValue:[SFMUserDefaults contemptValue]];
     [self setUciOption:@"Skill Level" integerValue:[SFMUserDefaults skillLevelValue]];
-    [self setUciOption:@"SyzygyPath" stringValue:[SFMUserDefaults syzygyPath]];
+    
+    // Syzygy Path
+    if ([SFMUserDefaults sandboxBookmarkData]) {
+        NSError *error = nil;
+        BOOL dataIsStale;
+        self.bookmarkUrl = [NSURL URLByResolvingBookmarkData:[SFMUserDefaults sandboxBookmarkData] options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&dataIsStale error:&error];
+        if (error) {
+            NSLog(@"%@", [error description]);
+        } else if (dataIsStale) {
+            // Need to recreate
+            NSData *bookmarkData = [self.bookmarkUrl bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
+            if (error) {
+                NSLog(@"%@", [error description]);
+            } else {
+                [SFMUserDefaults setSandboxBookmarkData:bookmarkData];
+            }
+        } else {
+            [self setUciOption:@"SyzygyPath" stringValue:self.bookmarkUrl.absoluteString];
+        }
+    }
 }
 
 #pragma mark - Teardown
@@ -282,6 +305,7 @@ static volatile int32_t instancesAnalyzing = 0;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.engineTask interrupt];
     [self.engineTask terminate]; // Just for good measure
+    [self.bookmarkUrl stopAccessingSecurityScopedResource];
 }
 
 @end

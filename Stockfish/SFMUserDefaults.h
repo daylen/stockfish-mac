@@ -20,7 +20,7 @@
 + (NSInteger)skillLevelValue;
 + (void)setSkillLevelValue:(NSInteger)val;
 
-+ (NSString *)syzygyPath;
-+ (void)setSyzygyPath:(NSString *)str;
++ (NSData *)sandboxBookmarkData;
++ (void)setSandboxBookmarkData:(NSData *)data;
 
 @end

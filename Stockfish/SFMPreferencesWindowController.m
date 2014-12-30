@@ -20,6 +20,7 @@
 @property (weak) IBOutlet SFMPreferenceCellView *hashCell;
 @property (weak) IBOutlet SFMPreferenceCellView *contemptCell;
 @property (weak) IBOutlet SFMPreferenceCellView *skillCell;
+@property (weak) IBOutlet NSButton *chooseButton;
 @property (weak) IBOutlet NSButton *recommendedSettingsButton;
 
 @property (nonatomic) SFMUCIEngine *optionsProbe;
@@ -39,6 +40,7 @@
     self.hashCell.hidden = YES;
     self.contemptCell.hidden = YES;
     self.skillCell.hidden = YES;
+    self.chooseButton.hidden = YES;
     self.recommendedSettingsButton.hidden = YES;
 }
 
@@ -52,6 +54,7 @@
         self.hashCell.enabled = NO;
         self.contemptCell.enabled = NO;
         self.skillCell.enabled = NO;
+        self.chooseButton.enabled = NO;
         self.recommendedSettingsButton.enabled = NO;
         NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot change preferences" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
         [alert beginSheetModalForWindow:self.window completionHandler:nil];
@@ -69,11 +72,38 @@
     [SFMUserDefaults setSkillLevelValue:self.skillCell.currValue];
     [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
 }
+
+- (IBAction)clickedChooseFolder:(NSButton *)sender {
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    openPanel.canChooseFiles = NO;
+    openPanel.canChooseDirectories = YES;
+    openPanel.allowsMultipleSelection = NO;
+    [openPanel beginWithCompletionHandler:^(NSInteger result) {
+        if (result == NSModalResponseOK) {
+            NSURL *url = [openPanel URL];
+            NSError *error = nil;
+            NSData *bookmarkData = [url bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
+            if (error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSAlert alertWithMessageText:@"Uh-oh" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [error description]] beginSheetModalForWindow:self.window completionHandler:nil];
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSAlert alertWithMessageText:@"Saved!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Selected path to Syzygy tablebases was saved."] beginSheetModalForWindow:self.window completionHandler:nil];
+                });
+                [SFMUserDefaults setSandboxBookmarkData:bookmarkData];
+                [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
+            }
+        }
+    }];
+}
+
 - (IBAction)clickedUseRecommended:(NSButton *)sender {
     self.threadsCell.currValue = self.threadsCell.max / 2;
     self.hashCell.currValue = self.hashCell.max / 2;
     self.contemptCell.currValue = 0;
     self.skillCell.currValue = self.skillCell.max;
+    [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
 }
 
 - (void)applyLimits:(SFMUCIOption *)option toSlider:(SFMPreferenceCellView *)view currValue:(NSInteger)currValue {
@@ -117,6 +147,7 @@
             }
         }
     }
+    self.chooseButton.hidden = NO;
     self.recommendedSettingsButton.hidden = NO;
 }
 

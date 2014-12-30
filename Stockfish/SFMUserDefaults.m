@@ -12,7 +12,7 @@
 #define UCI_HASH @"uci_hash"
 #define UCI_CONTEMPT @"uci_contempt"
 #define UCI_SKILL_LEVEL @"uci_skill_level"
-#define UCI_SYZYGY @"uci_syzygy"
+#define SANDBOX_BOOKMARK_DATA @"sandbox_bookmark_data"
 
 @implementation SFMUserDefaults
 
@@ -52,14 +52,12 @@
 + (void)setSkillLevelValue:(NSInteger)val {
     [[NSUserDefaults standardUserDefaults] setInteger:val forKey:UCI_SKILL_LEVEL];
 }
-+ (NSString *)syzygyPath {
-    if (![[NSUserDefaults standardUserDefaults] stringForKey:UCI_SYZYGY]) {
-        [SFMUserDefaults setSyzygyPath:@""];
-    }
-    return [[NSUserDefaults standardUserDefaults] stringForKey:UCI_SYZYGY];
++ (NSData *)sandboxBookmarkData {
+    return [[NSUserDefaults standardUserDefaults] dataForKey:SANDBOX_BOOKMARK_DATA];
 }
-+ (void)setSyzygyPath:(NSString *)str {
-    [[NSUserDefaults standardUserDefaults] setObject:str forKey:UCI_SYZYGY];
+
++ (void)setSandboxBookmarkData:(NSData *)data {
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:SANDBOX_BOOKMARK_DATA];
 }
 
 @end

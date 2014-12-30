@@ -7,6 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SFMPreferencesWindowController">
             <connections>
+                <outlet property="chooseButton" destination="sYe-zw-x1o" id="erh-RG-hZh"/>
                 <outlet property="contemptCell" destination="DSA-DT-rzD" id="bQo-v8-21w"/>
                 <outlet property="hashCell" destination="eUt-OZ-O56" id="c25-Yi-bSV"/>
                 <outlet property="recommendedSettingsButton" destination="3p8-xF-VYu" id="sHs-gj-Osf"/>
@@ -20,38 +21,48 @@
         <window title="Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="196" y="500" width="480" height="261"/>
+            <rect key="contentRect" x="196" y="500" width="482" height="261"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="261"/>
+                <rect key="frame" x="0.0" y="0.0" width="482" height="261"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="Rz3-9b-duP" customClass="SFMPreferenceCellView">
-                        <rect key="frame" x="0.0" y="211" width="480" height="50"/>
+                        <rect key="frame" x="0.0" y="211" width="482" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="D43-Ez-MDr"/>
                         </constraints>
                     </customView>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="eUt-OZ-O56" customClass="SFMPreferenceCellView">
-                        <rect key="frame" x="0.0" y="161" width="480" height="50"/>
+                        <rect key="frame" x="0.0" y="161" width="482" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="Ah7-cX-BPj"/>
                         </constraints>
                     </customView>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="DSA-DT-rzD" customClass="SFMPreferenceCellView">
-                        <rect key="frame" x="0.0" y="111" width="480" height="50"/>
+                        <rect key="frame" x="0.0" y="111" width="482" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="Wq7-h6-TRm"/>
                         </constraints>
                     </customView>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="MNQ-R8-9m6" customClass="SFMPreferenceCellView">
-                        <rect key="frame" x="0.0" y="61" width="480" height="50"/>
+                        <rect key="frame" x="0.0" y="61" width="482" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="zyV-2R-Eve"/>
                         </constraints>
                     </customView>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sYe-zw-x1o">
+                        <rect key="frame" x="14" y="13" width="210" height="32"/>
+                        <buttonCell key="cell" type="push" title="Choose Syzygy TB folder…" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QX6-Sy-UYW">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="clickedChooseFolder:" target="-2" id="0KT-ac-3dA"/>
+                        </connections>
+                    </button>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3p8-xF-VYu">
-                        <rect key="frame" x="118" y="13" width="244" height="32"/>
+                        <rect key="frame" x="224" y="13" width="244" height="32"/>
                         <buttonCell key="cell" type="push" title="Reset to Recommended Settings" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Mhq-3g-NpI">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
@@ -66,20 +77,21 @@
                     <constraint firstItem="eUt-OZ-O56" firstAttribute="top" secondItem="Rz3-9b-duP" secondAttribute="bottom" id="3pe-u0-cI5"/>
                     <constraint firstItem="DSA-DT-rzD" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="4nz-aZ-YzG"/>
                     <constraint firstAttribute="trailing" secondItem="DSA-DT-rzD" secondAttribute="trailing" id="7fd-Vd-0mA"/>
-                    <constraint firstItem="3p8-xF-VYu" firstAttribute="top" secondItem="MNQ-R8-9m6" secondAttribute="bottom" constant="20" id="8R2-T4-u3a"/>
+                    <constraint firstItem="sYe-zw-x1o" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" constant="20" symbolic="YES" id="A35-YH-L4s"/>
                     <constraint firstItem="MNQ-R8-9m6" firstAttribute="top" secondItem="DSA-DT-rzD" secondAttribute="bottom" id="H13-EU-An5"/>
-                    <constraint firstAttribute="centerX" secondItem="3p8-xF-VYu" secondAttribute="centerX" id="H8I-vo-PY0"/>
                     <constraint firstItem="MNQ-R8-9m6" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="Hdk-Yr-qdg"/>
                     <constraint firstItem="DSA-DT-rzD" firstAttribute="top" secondItem="eUt-OZ-O56" secondAttribute="bottom" id="IGK-av-m2K"/>
-                    <constraint firstAttribute="bottom" secondItem="3p8-xF-VYu" secondAttribute="bottom" constant="20" id="KZk-Pp-R3E"/>
                     <constraint firstItem="eUt-OZ-O56" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="PQ4-v5-vhf"/>
                     <constraint firstAttribute="trailing" secondItem="Rz3-9b-duP" secondAttribute="trailing" id="bFA-u4-A0z"/>
+                    <constraint firstItem="sYe-zw-x1o" firstAttribute="baseline" secondItem="3p8-xF-VYu" secondAttribute="baseline" id="bww-GD-UUd"/>
                     <constraint firstItem="Rz3-9b-duP" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="fR2-yI-t6a"/>
                     <constraint firstItem="Rz3-9b-duP" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" id="jtN-d4-NFy"/>
+                    <constraint firstItem="3p8-xF-VYu" firstAttribute="leading" secondItem="sYe-zw-x1o" secondAttribute="trailing" constant="12" symbolic="YES" id="rei-by-iYR"/>
                     <constraint firstAttribute="trailing" secondItem="MNQ-R8-9m6" secondAttribute="trailing" id="vsw-Az-bcZ"/>
+                    <constraint firstItem="sYe-zw-x1o" firstAttribute="top" secondItem="MNQ-R8-9m6" secondAttribute="bottom" constant="20" symbolic="YES" id="yyu-PS-RBN"/>
                 </constraints>
             </view>
-            <point key="canvasLocation" x="139" y="175.5"/>
+            <point key="canvasLocation" x="140" y="175.5"/>
         </window>
     </objects>
 </document>
