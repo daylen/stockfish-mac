@@ -271,6 +271,40 @@
                     <constraint firstItem="I7a-Lu-hEd" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="zRX-Jb-tb3"/>
                 </constraints>
             </view>
+            <toolbar key="toolbar" implicitIdentifier="27A8D2CF-22E7-4D12-A568-F8E64B1F53BE" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="small" id="Hl5-t8-Qo1">
+                <allowedToolbarItems>
+                    <toolbarItem implicitItemIdentifier="27C6B455-9E4A-4A69-88E9-39686A2581AE" label="Flip Board" paletteLabel="Flip Board" tag="-1" image="Flip" id="xDU-Mj-c3h">
+                        <connections>
+                            <action selector="flipBoard:" target="-1" id="0f4-wc-qxJ"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="121145AB-5E2E-4E3F-A473-CB5CBFED95AF" label="Back" paletteLabel="Back" tag="-1" image="Back" id="S7g-iN-6hB">
+                        <connections>
+                            <action selector="previousMove:" target="-1" id="vBf-i5-dYT"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="7776E9AD-7D2F-4BDE-97D2-BBC2311A609A" label="Forward" paletteLabel="Forward" tag="-1" image="Forward" id="sCE-hU-OE9">
+                        <connections>
+                            <action selector="nextMove:" target="-1" id="44q-zb-d2y"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="C2BEC285-5848-49F3-8E07-BFEC51D71A7F" label="Analyze" paletteLabel="Analyze" tag="-1" image="Search" id="e6i-E7-ze9">
+                        <connections>
+                            <action selector="toggleInfiniteAnalysis:" target="-1" id="wVP-GA-VlL"/>
+                        </connections>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="lnO-fI-96r"/>
+                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="qoR-jQ-Ep7"/>
+                </allowedToolbarItems>
+                <defaultToolbarItems>
+                    <toolbarItem reference="xDU-Mj-c3h"/>
+                    <toolbarItem reference="qoR-jQ-Ep7"/>
+                    <toolbarItem reference="S7g-iN-6hB"/>
+                    <toolbarItem reference="sCE-hU-OE9"/>
+                    <toolbarItem reference="qoR-jQ-Ep7"/>
+                    <toolbarItem reference="e6i-E7-ze9"/>
+                </defaultToolbarItems>
+            </toolbar>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-x8E"/>
             </connections>
@@ -286,4 +320,10 @@
             <size key="maxSize" width="463" height="10000000"/>
         </textView>
     </objects>
+    <resources>
+        <image name="Back" width="128" height="128"/>
+        <image name="Flip" width="128" height="128"/>
+        <image name="Forward" width="128" height="128"/>
+        <image name="Search" width="128" height="128"/>
+    </resources>
 </document>

@@ -107,9 +107,6 @@
 {
     if (self.engine.isAnalyzing) {
         [self doMoveWithOverwritePrompt:[self.engine.latestLine.moves firstObject]];
-    } else {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot do best move" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Start Infinite Analysis and then try again."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
     }
 }
 #pragma mark - Helper methods
@@ -204,6 +201,12 @@
         } else {
             [menuItem setTitle:@"Start Infinite Analysis"];
         }
+    } else if ([menuItem action] == @selector(doBestMove:)) {
+        return self.engine.isAnalyzing;
+    } else if ([menuItem action] == @selector(firstMove:) || [menuItem action] == @selector(previousMove:)) {
+        return ![self.currentGame atBeginning];
+    } else if ([menuItem action] == @selector(lastMove:) || [menuItem action] == @selector(nextMove:)) {
+        return ![self.currentGame atEnd];
     }
     return YES;
 }
