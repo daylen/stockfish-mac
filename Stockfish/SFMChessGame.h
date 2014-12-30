@@ -24,7 +24,7 @@
 
 #pragma mark - Properties
 
-@property (nonatomic) id<SFMChessGameDelegate> delegate;
+@property (weak, nonatomic) id<SFMChessGameDelegate> delegate;
 
 @property (nonatomic) NSDictionary *tags;
 @property (nonatomic, readonly) SFMPosition *position;
