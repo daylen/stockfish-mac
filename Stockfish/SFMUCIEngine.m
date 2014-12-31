@@ -30,7 +30,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 
 @property (nonatomic) NSURL *bookmarkUrl;
 
-@property (readwrite, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *latestLine;
+@property (readwrite, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *lines;
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
 @property dispatch_group_t analysisGroup;
@@ -46,7 +46,7 @@ static volatile int32_t instancesAnalyzing = 0;
 - (void)setIsAnalyzing:(BOOL)isAnalyzing {
     if (_isAnalyzing != isAnalyzing) {
         _isAnalyzing = isAnalyzing;
-        self.latestLine = nil;
+        self.lines = nil;
         
         if (isAnalyzing) {
             NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
@@ -149,10 +149,10 @@ static volatile int32_t instancesAnalyzing = 0;
                            depth:[depth integerValue]];
     } else if ([tokens containsObject:@"depth"] && [tokens containsObject:@"pv"]) {
         // New line
-        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithDictionary:self.latestLine];
+        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithDictionary:self.lines];
         SFMUCILine *line = [[SFMUCILine alloc] initWithTokens:tokens position:self.gameToAnalyze.position];
         newDict[@(line.variationNum)] = line;
-        self.latestLine = newDict;
+        self.lines = newDict;
         [self.delegate uciEngine:self didGetNewLine:newDict];
     } else if ([tokens containsObject:@"bestmove"]) {
         // Stopped analysis
@@ -311,7 +311,6 @@ static volatile int32_t instancesAnalyzing = 0;
             NSString *absoluteString = self.bookmarkUrl.absoluteString;
             NSString *stripped = [absoluteString stringByReplacingOccurrencesOfString:@"file://" withString:@""];
             [self setUciOption:@"SyzygyPath" stringValue:stripped];
-            NSLog(@"Syzygy path set");
         }
     }
 }

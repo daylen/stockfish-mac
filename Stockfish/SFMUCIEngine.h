@@ -31,7 +31,7 @@
 @property (nonatomic) SFMChessGame *gameToAnalyze;
 @property (nonatomic) NSUInteger multipv;
 
-@property (readonly, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *latestLine; // TODO rename
+@property (readonly, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *lines;
 
 - (instancetype)initStockfish;
 - (instancetype)initOptionsProbe;

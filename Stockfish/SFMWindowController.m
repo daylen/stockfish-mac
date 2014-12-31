@@ -106,7 +106,7 @@
 - (IBAction)doBestMove:(id)sender
 {
     if (self.engine.isAnalyzing) {
-        [self doMoveWithOverwritePrompt:[((SFMUCILine *)self.engine.latestLine[@(1)]).moves firstObject]];
+        [self doMoveWithOverwritePrompt:[((SFMUCILine *)self.engine.lines[@(1)]).moves firstObject]];
     }
 }
 - (IBAction)increaseVariations:(id)sender {
@@ -214,6 +214,8 @@
         return ![self.currentGame atBeginning];
     } else if ([menuItem action] == @selector(lastMove:) || [menuItem action] == @selector(nextMove:)) {
         return ![self.currentGame atEnd];
+    } else if ([menuItem action] == @selector(decreaseVariations:)) {
+        return self.engine.multipv != 1;
     }
     return YES;
 }
@@ -228,7 +230,7 @@
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth {
     
     NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
-    SFMUCILine *pv = engine.latestLine[@(1)];
+    SFMUCILine *pv = engine.lines[@(1)];
     
     // 1. Score
     [statusComponents addObject:[SFMFormatter scoreAsText:(int) pv.score isMate:pv.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:pv.scoreIsLowerBound isUpperBound:pv.scoreIsUpperBound]];
