@@ -10,25 +10,16 @@ Stockfish for Mac is a powerful chess analysis app. Play two-player games on the
 
 Stockfish for Mac has many of the essential features one would expect in a professional chess analysis application:
 
-- Beautiful chess board with PDF graphics; automatically scales to any resolution
-- Integrates with the Stockfish chess engine, but is generic enough to interface with any UCI chess engine
+- Chess board with "Magic Move" animations, legal move highlight, best move arrow
+- Can interface with any UCI chess engine
 - Supports opening, viewing, and saving multi-game PGN files (strips out variations and commentary)
-- Automatically detects and loads the right Stockfish binary based on CPU capabilities
-- Can automatically adjust number of threads and hash size based on system capabilities
-- Supports copying and pasting FEN strings, with validation
+- System hardware detection to load 64-bit, SSE4.2, or Haswell binaries
+- MultiPV
+- Undo/Redo
+- Supports copying and pasting FEN strings
+- Supports some UCI options
 
-Some of the features Stockfish for Mac *does not* have:
-
-- Chess clocks
-- Opening books
-- Variations and commentary
-- Endgame tablebases
-- Set up position
-- One player mode
-- Skill level adjustment
-- etc.
-
-Those features didn't make the 1.0.
+Features Stockfish for Mac does not have are currently open tickets in the issue tracker.
 
 # Acknowledgements
 
