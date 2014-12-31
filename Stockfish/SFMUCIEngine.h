@@ -16,7 +16,7 @@
 - (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name;
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move
            number:(NSInteger)moveNumber depth:(NSInteger)depth;
-- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(SFMUCILine *)line;
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(NSDictionary *)lines;
 
 @optional
 - (void)uciEngine:(SFMUCIEngine *)engine didGetOptions:(NSArray* /* of SFMUCIOption */)options;
@@ -29,8 +29,9 @@
 
 @property (nonatomic) BOOL isAnalyzing;
 @property (nonatomic) SFMChessGame *gameToAnalyze;
+@property (nonatomic) NSUInteger multipv;
 
-@property (readonly, nonatomic) SFMUCILine *latestLine;
+@property (readonly, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *latestLine; // TODO rename
 
 - (instancetype)initStockfish;
 - (instancetype)initOptionsProbe;

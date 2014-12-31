@@ -30,7 +30,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 
 @property (nonatomic) NSURL *bookmarkUrl;
 
-@property (readwrite, nonatomic) SFMUCILine *latestLine;
+@property (readwrite, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *latestLine;
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
 @property dispatch_group_t analysisGroup;
@@ -46,9 +46,11 @@ static volatile int32_t instancesAnalyzing = 0;
 - (void)setIsAnalyzing:(BOOL)isAnalyzing {
     if (_isAnalyzing != isAnalyzing) {
         _isAnalyzing = isAnalyzing;
+        self.latestLine = nil;
         
         if (isAnalyzing) {
             NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
+            [self setUciOption:@"MultiPV" integerValue:self.multipv];
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);
             OSAtomicIncrement32(&instancesAnalyzing);
@@ -64,7 +66,6 @@ static volatile int32_t instancesAnalyzing = 0;
 - (void)setGameToAnalyze:(SFMChessGame *)gameToAnalyze {
     if (self.isAnalyzing) {
         self.isAnalyzing = NO;
-        self.latestLine = nil;
         dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             _gameToAnalyze = gameToAnalyze;
             self.isAnalyzing = YES;
@@ -72,6 +73,21 @@ static volatile int32_t instancesAnalyzing = 0;
 
     } else {
         _gameToAnalyze = gameToAnalyze;
+    }
+}
+
+- (void)setMultipv:(NSUInteger)multipv {
+    if (multipv < 1) {
+        return;
+    }
+    if (self.isAnalyzing) {
+        self.isAnalyzing = NO;
+        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            _multipv = multipv;
+            self.isAnalyzing = YES;
+        });
+    } else {
+        _multipv = multipv;
     }
 }
 
@@ -131,11 +147,13 @@ static volatile int32_t instancesAnalyzing = 0;
             didGetNewCurrentMove:move
                           number:[moveNumber integerValue]
                            depth:[depth integerValue]];
-    } else if ([tokens containsObject:@"pv"]) {
+    } else if ([tokens containsObject:@"depth"] && [tokens containsObject:@"pv"]) {
         // New line
+        NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithDictionary:self.latestLine];
         SFMUCILine *line = [[SFMUCILine alloc] initWithTokens:tokens position:self.gameToAnalyze.position];
-        self.latestLine = line;
-        [self.delegate uciEngine:self didGetNewLine:line];
+        newDict[@(line.variationNum)] = line;
+        self.latestLine = newDict;
+        [self.delegate uciEngine:self didGetNewLine:newDict];
     } else if ([tokens containsObject:@"bestmove"]) {
         // Stopped analysis
         dispatch_group_leave(_analysisGroup);
@@ -212,6 +230,7 @@ static volatile int32_t instancesAnalyzing = 0;
         _gameToAnalyze = nil;
         _analysisGroup = dispatch_group_create();
         _options = [[NSMutableArray alloc] init];
+        _multipv = 1;
         
         [self sendCommandToEngine:@"uci"];
         if (shouldApplyPreferences) {
@@ -277,6 +296,7 @@ static volatile int32_t instancesAnalyzing = 0;
         NSError *error = nil;
         BOOL dataIsStale;
         self.bookmarkUrl = [NSURL URLByResolvingBookmarkData:[SFMUserDefaults sandboxBookmarkData] options:NSURLBookmarkResolutionWithSecurityScope relativeToURL:nil bookmarkDataIsStale:&dataIsStale error:&error];
+        [self.bookmarkUrl startAccessingSecurityScopedResource];
         if (error) {
             NSLog(@"%@", [error description]);
         } else if (dataIsStale) {
@@ -288,7 +308,10 @@ static volatile int32_t instancesAnalyzing = 0;
                 [SFMUserDefaults setSandboxBookmarkData:bookmarkData];
             }
         } else {
-            [self setUciOption:@"SyzygyPath" stringValue:self.bookmarkUrl.absoluteString];
+            NSString *absoluteString = self.bookmarkUrl.absoluteString;
+            NSString *stripped = [absoluteString stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+            [self setUciOption:@"SyzygyPath" stringValue:stripped];
+            NSLog(@"Syzygy path set");
         }
     }
 }

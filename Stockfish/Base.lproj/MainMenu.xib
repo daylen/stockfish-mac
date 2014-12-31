@@ -190,6 +190,17 @@
                                     <action selector="doBestMove:" target="-1" id="RV1-zN-XAN"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="Vzb-qg-RZu"/>
+                            <menuItem title="Increase Variations" keyEquivalent="+" id="Egv-bl-mcY">
+                                <connections>
+                                    <action selector="increaseVariations:" target="-1" id="zBD-FG-Qr6"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Decrease Variations" keyEquivalent="-" id="KEU-Po-Ugs">
+                                <connections>
+                                    <action selector="decreaseVariations:" target="-1" id="pei-o2-RAT"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

@@ -31,6 +31,7 @@
         _tbHits = [[tokens sfm_objectAfterObject:@"tbhits"] integerValue];
         _time = [[tokens sfm_objectAfterObject:@"time"] longLongValue];
         _moves = [position movesArrayForUci:[tokens sfm_objectsAfterObject:@"pv"]];
+        NSAssert(_depth != 0, @"failed to init uci line");
     }
     return self;
 }

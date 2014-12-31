@@ -106,9 +106,16 @@
 - (IBAction)doBestMove:(id)sender
 {
     if (self.engine.isAnalyzing) {
-        [self doMoveWithOverwritePrompt:[self.engine.latestLine.moves firstObject]];
+        [self doMoveWithOverwritePrompt:[((SFMUCILine *)self.engine.latestLine[@(1)]).moves firstObject]];
     }
 }
+- (IBAction)increaseVariations:(id)sender {
+    self.engine.multipv++;
+}
+- (IBAction)decreaseVariations:(id)sender {
+    self.engine.multipv--;
+}
+
 #pragma mark - Helper methods
 - (void)syncToViewsAndEngine
 {
@@ -221,12 +228,13 @@
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth {
     
     NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
+    SFMUCILine *pv = engine.latestLine[@(1)];
     
     // 1. Score
-    [statusComponents addObject:[SFMFormatter scoreAsText:(int) engine.latestLine.score isMate:engine.latestLine.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:engine.latestLine.scoreIsLowerBound isUpperBound:engine.latestLine.scoreIsUpperBound]];
+    [statusComponents addObject:[SFMFormatter scoreAsText:(int) pv.score isMate:pv.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:pv.scoreIsLowerBound isUpperBound:pv.scoreIsUpperBound]];
     
     // 2. Depth
-    [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", engine.latestLine.depth, engine.latestLine.selectiveDepth]];
+    [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", pv.depth, pv.selectiveDepth]];
     
     // 3. Curr Move
     if (move) {
@@ -235,48 +243,70 @@
     }
     
     // 4. Speed
-    [statusComponents addObject:[NSString stringWithFormat:@"%@/s", [SFMFormatter nodesAsText:engine.latestLine.nodesPerSecond]]];
+    [statusComponents addObject:[NSString stringWithFormat:@"%@/s", [SFMFormatter nodesAsText:pv.nodesPerSecond]]];
+    
+    // 5. MultiPV
+    if (self.engine.multipv != 1) {
+        [statusComponents addObject:[NSString stringWithFormat:@"MultiPV=%lu", self.engine.multipv]];
+    }
     
     self.engineStatusTextField.stringValue = [statusComponents componentsJoinedByString:@"    "];
     
 }
 
-- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(SFMUCILine *)line {
-    // Update the status text
-    [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:line.depth];
+- (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(NSDictionary *)lines {
+    SFMUCILine *pv = lines[@(1)];
     
-    // Draw an arrow
-    self.boardView.arrows = @[[line.moves firstObject]];
-    
-    // First line
-    NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
-    
-    // Second line
-    NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
-    
-    // 1. Score
-    [statusComponents addObject:[SFMFormatter scoreAsText:(int) engine.latestLine.score isMate:engine.latestLine.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:engine.latestLine.scoreIsLowerBound isUpperBound:engine.latestLine.scoreIsUpperBound]];
-    
-    // 2. Depth
-    [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", engine.latestLine.depth, engine.latestLine.selectiveDepth]];
-
-    // 3. TB
-    if (engine.latestLine.tbHits) {
-        [statusComponents addObject:[NSString stringWithFormat:@"TB=%lu", engine.latestLine.tbHits]];
+    if (pv) {
+        // Update the status text
+        [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:pv.depth];
+        
+        // Draw an arrow
+        if ([pv.moves count] > 0) {
+            self.boardView.arrows = @[[pv.moves firstObject]];
+        }
     }
     
-    // 4. Time
-    [statusComponents addObject:[SFMFormatter millisecondsToClock:engine.latestLine.time]];
-    
-    // 5. Nodes
-    [statusComponents addObject:[SFMFormatter nodesAsText:engine.latestLine.nodes]];
-    
-    NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
-    
     NSMutableAttributedString *combined = [[NSMutableAttributedString alloc] init];
-    [combined appendAttributedString:boldPv];
-    [combined appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-    [combined appendAttributedString:secondLine];
+    
+    NSArray *keys = [[lines allKeys] sortedArrayUsingComparator:^NSComparisonResult(NSNumber *obj1, NSNumber *obj2) {
+        return obj1.integerValue > obj2.integerValue;
+    }];
+    
+    for (NSNumber *pvNum in keys) {
+        SFMUCILine *line = lines[pvNum];
+        
+        // First line
+        NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
+        
+        // Second line
+        NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
+        
+        // 1. Score
+        [statusComponents addObject:[SFMFormatter scoreAsText:(int) line.score isMate:line.scoreIsMateDistance isWhiteToMove:engine.gameToAnalyze.position.sideToMove == WHITE isLowerBound:line.scoreIsLowerBound isUpperBound:line.scoreIsUpperBound]];
+        
+        // 2. Depth
+        [statusComponents addObject:[NSString stringWithFormat:@"Depth=%lu/%lu", line.depth, line.selectiveDepth]];
+        
+        // 3. TB
+        if (line.tbHits) {
+            [statusComponents addObject:[NSString stringWithFormat:@"TB=%lu", line.tbHits]];
+        }
+        
+        // 4. Time
+        [statusComponents addObject:[SFMFormatter millisecondsToClock:line.time]];
+        
+        // 5. Nodes
+        [statusComponents addObject:[SFMFormatter nodesAsText:line.nodes]];
+        
+        NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
+        
+        
+        [combined appendAttributedString:boldPv];
+        [combined appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+        [combined appendAttributedString:secondLine];
+        [combined appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n\n"]];
+    }
     
     [self.lineTextView.textStorage setAttributedString:combined];
     
