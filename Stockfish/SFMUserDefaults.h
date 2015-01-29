@@ -23,4 +23,7 @@
 + (NSData *)sandboxBookmarkData;
 + (void)setSandboxBookmarkData:(NSData *)data;
 
++ (BOOL)arrowsEnabled;
++ (void)setArrowsEnabled:(BOOL)enabled;
+
 @end

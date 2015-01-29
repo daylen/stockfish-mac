@@ -13,6 +13,7 @@
 #define UCI_CONTEMPT @"uci_contempt"
 #define UCI_SKILL_LEVEL @"uci_skill_level"
 #define SANDBOX_BOOKMARK_DATA @"sandbox_bookmark_data"
+#define ARROWS_ENABLED @"arrows_enabled"
 
 @implementation SFMUserDefaults
 
@@ -58,6 +59,17 @@
 
 + (void)setSandboxBookmarkData:(NSData *)data {
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:SANDBOX_BOOKMARK_DATA];
+}
+
++ (BOOL)arrowsEnabled {
+    if (![[NSUserDefaults standardUserDefaults] objectForKey:ARROWS_ENABLED]) {
+        [SFMUserDefaults setArrowsEnabled:YES];
+    }
+    return [[NSUserDefaults standardUserDefaults] boolForKey:ARROWS_ENABLED];
+}
+
++ (void)setArrowsEnabled:(BOOL)enabled {
+    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:ARROWS_ENABLED];
 }
 
 @end

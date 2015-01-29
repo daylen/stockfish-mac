@@ -13,6 +13,7 @@
 #import "SFMMove.h"
 #import "SFMUCILine.h"
 #import "SFMPosition.h"
+#import "SFMUserDefaults.h"
 
 @interface SFMWindowController ()
 
@@ -115,6 +116,12 @@
 - (IBAction)decreaseVariations:(id)sender {
     self.engine.multipv--;
 }
+- (IBAction)toggleShowArrows:(id)sender {
+    [SFMUserDefaults setArrowsEnabled:![SFMUserDefaults arrowsEnabled]];
+    if (![SFMUserDefaults arrowsEnabled]) {
+        self.boardView.arrows = nil;
+    }
+}
 
 #pragma mark - Helper methods
 - (void)syncToViewsAndEngine
@@ -216,6 +223,8 @@
         return ![self.currentGame atEnd];
     } else if ([menuItem action] == @selector(decreaseVariations:)) {
         return self.engine.multipv != 1;
+    } else if ([menuItem action] == @selector(toggleShowArrows:)) {
+        [menuItem setState:[SFMUserDefaults arrowsEnabled] ? NSOnState : NSOffState];
     }
     return YES;
 }
@@ -264,7 +273,7 @@
         [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:pv.depth];
         
         // Draw an arrow
-        if ([pv.moves count] > 0) {
+        if ([pv.moves count] > 0 && [SFMUserDefaults arrowsEnabled]) {
             self.boardView.arrows = @[[pv.moves firstObject]];
         }
     }
