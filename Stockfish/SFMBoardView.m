@@ -15,6 +15,7 @@
 #import "NSColor+ColorUtils.h"
 #import "SFMItertools.h"
 #import "SFMSquareUtils.h"
+#import "SFMUserDefaults.h"
 
 @import QuartzCore;
 
@@ -54,18 +55,27 @@
     if (self = [super initWithFrame:frame]) {
         self.wantsLayer = YES;
         _boardIsFlipped = NO;
-        
+
         _boardColor = [NSColor colorWithRed:0.25 green:0.25 blue:0.25 alpha:1];
         _lightSquareColor = [NSColor colorWithHex:0xf6fbf8 alpha:1];
-        _darkSquareColor = [NSColor colorWithHex:0x8bcea3 alpha:1];
+        _darkSquareColor = [self darkSquareColorFromPreferences];
         _fontColor = [NSColor whiteColor];
         _highlightColor = [NSColor colorWithSRGBRed:1 green:1 blue:0 alpha:0.7];
         
         _pieceViews = [[NSMutableDictionary alloc] init];
         _arrowViews = [[NSMutableDictionary alloc] init];
         _highlightedSquares = [[NSMutableArray alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applyPreferencesToBoard:) name:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
     }
     return self;
+}
+-(NSColor *)darkSquareColorFromPreferences {
+    return [NSColor colorWithHex:[SFMUserDefaults boardColorValue] alpha:1];
+}
+
+-(void)applyPreferencesToBoard:(NSNotification *)notification {
+    _darkSquareColor = [self darkSquareColorFromPreferences];
+    [self setNeedsDisplay:YES];
 }
 
 #pragma mark - Setters
