@@ -20,6 +20,9 @@
 		7705069D187CE43400BA4635 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7705069B187CE43400BA4635 /* InfoPlist.strings */; };
 		770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.m */; };
 		7716E40E1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7716E40D1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m */; };
+		772A80051C38F644006E2232 /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 772A80021C38F644006E2232 /* stockfish-64 */; };
+		772A80061C38F644006E2232 /* stockfish-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = 772A80031C38F644006E2232 /* stockfish-bmi2 */; };
+		772A80071C38F644006E2232 /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 772A80041C38F644006E2232 /* stockfish-sse42 */; };
 		7734B674189506F500FC4D79 /* SFMArrowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7734B673189506F500FC4D79 /* SFMArrowView.m */; };
 		7734B677189596B200FC4D79 /* NSBezierPath+Arrowhead.m in Sources */ = {isa = PBXBuildFile; fileRef = 7734B676189596B200FC4D79 /* NSBezierPath+Arrowhead.m */; };
 		773DE96F18822DD0009156C3 /* SFMPieceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 773DE96E18822DD0009156C3 /* SFMPieceView.m */; };
@@ -65,8 +68,6 @@
 		77764F071888B80C00A7C4CC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77764F051888B80C00A7C4CC /* Preferences.xib */; };
 		77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */; };
 		77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */; };
-		778A271D188A1E4300F57827 /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271B188A1E4300F57827 /* stockfish-64 */; };
-		778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 778A271C188A1E4300F57827 /* stockfish-sse42 */; };
 		77924AEA187DECEB0019C56E /* SFMPGNFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.m */; };
 		77924AED187DED010019C56E /* SFMChessGame.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.m */; };
 		77924AFD187E72940019C56E /* SFMParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.m */; };
@@ -76,7 +77,6 @@
 		7795E2F71A4D1E6100736550 /* NSArray+ArrayUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7795E2F61A4D1E6100736550 /* NSArray+ArrayUtils.m */; };
 		779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.m */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
-		77B7335618F9F9E6007FD666 /* stockfish-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = 77B7335518F9F9E6007FD666 /* stockfish-bmi2 */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
 		77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 77E215BD188BA99900E935D0 /* Binaries.entitlements */; };
@@ -117,6 +117,9 @@
 		770506DF187CF2B100BA4635 /* SFMWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SFMWindowController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7716E40C1A4B5BBB00C52FB2 /* NSColor+ColorUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSColor+ColorUtils.h"; path = "Stockfish/NSColor+ColorUtils.h"; sourceTree = "<group>"; };
 		7716E40D1A4B5BBB00C52FB2 /* NSColor+ColorUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSColor+ColorUtils.m"; path = "Stockfish/NSColor+ColorUtils.m"; sourceTree = "<group>"; };
+		772A80021C38F644006E2232 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-64"; sourceTree = "<group>"; };
+		772A80031C38F644006E2232 /* stockfish-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-bmi2"; sourceTree = "<group>"; };
+		772A80041C38F644006E2232 /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-sse42"; sourceTree = "<group>"; };
 		7734B672189506F500FC4D79 /* SFMArrowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMArrowView.h; path = Stockfish/SFMArrowView.h; sourceTree = "<group>"; };
 		7734B673189506F500FC4D79 /* SFMArrowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMArrowView.m; path = Stockfish/SFMArrowView.m; sourceTree = "<group>"; };
 		7734B675189596B200FC4D79 /* NSBezierPath+Arrowhead.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSBezierPath+Arrowhead.h"; path = "Stockfish/NSBezierPath+Arrowhead.h"; sourceTree = "<group>"; };
@@ -199,8 +202,6 @@
 		77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMPreferencesWindowController.m; sourceTree = "<group>"; };
 		77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMHardwareDetector.h; path = Stockfish/SFMHardwareDetector.h; sourceTree = "<group>"; };
 		77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMHardwareDetector.m; path = Stockfish/SFMHardwareDetector.m; sourceTree = "<group>"; };
-		778A271B188A1E4300F57827 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-64"; path = "Stockfish/stockfish-64"; sourceTree = "<group>"; };
-		778A271C188A1E4300F57827 /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-sse42"; path = "Stockfish/stockfish-sse42"; sourceTree = "<group>"; };
 		778A271F188A7A1A00F57827 /* Stockfish.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Stockfish.entitlements; sourceTree = "<group>"; };
 		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
 		77924AE9187DECEB0019C56E /* SFMPGNFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMPGNFile.m; path = Stockfish/SFMPGNFile.m; sourceTree = "<group>"; };
@@ -218,7 +219,6 @@
 		7795E2F61A4D1E6100736550 /* NSArray+ArrayUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSArray+ArrayUtils.m"; path = "Stockfish/NSArray+ArrayUtils.m"; sourceTree = "<group>"; };
 		779925D8188273C800EAAEDD /* SFMChessGameTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMChessGameTest.m; sourceTree = "<group>"; };
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		77B7335518F9F9E6007FD666 /* stockfish-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = "stockfish-bmi2"; path = "Stockfish/stockfish-bmi2"; sourceTree = "<group>"; };
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
 		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
@@ -465,9 +465,9 @@
 		7748D07D18868CA0009E021E /* Engine Binaries */ = {
 			isa = PBXGroup;
 			children = (
-				778A271B188A1E4300F57827 /* stockfish-64 */,
-				77B7335518F9F9E6007FD666 /* stockfish-bmi2 */,
-				778A271C188A1E4300F57827 /* stockfish-sse42 */,
+				772A80021C38F644006E2232 /* stockfish-64 */,
+				772A80031C38F644006E2232 /* stockfish-bmi2 */,
+				772A80041C38F644006E2232 /* stockfish-sse42 */,
 			);
 			name = "Engine Binaries";
 			sourceTree = "<group>";
@@ -561,7 +561,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SFM;
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Daylen Yang";
 				TargetAttributes = {
 					7705066D187CE43300BA4635 = {
@@ -604,14 +604,13 @@
 				7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */,
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
+				772A80051C38F644006E2232 /* stockfish-64 in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
-				778A271D188A1E4300F57827 /* stockfish-64 in Resources */,
 				77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */,
-				778A271E188A1E4300F57827 /* stockfish-sse42 in Resources */,
-				77B7335618F9F9E6007FD666 /* stockfish-bmi2 in Resources */,
+				772A80061C38F644006E2232 /* stockfish-bmi2 in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
@@ -620,6 +619,7 @@
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
 				77764F071888B80C00A7C4CC /* Preferences.xib in Resources */,
 				773DE98618822DF8009156C3 /* queen_w.pdf in Resources */,
+				772A80071C38F644006E2232 /* stockfish-sse42 in Resources */,
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
@@ -784,6 +784,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -852,6 +853,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -875,6 +877,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -898,6 +901,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "StockfishTests/StockfishTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUNDLE_LOADER)";
@@ -917,6 +921,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "StockfishTests/StockfishTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUNDLE_LOADER)";
@@ -976,6 +981,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
@@ -1000,6 +1006,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "StockfishTests/StockfishTests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUNDLE_LOADER)";
