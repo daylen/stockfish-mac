@@ -22,6 +22,7 @@
 @property (weak) IBOutlet SFMPreferenceCellView *skillCell;
 @property (weak) IBOutlet NSButton *chooseButton;
 @property (weak) IBOutlet NSButton *recommendedSettingsButton;
+@property (weak) IBOutlet NSPopUpButton *boardColorPopUpButton;
 
 @property (nonatomic) SFMUCIEngine *optionsProbe;
 
@@ -44,10 +45,23 @@
     self.recommendedSettingsButton.hidden = YES;
 }
 
+- (NSDictionary *)boardColors {
+    return @ {
+        @"Blue": @0x4B7399,
+        @"Green":@0x8bCEA3,
+        @"Gray": @0x999999,
+        @"Orange": @0xD08B18,
+        @"Violet": @0x8877B8,
+        @"Red": @0xBA5546
+    };
+
+}
 - (void)windowDidLoad {
     [super windowDidLoad];
     self.window.delegate = self;
-    
+    [self.boardColorPopUpButton addItemsWithTitles:[self.boardColors allKeys]];
+    NSNumber *color  =  [NSNumber numberWithInteger:[SFMUserDefaults boardColorValue]];
+    self.boardColorPopUpButton.title = [self.boardColors allKeysForObject:color][0];
     // Check if infinite analysis is on
     if ([SFMUCIEngine instancesAnalyzing] != 0) {
         self.threadsCell.enabled = NO;
@@ -70,6 +84,13 @@
     [SFMUserDefaults setHashValue:self.hashCell.currValue];
     [SFMUserDefaults setContemptValue:self.contemptCell.currValue];
     [SFMUserDefaults setSkillLevelValue:self.skillCell.currValue];
+    [SFMUserDefaults setBoardColorValue:[self.boardColors[self.boardColorPopUpButton.title] intValue]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
+}
+
+- (IBAction)boardColorItemSelected:(id)sender{
+    NSPopUpButton *btn = (NSPopUpButton *)sender;
+    [SFMUserDefaults setBoardColorValue:[self.boardColors[btn.title] intValue]];
     [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
 }
 

@@ -20,6 +20,10 @@
 + (NSInteger)skillLevelValue;
 + (void)setSkillLevelValue:(NSInteger)val;
 
+
++ (NSInteger)boardColorValue;
++ (void)setBoardColorValue:(NSInteger)val;
+
 + (NSData *)sandboxBookmarkData;
 + (void)setSandboxBookmarkData:(NSData *)data;
 
