@@ -251,7 +251,7 @@ static volatile int32_t instancesAnalyzing = 0;
     NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath:@"/usr/sbin/sysctl"];
     [task setStandardOutput:outputPipe];
-    [task setArguments:@[@"-n", @"machdep.cpu"]];
+    [task setArguments:@[@"-n", @"machdep.cpu.features", @"machdep.cpu.leaf7_features"]];
     [task launch];
     [task waitUntilExit];
     NSData *data = [[outputPipe fileHandleForReading] availableData];
