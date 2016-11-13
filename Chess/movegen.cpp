@@ -913,7 +913,6 @@ namespace {
     if(pos.ep_square() != SQ_NONE) {
       assert(square_rank(pos.ep_square()) == RANK_6);
       b1 = pawns & pos.black_pawn_attacks(pos.ep_square());
-      assert(b1 != EmptyBoardBB);
       while(b1) {
         sq = pop_1st_bit(&b1);
         mlist[n++].move = make_ep_move(sq, pos.ep_square());
@@ -976,7 +975,6 @@ namespace {
     if(pos.ep_square() != SQ_NONE) {
       assert(square_rank(pos.ep_square()) == RANK_3);
       b1 = pawns & pos.white_pawn_attacks(pos.ep_square());
-      assert(b1 != EmptyBoardBB);
       while(b1) {
         sq = pop_1st_bit(&b1);
         mlist[n++].move = make_ep_move(sq, pos.ep_square());
