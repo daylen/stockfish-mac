@@ -35,4 +35,16 @@
     return [self subarrayWithRange:NSMakeRange(idxA + 1, idxB - idxA - 1)];
 }
 
+- (BOOL)sfm_isPrefixOf:(NSArray *)b {
+    if (self.count > b.count) {
+        return NO;
+    }
+    for (int i = 0; i < self.count; i++) {
+        if (![self[i] isEqual:b[i]]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 @end

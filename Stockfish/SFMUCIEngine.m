@@ -151,6 +151,10 @@ static volatile int32_t instancesAnalyzing = 0;
         // New line
         NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithDictionary:self.lines];
         SFMUCILine *line = [[SFMUCILine alloc] initWithTokens:tokens position:self.gameToAnalyze.position];
+        NSArray *oldMoves = ((SFMUCILine *) self.lines[@(line.variationNum)]).moves;
+        if ([line.moves sfm_isPrefixOf:oldMoves]) {
+            line.moves = [oldMoves copy];
+        }
         newDict[@(line.variationNum)] = line;
         self.lines = newDict;
         [self.delegate uciEngine:self didGetNewLine:newDict];

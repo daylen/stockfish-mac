@@ -14,4 +14,6 @@
 
 - (NSArray *)sfm_objectsAfterObject:(id)a beforeObject:(id)b;
 
+- (BOOL)sfm_isPrefixOf:(NSArray *)b;
+
 @end
