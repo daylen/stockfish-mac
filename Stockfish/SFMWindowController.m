@@ -41,11 +41,9 @@
 
 - (IBAction)copyFenString:(id)sender
 {
-    NSMutableString *fen = [self.currentGame.position.fen mutableCopy];
-    [fen appendFormat:@" %lu %lu", (unsigned long)self.currentGame.currentMoveIndex, self.currentGame.currentMoveIndex / 2 + 1];
+    NSString *fen = [self.currentGame.position.fen copy];
     [[NSPasteboard generalPasteboard] declareTypes:@[NSPasteboardTypeString] owner:nil];
-    [[NSPasteboard generalPasteboard] setString:[fen copy] forType:NSPasteboardTypeString];
-    
+    [[NSPasteboard generalPasteboard] setString:fen forType:NSPasteboardTypeString];
 }
 - (IBAction)pasteFenString:(id)sender
 {
