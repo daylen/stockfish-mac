@@ -314,6 +314,7 @@ static volatile int32_t instancesAnalyzing = 0;
         } else {
             NSString *absoluteString = self.bookmarkUrl.absoluteString;
             NSString *stripped = [absoluteString stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+            stripped = [stripped stringByReplacingOccurrencesOfString:@"%20" withString:@" "];
             [self setUciOption:@"SyzygyPath" stringValue:stripped];
         }
     }
