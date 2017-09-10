@@ -151,7 +151,10 @@
 }
 - (void)updateNotationView
 {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame moveTextString:YES num:(int) self.currentGame.currentMoveIndex] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+    NSString *currentGameHtml = [self.currentGame moveTextString:YES num:(int) self.currentGame.currentMoveIndex];
+    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[currentGameHtml dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
+
+    // set bold
     [str enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, str.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
         NSFont *currFont = (NSFont *) value;
         if ([[currFont fontDescriptor] symbolicTraits] & NSFontBoldTrait) {
@@ -161,13 +164,85 @@
 
         }
     }];
+    
+    [self setMoveLinkAttributes:str];
     [self.notationView.textStorage setAttributedString:[str copy]];
 }
+
+/*!
+ Sets a link for each ply so that when it is clicked the game goes to that ply
+ */
+- (void)setMoveLinkAttributes:(NSMutableAttributedString*)string
+{
+    NSError *error = nil;
+    NSRegularExpression *moveNumberRegex = [NSRegularExpression regularExpressionWithPattern:@"\\d+\\." options:0 error:&error];
+    
+    NSString *str = [string string];
+    NSArray *matches = [moveNumberRegex matchesInString:str options:0 range:NSMakeRange(0, string.length)];
+    int plyCount = 0;
+    
+    if([matches count] <= 0){
+        return;
+    }
+    for(int i = 0; i < [matches count]; i++){
+        NSRange range = [matches[i] range];
+        NSRange nextRange = i + 1 == [matches count] ? NSMakeRange(str.length, 0) : [matches[i+1] range];
+        unsigned long start = range.location + range.length;
+        unsigned long len = nextRange.location - start;
+        start++; len-=2;//remove spaces
+        
+        NSRange firstMove, secondMove;
+        [self splitStringMoves:str inRange:NSMakeRange(start, len) firstMove:&firstMove secondMove:&secondMove];
+        
+        [self addLinkAttribute:string withValue:++plyCount range:firstMove];
+        if(secondMove.location != NSNotFound){
+            [self addLinkAttribute:string withValue:++plyCount range:secondMove];
+        }
+    }
+}
+
+- (void)addLinkAttribute:(NSMutableAttributedString*)string withValue:(int)value range:(NSRange)range
+{
+    [string addAttribute:NSLinkAttributeName value:[NSNumber numberWithInt:value] range:range];
+}
+
+/*!
+ Splits a string into one or two ranges, each corresponding to a move
+ */
+- (void)splitStringMoves:(NSString*)str inRange:(NSRange)range firstMove:(NSRange*)first secondMove:(NSRange*)second
+{
+    NSRange moveSeparator = [str rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet] options:0 range:range];
+    
+    if(moveSeparator.location != NSNotFound){
+        *first = NSMakeRange(range.location, moveSeparator.location - range.location);
+        unsigned long start = moveSeparator.location + moveSeparator.length;
+        *second = NSMakeRange(start, range.location + range.length - start);
+    }
+    else {
+        *first = range;
+        *second = NSMakeRange(NSNotFound, 0);
+    }
+}
+
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex
+{
+    [self.currentGame goToPly:[link intValue]];
+    [self syncToViewsAndEngine];
+    return YES;
+}
+
 
 #pragma mark - Init
 - (void)windowDidLoad
 {
     [super windowDidLoad];
+    self.notationView.delegate = self;
+    NSDictionary *linkAttributes = @{
+        NSUnderlineStyleAttributeName:@(NSUnderlineStyleNone),
+        NSCursorAttributeName:[NSCursor pointingHandCursor]
+    };
+    [self.notationView setLinkTextAttributes:linkAttributes];
+    
     self.boardView.delegate = self;
     self.boardView.dataSource = self;
     
