@@ -55,60 +55,92 @@
     
 }
 
-+ (NSArray *)tokenizeMoveText:(NSString *)moveText
-{
-    // Strip the period, space, and new line characters
-    NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
-    [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-    NSArray *allTokens = [moveText componentsSeparatedByCharactersInSet:cSet];
-    
-    // Eliminate all non-move tokens, such as move numbers, annotations, and variations
-    int depth = 0;
-    NSMutableArray *moveTokens = [NSMutableArray new];
-    for (NSString *token in allTokens) {
-        if ([token length] == 0) {
-            continue;
-        }
-        int delta = [SFMParser depthDeltaForString:token];
-        depth += delta;
-        
-        if (depth < 0) {
-            @throw [NSException exceptionWithName:@"ParseException" reason:@"A set of parentheses or brackets in the move text don't match." userInfo:nil];
-        }
-        
-        if (depth == 0 && [self isLetter:[token characterAtIndex:0]] && delta == 0) {
-            [moveTokens addObject:token];
-        }
-    }
-    
-    return [moveTokens copy];
-    
++ (SFMNode *)parseMoveText:(NSString *)moveText position:(SFMPosition *)position{
+    SFMNode *head = [[SFMNode alloc] init];
+    NSMutableCharacterSet *charactersToTrim = [[NSMutableCharacterSet alloc] init];
+    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
+    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"*"]];
+    return [self parseString:[moveText stringByTrimmingCharactersInSet:charactersToTrim] fromNode:head position:position];
 }
 
-# pragma mark - Private
++ (SFMNode *)parseString:(NSString *)str fromNode:(SFMNode *)node position:(SFMPosition *)position
+{
+    NSArray *tokens = [self tokenizeString:str];
+    SFMNode *currentNode = node;
+    for(NSString *token in tokens){
+        currentNode = [self parseToken:token fromNode:currentNode position:position];
+    }
+    return node;
+}
+
++ (SFMNode *)parseToken:(NSString *)token fromNode:(SFMNode *)node position:(SFMPosition *)position
+{
+    SFMNode *currentNode = node;
+    if([token characterAtIndex:0] == '{'){ //comment
+        [node setComment:[token substringWithRange:NSMakeRange(1, [token length] - 2)]];
+    }
+    else if([token characterAtIndex:0] == '('){ //variation
+        [position undoMoves:1];
+        SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
+        [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy]];
+        [dummy.next setParent:currentNode.parent];
+        [currentNode.variations addObject:dummy.next];
+        [position doMove:node.move error:nil];
+    }
+    else{ //plain moves
+        NSError *e = nil;
+        currentNode = [position nodeForSan:token parentNode:currentNode error:&e];
+        if(e){
+            // TODO: handle
+        }
+    }
+    return currentNode;
+}
 
 /*!
- Get the "depth delta" by counting parentheses.
+ Splits the string into tokens at the same depth. A token can be: move sequence, variation or comment
  */
-+ (int)depthDeltaForString:(NSString *)string
++ (NSArray *)tokenizeString:(NSString*)str
 {
-    int delta = 0;
+    if ([[str stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
+    {
+        return [NSArray new];
+    }
+    
+    NSMutableArray *tokens = [NSMutableArray new];
+    NSMutableArray *stack = [NSMutableArray new];
     char ch;
-    for (int i = 0; i < [string length]; i++) {
-        ch = [string characterAtIndex:i];
-        delta += (ch == '{');
-        delta += (ch == '(');
-        delta -= (ch == ')');
-        delta -= (ch == '}');
+    
+    int tokenStartIndex = 0;
+    for (int i = 0; i < [str length]; i++) {
+        ch = [str characterAtIndex:i];
+        
+        if(ch == '(' || ch == '{'){
+            if([stack count] == 0 && i - tokenStartIndex > 0){
+                [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex)]];
+                tokenStartIndex = i;
+            }
+            [stack addObject:[NSString stringWithFormat:@"%c", ch == '(' ? ')' : '}']];
+        }
+        else if(ch == ')' || ch == '}'){
+            if([stack count] == 0 || ![[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", ch]]){
+                [NSException raise:@"Invalid move text" format:@"Move text is invalid." arguments:nil];
+            }
+            [stack removeLastObject];
+            if([stack count] == 0){
+                [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex + 1)]];
+                tokenStartIndex = i + 1;
+            }
+        }
     }
-    return delta;
+    
+    if(tokenStartIndex < [str length]){
+        [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, [str length] - tokenStartIndex)]];
+    }
+    
+    return tokens;
 }
 
-
-/*!
- @return YES if the character is a lower or upper-case letter.
- */
 + (BOOL)isLetter:(char)c
 {
     return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));

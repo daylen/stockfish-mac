@@ -32,20 +32,73 @@
     XCTAssertEqual([second.tags count], 1, @"Wrong count for game 2");
 }
 
-- (void)testTokenizeMoveText
+- (void)testParseMoveTextPlainMoves
 {
-    NSString *fiveMoves = @"1. e4\ne5 2.\rNf3 Nc6\r\n3. Bb5";
-    NSArray *fiveMovesParsed = [SFMParser tokenizeMoveText:fiveMoves];
-    NSArray *fiveMovesExpect = @[@"e4", @"e5", @"Nf3", @"Nc6", @"Bb5"];
-    XCTAssertEqualObjects(fiveMovesParsed, fiveMovesExpect, @"Parse failure for 5 moves");
+    SFMPosition *initialPosition = [[SFMPosition alloc] init];
+    NSString *moveText = @"1. e4\ne5 2.\rNf3 Nc6\r\n3. Bb5";
+    SFMNode *parsedNode = [SFMParser parseMoveText:moveText position:initialPosition];
+    NSArray *moves = @[
+                       [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4],
+                       [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5],
+                       [[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3],
+                       [[SFMMove alloc] initWithFrom:SQ_B8 to:SQ_C6],
+                       [[SFMMove alloc] initWithFrom:SQ_F1 to:SQ_B5],
+                       ];
+    SFMNode *expectedNode = [[SFMNode alloc] init];
+    expectedNode.next = [self buildNodeFromMoveArray:moves parent:expectedNode];
+    [self verifyNodeSubtree:parsedNode against:expectedNode];
+}
+
+- (void)testParseMoveTextWithVariationAndCommentary
+{
+    SFMPosition *initialPosition = [[SFMPosition alloc] init];
+    NSString *moveText = @"1.e4 (1.c4 c5 {Wow} 2.g3) e5 2.Nf3 Nc6 3. Bb5";
     
-    NSString *complexFiveMoves = @"1.e4 (asdf ( ) ) e5 2.{!} Nf3 Nc6 {Na1} 3. Bb5 {Good} *";
-    NSArray *complexFiveMovesParsed = [SFMParser tokenizeMoveText:complexFiveMoves];
-    XCTAssertEqualObjects(complexFiveMovesParsed, fiveMovesExpect, @"Parse failure for complex 5 moves");
+    SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition];
+    NSArray *mainMoves = @[
+                       [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4],
+                       [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5],
+                       [[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3],
+                       [[SFMMove alloc] initWithFrom:SQ_B8 to:SQ_C6],
+                       [[SFMMove alloc] initWithFrom:SQ_F1 to:SQ_B5]
+                       ];
     
-    NSString *anotherTest = @"1.e4 ({23}) e5 2. Nf3 Nc6 3.Bb5 {1123211344()}";
-    NSArray *anotherTestParsed = [SFMParser tokenizeMoveText:anotherTest];
-    XCTAssertEqualObjects(anotherTestParsed, fiveMovesExpect);
+    NSArray *variationMoves = @[
+                           [[SFMMove alloc] initWithFrom:SQ_C2 to:SQ_C4],
+                           [[SFMMove alloc] initWithFrom:SQ_C7 to:SQ_C5],
+                           [[SFMMove alloc] initWithFrom:SQ_G2 to:SQ_G3]
+                           ];
+    SFMNode *expected = [[SFMNode alloc] init];
+    expected.next = [self buildNodeFromMoveArray:mainMoves parent:expected];
+    SFMNode *variation = [self buildNodeFromMoveArray:variationMoves parent:expected];
+    [variation.next setComment:@"Wow"];
+    [expected.next.variations addObject:variation];
+
+    [self verifyNodeSubtree:parsed against:expected];
+}
+
+- (SFMNode*)buildNodeFromMoveArray:(NSArray*)moves parent:(SFMNode*)parent
+{
+    SFMNode *head = [[SFMNode alloc] initWithMove:[moves firstObject] andParent:parent];
+    SFMNode *current = head;
+    for(SFMMove *move in [moves subarrayWithRange:NSMakeRange(1, [moves count] - 1)]){
+        current.next = [[SFMNode alloc] initWithMove:move andParent:current];
+        current = current.next;
+    }
+    return head;
+}
+
+-(void) verifyNodeSubtree:(SFMNode*)actual against:(SFMNode*)expected
+{
+    while(actual != nil && expected != nil){
+        XCTAssertEqualObjects(actual.move, expected.move, @"Move mismatch.");
+        XCTAssertEqualObjects(actual.comment, expected.comment, @"Comment mismatch.");
+        for(int i = 0; i < [actual.variations count]; i++){
+            [self verifyNodeSubtree:[actual.variations objectAtIndex:i] against:[expected.variations objectAtIndex:i]];
+        }
+        actual = actual.next;
+        expected = expected.next;
+    }
 }
 
 @end

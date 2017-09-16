@@ -9,14 +9,16 @@
 #import "SFMChessGame.h"
 #import "Constants.h"
 #import "SFMParser.h"
+#import "SFMNode.h"
 
 @interface SFMChessGame()
 
-@property (nonatomic) NSMutableArray /* of SFMMove */ *moves;
+@property (nonatomic, readonly) SFMNode *startNode;
+@property (nonatomic, readwrite) SFMNode *currentNode;
 @property (nonatomic, readwrite) SFMPosition *position;
 @property (nonatomic, readonly) SFMPosition *startPosition;
 @property (nonatomic, copy) NSString *moveText;
-@property (readwrite) NSUInteger currentMoveIndex;
+@property (nonatomic) BOOL moveTextParsed;
 
 @end
 
@@ -35,8 +37,7 @@
                   @"White": @"?",
                   @"Black": @"?",
                   @"Result": @"*"};
-        _moves = [[NSMutableArray alloc] init];
-        _currentMoveIndex = 0;
+        _currentNode = [[SFMNode alloc] init];
         _position = [[SFMPosition alloc] init];
         _undoManager = [[NSUndoManager alloc] init];
     }
@@ -57,28 +58,24 @@
     if (self = [super init]) {
         _tags = tags;
         _moveText = moveText;
-        _currentMoveIndex = 0;
         _position = [[SFMPosition alloc] initWithFen:_tags[@"FEN"] ? _tags[@"FEN"] : FEN_START_POSITION];
         _undoManager = [[NSUndoManager alloc] init];
     }
     return self;
 }
 
+- (SFMNode *)startNode{
+    SFMNode *tmp = _currentNode;
+    while(!tmp.isTopNode){
+        tmp = tmp.parent;
+    }
+    return tmp;
+}
+
 - (void)parseMoveText:(NSError *__autoreleasing *)error {
-    if (_moves == nil) {
-        _moves = [[NSMutableArray alloc] init];
-        
-        NSArray *moveTokens = [SFMParser tokenizeMoveText:_moveText];
-        
-        NSError *e = nil;
-        NSArray *moves = [self.startPosition movesArrayForSan:moveTokens error:&e];
-        
-        if (e) {
-            *error = e;
-        } else {
-            _moves = [moves mutableCopy];
-            _moveText = nil;
-        }
+    if(!_moveTextParsed){
+        _currentNode = [SFMParser parseMoveText:_moveText position:[self.startPosition copy]];
+        _moveTextParsed = YES;
     }
 }
 
@@ -87,58 +84,69 @@
 - (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
     NSAssert(move, @"Move is nil");
     
-    [self.undoManager registerUndoWithTarget:self selector:@selector(deleteMovesFromPly:) object:@(self.currentMoveIndex)];
-    
-    if (![self atEnd]) {
-        *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:NOT_AT_END_CODE userInfo:nil];
-        return NO;
-    }
-    
     NSError *e = nil;
     [self.position doMove:move error:&e];
     if (e) {
         *error = e;
         return NO;
     }
+    SFMNode *newMove = [[SFMNode alloc] initWithMove:move andParent:_currentNode];
     
-    self.currentMoveIndex++;
-    [self.moves addObject:move];
-    
-    [self.delegate chessGameStateDidChange:self];
-    return YES;
-}
-
-- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error {
-    NSAssert(moves && [moves count] > 0, @"Moves array is nil or has nothing");
-    
-    [self.undoManager registerUndoWithTarget:self selector:@selector(deleteMovesFromPly:) object:@(self.currentMoveIndex)];
-    
-    NSError *e = nil;
-    for (SFMMove *move in moves) {
-        [self doMove:move error:&e];
-        if (e) {
-            *error = e;
-            return NO;
+    if (![self atEnd]) {
+        if([move isEqual:_currentNode.next.move]){
+            newMove = _currentNode.next;
+        }
+        else{
+            [_currentNode.next.variations addObject:newMove];
+            [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
         }
     }
+    else{
+        _currentNode.next = newMove;
+        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
+    }
     
+    _currentNode = newMove;
     [self.delegate chessGameStateDidChange:self];
     return YES;
 }
 
-- (NSArray *)deleteMovesFromPly:(NSNumber *)idx {
-    NSUInteger index = [idx integerValue];
-    NSArray *toDelete = [self.moves subarrayWithRange:NSMakeRange(index, [self.moves count] - index)];
-    if (!toDelete || [toDelete count] == 0) {
-        return nil;
-    }
-    
-    [[self.undoManager prepareWithInvocationTarget:self] doMoves:toDelete error:nil];
-    [self.moves removeObjectsInRange:NSMakeRange(index, [self.moves count] - index)];
+- (void)addSubtreeToCurrentNode:(SFMNode *)subtree
+{
+    [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:subtree];
+    _currentNode.next = subtree;
     [self goToEnd];
-    
+}
+
+- (void)removeSubtreeFromNode:(SFMNode *)node
+{
+    _currentNode = node.parent;
+    SFMNode *deletedNode;
+    if([_currentNode.next.nodeId isEqual:node.nodeId]){
+        deletedNode = _currentNode.next;
+        _currentNode.next = nil;
+    }
+    else{
+        for(int i = 0; i < [_currentNode.variations count]; i++){
+            if([[_currentNode.variations[i] nodeId] isEqual:node.nodeId]){
+                deletedNode = _currentNode.variations[i];
+                [_currentNode.variations removeObjectAtIndex:i];
+                break;
+            }
+        }
+    }
+    [[self.undoManager prepareWithInvocationTarget:self] addSubtreeToCurrentNode:deletedNode];
+    [self goToEnd];
     [self.delegate chessGameStateDidChange:self];
-    return toDelete;
+}
+
+- (void)removeSubtreeFromNodeId:(NSUUID *)nodeId
+{
+    SFMNode *nodeToRemove = [self searchNode:self.startNode forId:nodeId];
+    if(nodeToRemove == nil){
+        [NSException raise:@"Node with id not found." format:@"Node was not found."];
+    }
+    [self removeSubtreeFromNode:nodeToRemove];
 }
 
 - (void)setResult:(NSString *)result {
@@ -151,41 +159,70 @@
 
 - (BOOL)atBeginning
 {
-    return self.currentMoveIndex == 0;
+    return _currentNode.isTopNode;
 }
 - (BOOL)atEnd
 {
-    return self.currentMoveIndex == [self.moves count];
+    return _currentNode.next == nil;
 }
 - (void)goBackOneMove
 {
     if (![self atBeginning]) {
-        [self goToPly:self.currentMoveIndex - 1];
+        [self.position undoMoves:1];
+        _currentNode = _currentNode.parent;
     }
 }
 - (void)goForwardOneMove
 {
     if (![self atEnd]) {
-        [self goToPly:self.currentMoveIndex + 1];
+        [self.position doMove:_currentNode.next.move error:nil];
+        _currentNode = _currentNode.next;
     }
 }
 - (void)goToBeginning
 {
-    [self goToPly:0];
+    [self goToNode:self.startNode];
 }
 - (void)goToEnd
 {
-    [self goToPly:[self.moves count]];
-}
-- (void)goToPly:(NSUInteger)ply
-{
-    self.currentMoveIndex = ply;
-    
-    // Replay moves up to current ply
-    self.position = [self.startPosition copy];
-    for (NSUInteger i = 0; i < ply; i++) {
-        [self.position doMove:self.moves[i] error:nil];
+    while(![self atEnd]){
+        [self goToNode:_currentNode.next];
     }
+}
+
+- (void) goToNode:(SFMNode *)node{
+    self.position = [self.startPosition copy];
+    for(SFMMove *mv in [node reconstructMovesFromBeginning]){
+        [self.position doMove:mv error:nil];
+    }
+    _currentNode = node;
+}
+
+- (void)goToNodeId:(NSUUID*)nodeId{
+    SFMNode *node = [self searchNode:self.startNode forId:nodeId];
+    [self goToNode: node];
+}
+
+- (SFMNode *)searchNode:(SFMNode *)node forId:(NSUUID*)nid{
+    
+    if([node.nodeId isEqual:nid]){
+        return node;
+    }
+    
+    if(node.next != nil){
+        SFMNode *mainVar = [self searchNode:node.next forId:nid];
+        if(mainVar != nil){
+            return mainVar;
+        }
+    }
+
+    for(SFMNode *var in node.variations){
+        SFMNode *result = [self searchNode:var forId:nid];
+        if(result != nil){
+            return result;
+        }
+    }
+    return nil;
 }
 
 #pragma mark - Other
@@ -195,6 +232,10 @@
 }
 
 #pragma mark - Export
+-(int)currentPly
+{
+    return _currentNode.ply;
+}
 
 - (NSString *)pgnString
 {
@@ -212,7 +253,7 @@
         [str appendString:self.moveText];
     } else {
         [str appendString:@"\n"];
-        [str appendString:[self moveTextString:NO num:1]];
+        [str appendString:[[self moveTextString] string]];
         [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
     }
     
@@ -225,8 +266,8 @@
     return s;
 }
 
-- (NSString *)moveTextString:(BOOL)html num:(int)num {
-    return [self.startPosition sanForMovesArray:self.moves html:html breakLines:NO num:num];
+- (NSAttributedString *)moveTextString {
+    return [self.startPosition moveTextForNode:self.startNode withCurrentNodeId:_currentNode.nodeId];
 }
 
 - (NSString *)uciString
@@ -239,7 +280,7 @@
     }
     if (![self atBeginning]) {
         [str appendString:@" moves"];
-        NSArray *truncatedMoves = [self.moves subarrayWithRange:NSMakeRange(0, self.currentMoveIndex)];
+        NSArray *truncatedMoves = [_currentNode reconstructMovesFromBeginning];
         [str appendFormat:@" %@", [SFMPosition uciForMovesArray:truncatedMoves]];
     }
     return [str copy];
@@ -251,8 +292,7 @@
     SFMChessGame *copy = [[SFMChessGame alloc] init];
     copy.tags = [self.tags copy];
     copy.position = [self.position copy];
-    copy.currentMoveIndex = self.currentMoveIndex;
-    copy.moves = [self.moves mutableCopy];
+    copy.currentNode = [_currentNode copy];
     return copy;
 }
 

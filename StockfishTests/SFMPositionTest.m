@@ -64,18 +64,6 @@
     XCTAssert(error.code == ILLEGAL_MOVE_CODE);
 }
 
-- (void)testMovesArrayForSan {
-    SFMPosition *p = [[SFMPosition alloc] init];
-    NSError *error = nil;
-    NSArray *movesArr = [p movesArrayForSan:@[@"e4", @"e5", @"Nf3", @"Nc6", @"Bb5", @"a6"] error:&error];
-    XCTAssertNil(error);
-    XCTAssert([movesArr count] == 6);
-    
-    movesArr = [p movesArrayForSan:@[@"e4", @"e4"] error:&error];
-    XCTAssertNotNil(error);
-    XCTAssert(error.code == PARSE_ERROR_CODE);
-}
-
 - (void)testSanForMovesArray {
     SFMPosition *p = [[SFMPosition alloc] init];
     SFMMove *m1 = [[SFMMove alloc] initWithFrom:SQ_D2 to:SQ_D4];

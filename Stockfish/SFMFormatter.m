@@ -46,9 +46,9 @@
     }
     
     if (isLowerBound) {
-        [str appendString:@"*"];
+        [str appendString:@"++"];
     } else if (isUpperBound) {
-        [str appendString:@"*"];
+        [str appendString:@"--"];
     }
     
     [str appendString:@")"];
