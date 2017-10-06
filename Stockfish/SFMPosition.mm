@@ -204,7 +204,11 @@ using namespace Chess;
     if(currentNode != nil){
         SFMPosition *currentPosition = [position copy];
         // Make the moves up to the parent node
-        NSArray *movesDelta = [currentNode.parent reconstructMoves:currentNode.ply - node.ply];
+        int movesToParent = currentNode.ply - node.ply;
+        if(node.isTopNode){
+            movesToParent--;
+        }
+        NSArray *movesDelta = [currentNode.parent reconstructMoves:movesToParent];
         [currentPosition doMoves:movesDelta error:nil];
         // Only add first level variations on new lines
         if(depth == 0 && [currentNode.variations count] > 0){
