@@ -102,7 +102,6 @@
     }
     
     _currentNode = newMove;
-    [self.delegate chessGameStateDidChange:self];
     return YES;
 }
 
