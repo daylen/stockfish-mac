@@ -254,15 +254,10 @@
         [str appendString:@"\"]\n"];
     }
     
-    if (self.moveText) {
-        // Original move text was not modified
-        [str appendString:self.moveText];
-    } else {
-        [str appendString:@"\n"];
-        [str appendString:[[self moveTextString] string]];
-        [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
-    }
-    
+    [str appendString:@"\n"];
+    [str appendString:[[self moveTextString] string]];
+    [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
+
     return str;
 }
 
