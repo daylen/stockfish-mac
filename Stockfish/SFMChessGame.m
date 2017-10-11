@@ -93,13 +93,8 @@
     SFMNode *newMove = [[SFMNode alloc] initWithMove:move andParent:_currentNode];
     
     if (![self atEnd]) {
-        if([move isEqual:_currentNode.next.move]){
-            newMove = _currentNode.next;
-        }
-        else{
-            [_currentNode.next.variations addObject:newMove];
-            [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
-        }
+        [_currentNode.next.variations addObject:newMove];
+        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
     }
     else{
         _currentNode.next = newMove;

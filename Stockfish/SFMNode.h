@@ -93,4 +93,9 @@
  */
 - (NSMutableArray*)reconstructMovesFromBeginning;
 
+/*!
+ Returns a pointer to an existing variation for this node, or nil if one is not found
+ */
+- (SFMNode *)existingVariationForMove:(SFMMove *)move;
+
 @end

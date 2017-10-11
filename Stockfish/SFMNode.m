@@ -57,6 +57,18 @@
     return movesSoFar;
 }
 
+- (SFMNode *)existingVariationForMove:(SFMMove *)move{
+    if([_move isEqual:move]){
+        return self;
+    }
+    for(SFMNode *variation in _variations){
+        if([variation.move isEqual:move]){
+            return variation;
+        }
+    }
+    return nil;
+}
+
 - (id)copyWithZone:(NSZone *)zone{
     return [[SFMNode alloc] initWithMove:_move annotation:_annotation parent:_parent topNode:_isTopNode ply:_ply];
 }

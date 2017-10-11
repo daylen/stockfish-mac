@@ -82,6 +82,7 @@
 - (void)goForwardOneMove;
 - (void)goToBeginning;
 - (void)goToEnd;
+- (void)goToNode:(SFMNode*)node;
 - (void)goToNodeId:(NSUUID*)nodeId;
 
 #pragma mark - Export

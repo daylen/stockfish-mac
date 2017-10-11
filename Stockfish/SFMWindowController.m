@@ -372,8 +372,15 @@
 #pragma mark - SFMBoardViewDelegate
 
 - (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move {
-    if(![self.currentGame atEnd] && ![move isEqual:self.currentGame.currentNode.next.move]){
-        [self doMoveWithOverwritePrompt:move];
+    if(![self.currentGame atEnd]){
+        SFMNode *existingVariation = [self.currentGame.currentNode.next existingVariationForMove:move];
+        if(existingVariation){
+            [self.currentGame goToNode:existingVariation];
+            [self syncToViewsAndEngine];
+        }
+        else{
+            [self doMoveWithOverwritePrompt:move];
+        }
     }
     else{
         [self doMoveForced:move];
