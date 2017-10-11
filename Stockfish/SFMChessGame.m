@@ -111,22 +111,34 @@
     return YES;
 }
 
-- (void)addSubtreeToCurrentNode:(SFMNode *)subtree
+- (void)addSubtreeToCurrentNode:(SFMNode *)subtree asVariation:(BOOL)asVariation
 {
     [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:subtree];
-    _currentNode.next = subtree;
-    [self goToEnd];
+    if(!asVariation){
+        _currentNode.next = subtree;
+        [self goForwardOneMove];
+    }
+    else{
+        [_currentNode.variations addObject:subtree];
+        [self goToNode:subtree];
+    }
+    [self.delegate chessGameStateDidChange:self];
 }
 
 - (void)removeSubtreeFromNode:(SFMNode *)node
 {
-    _currentNode = node.parent;
     SFMNode *deletedNode;
-    if([_currentNode.next.nodeId isEqual:node.nodeId]){
-        deletedNode = _currentNode.next;
+    BOOL variation = NO;
+    if([node.parent.next.nodeId isEqual:node.nodeId]){
+        //the node we are removing is the main variation
+        deletedNode = node;
+        _currentNode = node.parent;
         _currentNode.next = nil;
     }
     else{
+        //if we are removing a variation then go to the parent's next (main) move
+        variation = YES;
+        _currentNode = node.parent.next;
         for(int i = 0; i < [_currentNode.variations count]; i++){
             if([[_currentNode.variations[i] nodeId] isEqual:node.nodeId]){
                 deletedNode = _currentNode.variations[i];
@@ -135,8 +147,8 @@
             }
         }
     }
-    [[self.undoManager prepareWithInvocationTarget:self] addSubtreeToCurrentNode:deletedNode];
-    [self goToEnd];
+    [[self.undoManager prepareWithInvocationTarget:self] addSubtreeToCurrentNode:deletedNode asVariation:variation];
+    [self goToNode:_currentNode];
     [self.delegate chessGameStateDidChange:self];
 }
 
@@ -186,7 +198,7 @@
 - (void)goToEnd
 {
     while(![self atEnd]){
-        [self goToNode:_currentNode.next];
+        [self goForwardOneMove];
     }
 }
 
