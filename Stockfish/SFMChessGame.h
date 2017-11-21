@@ -28,7 +28,7 @@
 
 @property (nonatomic) NSDictionary *tags;
 @property (nonatomic, readonly) SFMPosition *position;
-@property (readonly) NSUInteger currentMoveIndex;
+@property (readonly) SFMNode *currentNode;
 @property (nonatomic) NSUndoManager *undoManager;
 
 #pragma mark - Init
@@ -65,23 +65,15 @@
 - (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error;
 
 /*!
- @param moves Array of moves.
- @param error
- @return YES if the moves were done.
- */
-- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error;
-
-/*!
- @param index
- @return An array of deleted moves.
- */
-- (NSArray *)deleteMovesFromPly:(NSNumber *)index;
-
-/*!
  Set the result of the game.
  @param result
  */
 - (void)setResult:(NSString *)result;
+
+/*!
+ Removes the subtree from the node and sets the current node as the removed node's parent
+ */
+- (void)removeSubtreeFromNode:(SFMNode *)node;
 
 #pragma mark - Navigation
 @property (nonatomic, readonly) BOOL atBeginning;
@@ -90,7 +82,8 @@
 - (void)goForwardOneMove;
 - (void)goToBeginning;
 - (void)goToEnd;
-- (void)goToPly:(NSUInteger)ply;
+- (void)goToNode:(SFMNode*)node;
+- (void)goToNodeId:(NSUUID*)nodeId;
 
 #pragma mark - Export
 /*!
@@ -103,7 +96,7 @@
  @param num
  @return A string containing the move text.
  */
-- (NSString *)moveTextString:(BOOL)html num:(int)num;
+- (NSAttributedString *)moveTextString;
 
 /*!
  @return The moves in the game in UCI format.

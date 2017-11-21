@@ -149,25 +149,46 @@
         [self.currentGame setResult:@"1/2-1/2"];
     }
 }
+
 - (void)updateNotationView
 {
-    NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithHTML:[[self.currentGame moveTextString:YES num:(int) self.currentGame.currentMoveIndex] dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:NULL];
-    [str enumerateAttribute:NSFontAttributeName inRange:NSMakeRange(0, str.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
-        NSFont *currFont = (NSFont *) value;
-        if ([[currFont fontDescriptor] symbolicTraits] & NSFontBoldTrait) {
-            [str setAttributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]} range:range];
-        } else {
-            [str setAttributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]} range:range];
+    NSAttributedString *currentGameString = [self.currentGame moveTextString];
+    [self.notationView.textStorage setAttributedString:[currentGameString copy]];
+    NSRange currentRange = [self currentNodeRange:currentGameString];
+    if(currentRange.location != NSNotFound){
+        [self.notationView scrollRangeToVisible:currentRange];
+    }
+}
 
+- (NSRange)currentNodeRange:(NSAttributedString *)moveText
+{
+    __block NSRange currentNodeRange = NSMakeRange(NSNotFound, 0);
+    [moveText enumerateAttribute:NSLinkAttributeName inRange:NSMakeRange(0, moveText.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop){
+        if([value isEqual:self.currentGame.currentNode.nodeId]){
+            currentNodeRange = range;
         }
     }];
-    [self.notationView.textStorage setAttributedString:[str copy]];
+    return currentNodeRange;
+}
+
+- (BOOL)textView:(NSTextView *)textView clickedOnLink:(id)link atIndex:(NSUInteger)charIndex
+{
+    [self.currentGame goToNodeId:link];
+    [self syncToViewsAndEngine];
+    return YES;
 }
 
 #pragma mark - Init
 - (void)windowDidLoad
 {
     [super windowDidLoad];
+    self.notationView.delegate = self;
+    NSDictionary *linkAttributes = @{
+        NSUnderlineStyleAttributeName:@(NSUnderlineStyleNone),
+        NSCursorAttributeName:[NSCursor pointingHandCursor]
+    };
+    [self.notationView setLinkTextAttributes:linkAttributes];
+
     self.boardView.delegate = self;
     self.boardView.dataSource = self;
     
@@ -247,7 +268,7 @@
     
     // 3. Curr Move
     if (move) {
-        NSString *san = [engine.gameToAnalyze.position sanForMovesArray:@[move] html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1];
+        NSString *san = [engine.gameToAnalyze.position sanForMovesArray:@[move] html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentNode.ply / 2 + 1];
         [statusComponents addObject:[NSString stringWithFormat:@"%@(%lu/%d)", san, moveNumber, engine.gameToAnalyze.position.numLegalMoves]];
     }
     
@@ -286,7 +307,7 @@
         SFMUCILine *line = lines[pvNum];
         
         // First line
-        NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentMoveIndex / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
+        NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentNode.ply / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
         
         // Second line
         NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
@@ -328,7 +349,7 @@
 {
     NSArray *tokens = [pv componentsSeparatedByString:@" "];
 
-    return [self.currentGame.position sanForMovesArray:[self.currentGame.position movesArrayForUci:tokens] html:NO breakLines:NO num:(int) self.currentGame.currentMoveIndex / 2 + 1];
+    return [self.currentGame.position sanForMovesArray:[self.currentGame.position movesArrayForUci:tokens] html:NO breakLines:NO num:(int) self.currentGame.currentNode.ply / 2 + 1];
 }
 
 - (SFMMove *)firstMoveFromPV:(NSString *)pv
@@ -351,31 +372,40 @@
 #pragma mark - SFMBoardViewDelegate
 
 - (void)boardView:(SFMBoardView *)boardView userDidMove:(SFMMove *)move {
-    [self doMoveWithOverwritePrompt:move];
+    if(![self.currentGame atEnd]){
+        SFMNode *existingVariation = [self.currentGame.currentNode.next existingVariationForMove:move];
+        if(existingVariation){
+            [self.currentGame goToNode:existingVariation];
+            [self syncToViewsAndEngine];
+        }
+        else{
+            [self doMoveWithOverwritePrompt:move];
+        }
+    }
+    else{
+        [self doMoveForced:move];
+    }
+
 }
 
 - (void)doMoveWithOverwritePrompt:(SFMMove *)move {
-    if (![self.currentGame atEnd]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Overwrite game history?" defaultButton:@"Overwrite" alternateButton:@"Cancel" otherButton:@"Duplicate" informativeTextWithFormat:@"You are not at the end of the game. Click Overwrite to replace the remaining game history with this move.\n\nClick Duplicate to make a copy of this game."];
-        [alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode) {
-            switch (returnCode) {
-                case 1:
-                    // Overwrite
-                    [self.currentGame deleteMovesFromPly:@(self.currentGame.currentMoveIndex)];
-                    [self doMoveForced:move];
-                    break;
-                case 0:
-                    // Cancel
-                    break;
-                case -1:
-                    // Duplicate
-                    [self.document duplicateDocument:nil];
-                    break;
-            }
-        }];
-    } else {
-        [self doMoveForced:move];
-    }
+    NSAlert *alert = [NSAlert alertWithMessageText:@"Overwrite game history?" defaultButton:@"Create variation" alternateButton:@"Cancel" otherButton:@"Overwrite" informativeTextWithFormat:@"You are not at the end of the game. Do you want to create a variation or overwrite the current move ?"];
+    [alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode) {
+        switch (returnCode) {
+            case 1:
+                // Create variation
+                [self doMoveForced:move];
+                break;
+            case 0:
+                // Cancel
+                break;
+            case -1:
+                // Overwrite
+                [self.currentGame removeSubtreeFromNode:self.currentGame.currentNode.next];
+                [self doMoveForced:move];
+                break;
+        }
+    }];
 }
 
 - (void)doMoveForced:(SFMMove *)move {

@@ -33,7 +33,7 @@
     [game doMove:[[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4] error:nil];
     [game doMove:[[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5] error:nil];
     XCTAssertTrue([game atEnd]);
-    XCTAssertEqualObjects([game moveTextString:NO num:1], @"1. e4 e5 ");
+    XCTAssertEqualObjects([[game moveTextString] string], @"1. e4 e5 ");
 }
 - (void)testLoadedGame
 {
@@ -49,7 +49,7 @@
     [game doMove:[[SFMMove alloc] initWithFrom:SQ_A7 to:SQ_A6] error:&error];
     XCTAssertNil(error);
     XCTAssertTrue([game atEnd]);
-    XCTAssertEqualObjects([game moveTextString:NO num:1], @"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ");
+    XCTAssertEqualObjects([[game moveTextString] string], @"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ");
 }
 
 - (void)testUciStringOutput

@@ -6,6 +6,9 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
+#import "SFMNode.h"
+#import "SFMPosition.h"
+
 @interface SFMParser : NSObject
 
 /*!
@@ -16,10 +19,16 @@
 + (NSMutableArray *)parseGamesFromString:(NSString *)str;
 
 /*!
- Tokenizes move text.
- @param moves A string such as: "1. e4 e5 2. Nf3 Nc6" and so on
- @return A tokenized array such as: "["e4", "e5", "Nf3", "Nc6"] and so on
+ Parses the move text for a chess game from a given position and returns the top node
+ @param moveText The move text
+ @param position The position
+ @return The top node of the tree
  */
-+ (NSArray *)tokenizeMoveText:(NSString *)moveText;
++ (SFMNode*) parseMoveText:(NSString*)moveText position:(SFMPosition*)position;
+
+/*!
+ @return YES if the character is a lower or upper-case letter.
+ */
++ (BOOL)isLetter:(char)c;
 
 @end

@@ -9,6 +9,7 @@
 #import "SFMPosition.h"
 #import "Constants.h"
 #import "SFMMove.h"
+#import "SFMParser.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -22,11 +23,14 @@ using namespace Chess;
 @interface SFMPosition()
 
 @property (assign, nonatomic) Position *position;
+@property (readonly, nonatomic) NSMutableArray *moves;
+@property (readonly, nonatomic) NSMutableArray *undoInfos;
 
 @end
 
 @implementation SFMPosition
 @synthesize position = _position;
+
 
 # pragma mark - Class
 
@@ -42,7 +46,7 @@ using namespace Chess;
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone {
-    return [[SFMPosition alloc] initWithFen:[self fen]];
+    return [[SFMPosition alloc] initWithFen:[self fen] moves:[_moves copy] undoInfos:[_undoInfos copy]];
 }
 
 - (void)dealloc {
@@ -56,9 +60,15 @@ using namespace Chess;
 }
 
 - (instancetype)initWithFen:(NSString *)fen {
+    return [self initWithFen:fen moves:[[NSMutableArray alloc] init] undoInfos:[[NSMutableArray alloc] init]];
+}
+
+- (instancetype)initWithFen:(NSString *)fen moves:(NSArray*)moves undoInfos:(NSArray*)undoInfos {
     self = [super init];
-    if (self) {
+    if(self){
         _position = new Position([fen UTF8String]);
+        _moves = [[NSMutableArray alloc] initWithArray:moves];
+        _undoInfos = [[NSMutableArray alloc] initWithArray:undoInfos];
     }
     return self;
 }
@@ -82,6 +92,7 @@ using namespace Chess;
             foundLegalMove = YES;
             UndoInfo u;
             self.position->do_move(m, u);
+            [self recordMove:m undoInfo:u];
         }
     }
     
@@ -91,27 +102,310 @@ using namespace Chess;
     }
 }
 
+- (BOOL)undoMoves:(int)numberOfMoves
+{
+    if(numberOfMoves > [_moves count]){
+        return NO;
+    }
+    while(numberOfMoves){
+        Move m; UndoInfo u;
+        [[_moves lastObject] getValue:&m];
+        [[_undoInfos lastObject] getValue:&u];
+        self.position->undo_move(m, u);
+        [_moves removeLastObject];
+        [_undoInfos removeLastObject];
+        numberOfMoves--;
+    }
+    return YES;
+}
+
+- (void)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error
+{
+    for(SFMMove *move in moves){
+        NSError *e = nil;
+        [self doMove:move error:&e];
+        if(e){
+            *error = e;
+            break;
+        }
+    }
+}
+
+/*!
+ Adds a move and its undo info to the stack so it can be undone
+ @param move The move
+ @param undoInfo The undo info
+ */
+- (void)recordMove:(Move)move undoInfo:(UndoInfo)undoInfo
+{
+    NSValue *m = [NSValue value: &move withObjCType:@encode(Move)];
+    NSValue *u = [NSValue value: &undoInfo withObjCType:@encode(UndoInfo)];
+    [_moves addObject:m];
+    [_undoInfos addObject:u];
+}
+
 # pragma mark - Conversion
 
-- (NSArray* /* of SFMMove */)movesArrayForSan:(NSArray* /* of NSString */)san
-                                        error:(NSError * __autoreleasing *)error {
-    SFMPosition *current = [self copy];
-    NSMutableArray /* of SFMMove */ *moves = [[NSMutableArray alloc] init];
+- (SFMNode *)nodeForSan:(NSString *)san parentNode:(SFMNode *)parent error:(NSError * __autoreleasing *)error
+{
+    SFMNode *currentNode = parent;
+    // Strip the period, space, and new line characters
+    NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
+    [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+    NSArray *tokens = [san componentsSeparatedByCharactersInSet:cSet];
+    for(NSString *tok in tokens){
+        if([tok length] > 0 && [SFMParser isLetter:[tok characterAtIndex:0]]){
+            NSRegularExpression *moveRegex = [NSRegularExpression regularExpressionWithPattern:@"([a-zA-Z\\-1-8]+)[+#]{0,1}([!?]{0,2})" options:0 error:nil];
+            NSTextCheckingResult *match = [moveRegex firstMatchInString:tok options:0 range:NSMakeRange(0, tok.length)];
+            NSString *moveString = [tok substringWithRange:[match rangeAtIndex:1]];
+            NSString *moveAnnotation = [tok substringWithRange:[match rangeAtIndex:2]];
+            Move m = move_from_san(*self.position, [moveString UTF8String]);
+            if (m == MOVE_NONE) {
+                // Error
+                if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
+                                                                code:PARSE_ERROR_CODE userInfo:nil];
+                return nil;
+            } else {
+                SFMMove *move = [[self class] moveObjFromLibMove:m];
+                currentNode.next = [[SFMNode alloc] initWithMove:move annotation:moveAnnotation andParent:currentNode];
+                currentNode = currentNode.next;
+                [self doMove:move error:nil];
+            }
+        }
+    }
+    return currentNode;
+}
+
+- (NSAttributedString *)moveTextForNode:(SFMNode *)node withCurrentNodeId:(NSUUID *)nodeId
+{
+    NSMutableAttributedString *san = [self moveTextForNode:node andPosition:[self copy] depth:0];
+    [self setFontAttributes:san currentMoveNodeId:nodeId];
+    return san;
+}
+
+/*!
+ Generates a mutable attributed string in Standard Algebraic Notation corresponding to the subtree rooted in node
+ @param node: The node
+ @param position: The position the node subtree is played from
+ @param depth: The depth of the recursion
+ */
+- (NSMutableAttributedString *)moveTextForNode:(SFMNode *)node andPosition:(SFMPosition *)position depth:(int)depth
+{
+    NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
+    SFMNode *currentNode = node;
+    NSAttributedString *flatLine = [self longestFlatLineFrom:node position:position];
+    [result appendAttributedString:flatLine];
+    // move to node at the end of the flat line
+    while(currentNode != nil && [currentNode.variations count] == 0 && currentNode.comment == nil){
+        currentNode = currentNode.next;
+    }
     
-    for (NSString *text in san) {
-        Move m = move_from_san(*current.position, [text UTF8String]);
-        if (m == MOVE_NONE) {
-            // Error
-            if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
-                                                            code:PARSE_ERROR_CODE userInfo:nil];
-            return nil;
-        } else {
-            [moves addObject:[[self class] moveObjFromLibMove:m]];
-            [current doMove:[moves lastObject] error:nil];
+    if(currentNode != nil){
+        SFMPosition *currentPosition = [position copy];
+        // Make the moves up to the parent node
+        int movesToParent = currentNode.ply - node.ply;
+        if(node.isTopNode){
+            movesToParent--;
+        }
+        NSArray *movesDelta = [currentNode.parent reconstructMoves:movesToParent];
+        [currentPosition doMoves:movesDelta error:nil];
+        // Only add first level variations on new lines
+        if(depth == 0 && [currentNode.variations count] > 0){
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+        }
+        
+        for(SFMNode *variation in currentNode.variations){
+            SFMPosition *copy = [currentPosition copy];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"( " attributes:[self variationStringAttributes]]];
+            NSMutableAttributedString *variationString = [self moveTextForNode:variation andPosition:copy depth:depth + 1];
+            [variationString addAttributes:[self variationStringAttributes] range:NSMakeRange(0, variationString.length)];
+            [result appendAttributedString:variationString];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:@") " attributes:[self variationStringAttributes]]];
+            if(depth == 0){
+                [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+            }
+        }
+        
+        [currentPosition doMove:currentNode.move error:nil];
+        // recurse for the rest of the moves
+        if(currentNode.next != nil){
+            [result appendAttributedString:[self moveTextForNode:currentNode.next andPosition:currentPosition depth:depth]];
         }
     }
     
-    return moves;
+    return result;
+}
+
+/*!
+ Converts the longest flat line (without variations or comments) starting from a node to an attributed string
+ */
+- (NSAttributedString *)longestFlatLineFrom:(SFMNode *)node position:(SFMPosition *)position
+{
+    NSMutableArray *moves = [NSMutableArray new];
+    NSMutableArray *nodes = [NSMutableArray new];
+    int ply = node.ply - 1;
+    while(node != nil && [node.variations count] == 0 && node.comment == nil){
+        if(node.move != nil){
+            [moves addObject:node.move];
+            [nodes addObject:node];
+        }
+        node = node.next;
+    }
+    
+    if(node != nil && node.move != nil) { // got to a node with variations or comment, add it
+        [moves addObject:node.move];
+        [nodes addObject:node];
+    }
+    Move line[800];
+    int i = 0;
+    
+    for (SFMMove *move in moves) {
+        line[i++] = [[self class] libMoveFromMoveObj:move];
+    }
+    
+    line[i] = MOVE_NONE;
+    
+    NSString *lineSan = @(line_to_san(*position.position, line, 0, NO, ply / 2 + 1).c_str());
+    
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan];
+    [self setMoveAttributes:attributedString nodes:nodes];
+    if(node.comment != nil){
+        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:[node.comment stringByAppendingString:@" "] attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
+    }
+    
+    return attributedString;
+}
+
+/*!
+ Sets the attributes for the string
+ @param string The move text
+ @param nodes The nodes for which the move text was generated
+ */
+- (void)setMoveAttributes:(NSMutableAttributedString*)string nodes:(NSArray *)nodes
+{
+    NSError *error = nil;
+    NSRegularExpression *moveNumberRegex = [NSRegularExpression regularExpressionWithPattern:@"\\d+\\.+" options:0 error:&error];
+    
+    NSString *str = [string string];
+    NSArray *matches = [moveNumberRegex matchesInString:str options:0 range:NSMakeRange(0, string.length)];
+    int plyCount = 0;
+    
+    if([matches count] <= 0){
+        return;
+    }
+    
+    for(int i = 0; i < [matches count]; i++){
+        NSRange range = [matches[i] range];
+        NSRange nextRange = i + 1 == [matches count] ? NSMakeRange(str.length, 0) : [matches[i+1] range];
+        unsigned long start = range.location + range.length;
+        unsigned long len = nextRange.location - start;
+        start++; len-=2;
+        
+        NSRange firstMove, secondMove;
+        [self splitStringMoves:str inRange:NSMakeRange(start, len) firstMove:&firstMove secondMove:&secondMove];
+        [self addMoveAnnotationAndLink:string node:[nodes objectAtIndex:plyCount++] range:firstMove];
+        
+        if(secondMove.location != NSNotFound){
+            [self addMoveAnnotationAndLink:string node:[nodes objectAtIndex:plyCount++] range:secondMove];
+        }
+    }
+}
+
+- (void)addMoveAnnotationAndLink:(NSMutableAttributedString*)string node:(SFMNode*)node range:(NSRange)range
+{
+    if(node.annotation != nil && [node.annotation length] > 0){
+        [string insertAttributedString:[[NSAttributedString new] initWithString:node.annotation]  atIndex:range.location + range.length];
+        range.length += [node.annotation length];
+    }
+    
+    [self addLinkAttribute:string withValue:node.nodeId range:range];
+}
+
+- (void)addLinkAttribute:(NSMutableAttributedString*)string withValue:(NSUUID *)value range:(NSRange)range
+{
+    [string addAttribute:NSLinkAttributeName value:value range:range];
+}
+
+- (void)setFontAttributes:(NSMutableAttributedString *)san currentMoveNodeId:(NSUUID *)currentMoveId
+{
+    [san enumerateAttributesInRange:NSMakeRange(0, san.length) options:0 usingBlock:^(NSDictionary<NSAttributedStringKey,id> *attrs, NSRange range, BOOL *stop){
+        BOOL isVariation = [[attrs objectForKey:NSForegroundColorAttributeName] isEqual: self.variationForegroundColor];
+        BOOL isCurrentMove = [[attrs objectForKey:NSLinkAttributeName] isEqual: currentMoveId];
+        BOOL isComment = [[attrs objectForKey:NSLinkAttributeName] isEqual: self.commentIdentifier];
+        CGFloat fontSize = [NSFont systemFontSize] + 1;
+        if(isVariation){
+            fontSize--;
+        }
+        NSFont *font = [NSFont systemFontOfSize:fontSize];
+        if(isCurrentMove){
+            [san addAttributes:self.currentMoveStringAttributes range:range];
+        }
+        if(isComment){
+            font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSItalicFontMask];
+            [san removeAttribute:NSLinkAttributeName range:range];
+            [san addAttribute:NSForegroundColorAttributeName value: self.commentForegroundColor range:range];
+        }
+        [san addAttribute:NSFontAttributeName value:font range:range];
+    }];
+}
+
+- (NSDictionary<NSAttributedStringKey, id> *) variationStringAttributes
+{
+    return @{
+             NSForegroundColorAttributeName: self.variationForegroundColor
+             };
+}
+
+- (NSDictionary<NSAttributedStringKey, id> *) currentMoveStringAttributes
+{
+    return @{
+             NSForegroundColorAttributeName: self.currentMoveForegroundColor,
+             NSBackgroundColorAttributeName: self.currentMoveBackgroundColor
+             };
+}
+
+- (NSString*) commentIdentifier
+{
+    return @"comment";
+}
+
+- (NSColor*) currentMoveForegroundColor{
+    return [NSColor whiteColor];
+}
+
+- (NSColor*) currentMoveBackgroundColor{
+    return [NSColor darkGrayColor];
+}
+
+- (NSColor*)variationForegroundColor{
+    return [NSColor darkGrayColor];
+}
+
+- (NSColor*)commentForegroundColor{
+    return [NSColor grayColor];
+}
+
+/*!
+ Splits a string into one or two ranges, each corresponding to a move
+ @param str The string
+ @param range The range in the string
+ @param first The range of the first move (output)
+ @param second The range of the second move (output)
+ */
+- (void)splitStringMoves:(NSString*)str inRange:(NSRange)range firstMove:(NSRange*)first secondMove:(NSRange*)second
+{
+    NSRange moveSeparator = [str rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet] options:0 range:range];
+    
+    if(moveSeparator.location != NSNotFound){
+        *first = NSMakeRange(range.location, moveSeparator.location - range.location);
+        unsigned long start = moveSeparator.location + moveSeparator.length;
+        *second = NSMakeRange(start, range.location + range.length - start);
+    }
+    else {
+        *first = range;
+        *second = NSMakeRange(NSNotFound, 0);
+    }
 }
 
 - (NSString *)sanForMovesArray:(NSArray* /* of SFMMove */)movesArray
@@ -149,7 +443,6 @@ using namespace Chess;
     
     return moves;
 }
-
 
 + (NSString *)uciForMovesArray:(NSArray* /* of SFMMove */)movesArray {
     NSMutableString *uci = [[NSMutableString alloc] init];
