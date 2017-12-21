@@ -94,11 +94,11 @@
     
     if (![self atEnd]) {
         [_currentNode.next.variations addObject:newMove];
-        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
+        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNodeAndUpdateState:) object:newMove];
     }
     else{
         _currentNode.next = newMove;
-        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:newMove];
+        [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNodeAndUpdateState:) object:newMove];
     }
     
     _currentNode = newMove;
@@ -107,7 +107,7 @@
 
 - (void)addSubtreeToCurrentNode:(SFMNode *)subtree asVariation:(BOOL)asVariation
 {
-    [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNode:) object:subtree];
+    [self.undoManager registerUndoWithTarget:self selector:@selector(removeSubtreeFromNodeAndUpdateState:) object:subtree];
     if(!asVariation){
         _currentNode.next = subtree;
         [self goForwardOneMove];
@@ -143,6 +143,11 @@
     }
     [[self.undoManager prepareWithInvocationTarget:self] addSubtreeToCurrentNode:deletedNode asVariation:variation];
     [self goToNode:_currentNode];
+}
+
+- (void)removeSubtreeFromNodeAndUpdateState:(SFMNode *)node
+{
+    [self removeSubtreeFromNode:node];
     [self.delegate chessGameStateDidChange:self];
 }
 

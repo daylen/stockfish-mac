@@ -75,6 +75,11 @@
  */
 - (void)removeSubtreeFromNode:(SFMNode *)node;
 
+/*!
+ Calls removeSubtreeFromNode and updates the state of the game
+ */
+- (void)removeSubtreeFromNodeAndUpdateState:(SFMNode *)node;
+
 #pragma mark - Navigation
 @property (nonatomic, readonly) BOOL atBeginning;
 @property (nonatomic, readonly) BOOL atEnd;
