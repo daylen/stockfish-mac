@@ -570,7 +570,7 @@
 				ORGANIZATIONNAME = "Daylen Yang";
 				TargetAttributes = {
 					7705066D187CE43300BA4635 = {
-						DevelopmentTeam = 7W2M93P346;
+						DevelopmentTeam = NR8F7ZFLA3;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -579,7 +579,7 @@
 						};
 					};
 					77050691187CE43400BA4635 = {
-						DevelopmentTeam = 7W2M93P346;
+						DevelopmentTeam = NR8F7ZFLA3;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 7705066D187CE43300BA4635;
 					};
@@ -880,12 +880,13 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -904,12 +905,13 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -924,6 +926,7 @@
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
@@ -949,6 +952,7 @@
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
@@ -1022,12 +1026,13 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1043,6 +1048,7 @@
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
