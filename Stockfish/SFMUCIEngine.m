@@ -139,9 +139,18 @@ static volatile int32_t instancesAnalyzing = 0;
     if ([tokens containsObject:@"currmove"]) {
         // Current move update
         NSString *moveUci = [tokens sfm_objectAfterObject:@"currmove"];
+        if (moveUci == nil) {
+            return;
+        }
         SFMMove *move = [[self.gameToAnalyze.position movesArrayForUci:@[moveUci]] firstObject];
+        if (move == nil) {
+            return;
+        }
         NSString *moveNumber = [tokens sfm_objectAfterObject:@"currmovenumber"];
         NSString *depth = [tokens sfm_objectAfterObject:@"depth"];
+        if (moveNumber == nil || depth == nil) {
+            return;
+        }
         
         [self.delegate uciEngine:self
             didGetNewCurrentMove:move
