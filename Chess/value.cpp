@@ -83,7 +83,7 @@ Value value_from_centipawns(int cp) {
 const std::string value_to_string(Value v) {
   std::stringstream s;
 
-  if(abs(v) < VALUE_MATE - 200)
+  if(v < VALUE_MATE - 200)
     s << "cp " << value_to_centipawns(v);
   else {
     s << "mate ";

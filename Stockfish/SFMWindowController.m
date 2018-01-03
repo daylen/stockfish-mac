@@ -49,7 +49,10 @@
 {
     // Don't want to deal with multi-game PGN
     if ([self.pgnFile.games count] > 1) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Please create a new game first."];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Could not paste FEN"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"Please create a new game first."];
         [alert beginSheetModalForWindow:self.window completionHandler:nil];
         return;
     }
@@ -60,7 +63,10 @@
 
     // Validate the FEN string and throw a modal if invalid
     if (![SFMPosition isValidFen:fen]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not paste FEN" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"The FEN string is not valid. Edit your FEN string and try again."];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Could not paste FEN"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"The FEN string is not valid. Edit your FEN string and try again."];
         [alert beginSheetModalForWindow:self.window completionHandler:nil];
         return;
     }
@@ -140,14 +146,21 @@
     if ([self.currentGame.position isMate]) {
         BOOL isWhite = [self.currentGame.position sideToMove] == WHITE;
         NSString *resultText = isWhite ? @"0-1" : @"1-0";
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat: isWhite ? @"Black wins." : @"White wins."];
-        [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Game over!"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:isWhite ? @"Black wins." : @"White wins."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
         [self.currentGame setResult:resultText];
     } else if ([self.currentGame.position isImmediateDraw]) {
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Game over!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"It's a draw."];
-        [alert beginSheetModalForWindow:self.window modalDelegate:nil didEndSelector:nil contextInfo:nil];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Game over!"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"It's a draw."];
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
         [self.currentGame setResult:@"1/2-1/2"];
     }
+    
 }
 
 - (void)updateNotationView
@@ -217,7 +230,10 @@
     [self.currentGame parseMoveText:&error];
     if (error) {
         [self close];
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Could not open game" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Stockfish could not parse the move text. Edit your PGN file and try again."];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Could not open game"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"Stockfish could not parse the move text. Edit your PGN file and try again."];
         [alert runModal];
     }
     
@@ -392,17 +408,22 @@
 }
 
 - (void)doMoveWithOverwritePrompt:(SFMMove *)move {
-    NSAlert *alert = [NSAlert alertWithMessageText:@"Overwrite game history?" defaultButton:@"Create variation" alternateButton:@"Cancel" otherButton:@"Overwrite" informativeTextWithFormat:@"You are not at the end of the game. Do you want to create a variation or overwrite the current move ?"];
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Overwrite game history?"];
+    [alert addButtonWithTitle:@"Create variation"];
+    [alert addButtonWithTitle:@"Cancel"];
+    [alert addButtonWithTitle:@"Overwrite"];
+    [alert setInformativeText:@"You are not at the end of the game. Do you want to create a variation or overwrite the current move ?"];
     [alert beginSheetModalForWindow:self.window completionHandler:^(NSModalResponse returnCode) {
         switch (returnCode) {
-            case 1:
+            case NSAlertFirstButtonReturn:
                 // Create variation
                 [self doMoveForced:move];
                 break;
-            case 0:
+            case NSAlertSecondButtonReturn:
                 // Cancel
                 break;
-            case -1:
+            case NSAlertThirdButtonReturn:
                 // Overwrite
                 [self.currentGame removeSubtreeFromNode:self.currentGame.currentNode.next];
                 [self doMoveForced:move];
