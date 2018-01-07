@@ -40,8 +40,8 @@ NSString* const moveRegex =
 "[a-h]x[a-h][2-7]|" // Pawn captures (exd5)
 "[a-h][18]=[BRQN]|" // Promotions (c8=Q)
 "[a-h]x[a-h][18]=[BRQN]|" // Capture and promotion (bxa8=Q)
-"O-O|" // Short castle
 "O-O-O|" // Long castle
+"O-O|" // Short castle
 ")"
 "[\\+#]?" // Check / mate
 "([!?]{0,2})" // Move annotation (!?, ??, ?)
