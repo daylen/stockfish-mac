@@ -443,7 +443,7 @@ namespace {
   const std::string score_string(Value v) {
     std::stringstream s;
 
-    if(abs(v) >= VALUE_MATE - 200) {
+    if(v >= VALUE_MATE - 200) {
       if(v < 0)
         s << "-#" << (VALUE_MATE + v) / 2;
       else

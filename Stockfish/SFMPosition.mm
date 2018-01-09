@@ -28,6 +28,25 @@ using namespace Chess;
 
 @end
 
+NSString* const moveRegex =
+@"("
+"[BRQNK][a-h][1-8]|" // Piece moves (Ba8)
+"[BRQNK]x[a-h][1-8]|" // Captures (Qxe6)
+"[BRQN][a-h][a-h][1-8]|" // Ambiguous column moves (Rae1)
+"[BRQN][a-h]x[a-h][1-8]|" // Ambiguous column captures (Raxd1)
+"[BRQN][1-8][a-h][1-8]|" // Ambiguous row moves (R1e2)
+"[BRQN][1-8]x[a-h][1-8]|" // Ambiguous row captures (R3xa4)
+"[a-h][2-7]|" // Pawn moves (e4)
+"[a-h]x[a-h][2-7]|" // Pawn captures (exd5)
+"[a-h][18]=[BRQN]|" // Promotions (c8=Q)
+"[a-h]x[a-h][18]=[BRQN]|" // Capture and promotion (bxa8=Q)
+"O-O-O|" // Long castle
+"O-O|" // Short castle
+")"
+"[\\+#]?" // Check / mate
+"([!?]{0,2})" // Move annotation (!?, ??, ?)
+;
+
 @implementation SFMPosition
 @synthesize position = _position;
 
@@ -156,8 +175,8 @@ using namespace Chess;
     NSArray *tokens = [san componentsSeparatedByCharactersInSet:cSet];
     for(NSString *tok in tokens){
         if([tok length] > 0 && [SFMParser isLetter:[tok characterAtIndex:0]]){
-            NSRegularExpression *moveRegex = [NSRegularExpression regularExpressionWithPattern:@"([a-zA-Z\\-1-8]+)[+#]{0,1}([!?]{0,2})" options:0 error:nil];
-            NSTextCheckingResult *match = [moveRegex firstMatchInString:tok options:0 range:NSMakeRange(0, tok.length)];
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:moveRegex options:0 error:nil];
+            NSTextCheckingResult *match = [regex firstMatchInString:tok options:0 range:NSMakeRange(0, tok.length)];
             NSString *moveString = [tok substringWithRange:[match rangeAtIndex:1]];
             NSString *moveAnnotation = [tok substringWithRange:[match rangeAtIndex:2]];
             Move m = move_from_san(*self.position, [moveString UTF8String]);
@@ -282,33 +301,46 @@ using namespace Chess;
  @param string The move text
  @param nodes The nodes for which the move text was generated
  */
-- (void)setMoveAttributes:(NSMutableAttributedString*)string nodes:(NSArray *)nodes
+- (void)setMoveAttributes:(NSMutableAttributedString*)attributedString nodes:(NSArray *)nodes
 {
     NSError *error = nil;
-    NSRegularExpression *moveNumberRegex = [NSRegularExpression regularExpressionWithPattern:@"\\d+\\.+" options:0 error:&error];
-    
-    NSString *str = [string string];
-    NSArray *matches = [moveNumberRegex matchesInString:str options:0 range:NSMakeRange(0, string.length)];
+    NSRegularExpression *moveNumberRegex = [NSRegularExpression regularExpressionWithPattern:@"\\s*\\d+\\.{1,3}\\s*" options:0 error:&error];
     int plyCount = 0;
+    NSRange range, nextRange;
+    NSString *str = [attributedString string];
     
-    if([matches count] <= 0){
-        return;
-    }
-    
-    for(int i = 0; i < [matches count]; i++){
-        NSRange range = [matches[i] range];
-        NSRange nextRange = i + 1 == [matches count] ? NSMakeRange(str.length, 0) : [matches[i+1] range];
+    range = [moveNumberRegex rangeOfFirstMatchInString:str options:0 range:NSMakeRange(0, str.length)];
+
+    while(range.location != NSNotFound){
+        nextRange = [moveNumberRegex rangeOfFirstMatchInString:str options:0 range:NSMakeRange(range.location + range.length, str.length - range.location - range.length)];
+        if(nextRange.location == NSNotFound){
+            nextRange = NSMakeRange(attributedString.length - 1, 0);
+        }
+        
         unsigned long start = range.location + range.length;
         unsigned long len = nextRange.location - start;
-        start++; len-=2;
         
-        NSRange firstMove, secondMove;
+        NSRange firstMove, secondMove, remaining;
         [self splitStringMoves:str inRange:NSMakeRange(start, len) firstMove:&firstMove secondMove:&secondMove];
-        [self addMoveAnnotationAndLink:string node:[nodes objectAtIndex:plyCount++] range:firstMove];
+        [self addMoveAnnotationAndLink:attributedString node:[nodes objectAtIndex:plyCount++] range:firstMove];
         
         if(secondMove.location != NSNotFound){
-            [self addMoveAnnotationAndLink:string node:[nodes objectAtIndex:plyCount++] range:secondMove];
+            secondMove.location += [[[nodes objectAtIndex:plyCount - 1] annotation] length];
+            [self addMoveAnnotationAndLink:attributedString node:[nodes objectAtIndex:plyCount++] range:secondMove];
+            remaining = NSMakeRange(secondMove.location + secondMove.length, attributedString.length - (secondMove.location + secondMove.length));
         }
+        else {
+            if(nextRange.length == 0){
+                break;
+            }
+            else{
+                // We can have strings like 2... g5 3. Qd2 where the absence of a second move does not indicate that we are done
+                remaining = NSMakeRange(firstMove.location + firstMove.length, attributedString.length - (firstMove.location + firstMove.length));
+            }
+        }
+        
+        str = [attributedString string];
+        range = [moveNumberRegex rangeOfFirstMatchInString:str options:0 range:remaining];
     }
 }
 

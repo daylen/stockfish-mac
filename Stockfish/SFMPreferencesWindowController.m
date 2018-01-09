@@ -56,7 +56,10 @@
         self.skillCell.enabled = NO;
         self.chooseButton.enabled = NO;
         self.recommendedSettingsButton.enabled = NO;
-        NSAlert *alert = [NSAlert alertWithMessageText:@"Cannot change preferences" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Cannot change preferences"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
         [alert beginSheetModalForWindow:self.window completionHandler:nil];
     }
     
@@ -85,11 +88,19 @@
             NSData *bookmarkData = [url bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
             if (error) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSAlert alertWithMessageText:@"Uh-oh" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", [error description]] beginSheetModalForWindow:self.window completionHandler:nil];
+                    NSAlert *alert = [[NSAlert alloc] init];
+                    [alert setMessageText:@"Uh-oh"];
+                    [alert addButtonWithTitle:@"OK"];
+                    [alert setInformativeText:[error description]];
+                    [alert beginSheetModalForWindow:self.window completionHandler:nil];
                 });
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSAlert alertWithMessageText:@"Saved!" defaultButton:@"OK" alternateButton:nil otherButton:nil informativeTextWithFormat:@"Selected path to Syzygy tablebases was saved."] beginSheetModalForWindow:self.window completionHandler:nil];
+                    NSAlert *alert = [[NSAlert alloc] init];
+                    [alert setMessageText:@"Saved"];
+                    [alert addButtonWithTitle:@"OK"];
+                    [alert setInformativeText:@"Selected path to Syzygy tablebases was saved."];
+                    [alert beginSheetModalForWindow:self.window completionHandler:nil];
                 });
                 [SFMUserDefaults setSandboxBookmarkData:bookmarkData];
                 [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
