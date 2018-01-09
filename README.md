@@ -12,7 +12,7 @@ Stockfish for Mac has many of the essential features one would expect in a profe
 
 - Chess board with "Magic Move" animations, legal move highlight, best move arrow
 - Can interface with any UCI chess engine
-- Supports opening, viewing, and saving multi-game PGN files (strips out variations and commentary)
+- Supports opening, viewing, and saving multi-game PGN files
 - System hardware detection to load 64-bit, SSE4.2, or Haswell binaries
 - MultiPV
 - Undo/Redo
