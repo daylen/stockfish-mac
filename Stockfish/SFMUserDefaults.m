@@ -37,7 +37,7 @@
 }
 + (NSInteger)contemptValue {
     if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_CONTEMPT]) {
-        [SFMUserDefaults setContemptValue:0];
+        [SFMUserDefaults setContemptValue:20];
     }
     return [[NSUserDefaults standardUserDefaults] integerForKey:UCI_CONTEMPT];
 }
