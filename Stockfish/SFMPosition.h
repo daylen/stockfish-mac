@@ -37,14 +37,14 @@
  @param move The move.
  @param error
  */
-- (void)doMove:(SFMMove *)move error:(NSError * __autoreleasing *)error;
+- (BOOL)doMove:(SFMMove *)move error:(NSError * __autoreleasing *)error;
 
 /*!
  Perform a sequence of moves on the current position
  @param moves The moves
  @param error
  */
-- (void)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error;
+- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error;
 
 /*!
  Undoes the number of moves on the current position.

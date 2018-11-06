@@ -24,7 +24,10 @@
 - (void)testParseGamesFromString
 {
     NSString *fakepgn = @"[tag \"whoa\"]\r\n[another \"yay\"]\n\n1. e4\re5 2. Nf3\n\n[tag \"whoa\"]\n\n1. e4\n";
-    NSMutableArray *games = [SFMParser parseGamesFromString:fakepgn];
+    NSError *err = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:fakepgn error:&err];
+    XCTAssertNotNil(games);
+    XCTAssertNil(err);
     XCTAssertEqual([games count], 2, @"Wrong count");
     SFMChessGame *first = games[0];
     SFMChessGame *second = games[1];
@@ -36,7 +39,10 @@
 {
     SFMPosition *initialPosition = [[SFMPosition alloc] init];
     NSString *moveText = @"1. e4\ne5 2.\rNf3 Nc6\r\n3. Bb5";
-    SFMNode *parsedNode = [SFMParser parseMoveText:moveText position:initialPosition];
+    NSError *err = nil;
+    SFMNode *parsedNode = [SFMParser parseMoveText:moveText position:initialPosition error:&err];
+    XCTAssertNotNil(parsedNode);
+    XCTAssertNil(err);
     NSArray *moves = @[
                        [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4],
                        [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5],
@@ -54,7 +60,10 @@
     SFMPosition *initialPosition = [[SFMPosition alloc] init];
     NSString *moveText = @"1.e4 (1.c4 c5 {Wow} 2.g3) e5 2.Nf3 Nc6 3. Bb5";
     
-    SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition];
+    NSError *err = nil;
+    SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition error:&err];
+    XCTAssertNotNil(parsed);
+    XCTAssertNil(err);
     NSArray *mainMoves = @[
                        [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4],
                        [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5],

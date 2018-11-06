@@ -7,12 +7,13 @@
 //
 
 #import "SFMDocument.h"
+#import "Constants.h"
 #import "SFMWindowController.h"
 #import "SFMPGNFile.h"
 
 @interface SFMDocument()
 
-@property SFMPGNFile *pgnFile;
+@property (nonatomic) SFMPGNFile *pgnFile;
 
 @end
 
@@ -50,15 +51,25 @@
 
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
-    BOOL readSuccess = NO;
     NSString *fileContents = [NSString stringWithContentsOfURL:url usedEncoding:nil error:outError];
     
     if (fileContents) {
-        readSuccess = YES;
-        self.pgnFile = [[SFMPGNFile alloc] initWithString:fileContents];
+        self.pgnFile = [[SFMPGNFile alloc] initWithString:fileContents error:outError];
+        if (self.pgnFile) {
+            return YES;
+        }
     }
-    return readSuccess;
+
+    if (outError != NULL && *outError == nil) {
+        *outError = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+    }
+    return NO;
     
+}
+
+- (void)setPgnFile:(SFMPGNFile * _Nonnull)pgnFile
+{
+    _pgnFile = pgnFile;
 }
 
 @end

@@ -23,7 +23,7 @@
  Create the given PGN.
  @param str
  */
-- (instancetype)initWithString:(NSString *)str;
+- (instancetype)initWithString:(NSString *)str error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 #pragma mark - Export
 
@@ -32,5 +32,7 @@
  @return The PGN file as an NSData blob.
  */
 @property (nonatomic, readonly, copy) NSData *data;
+
++ (SFMPGNFile * _Nullable)gameFromPgnOrFen:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

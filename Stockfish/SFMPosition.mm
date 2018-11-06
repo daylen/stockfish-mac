@@ -98,7 +98,7 @@ NSString* const moveRegex =
 
 # pragma mark - State modification
 
-- (void)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
+- (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
     Move m = [[self class] libMoveFromMoveObj:move];
     
     Move mlist[500];
@@ -119,6 +119,7 @@ NSString* const moveRegex =
         if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
                                                         code:ILLEGAL_MOVE_CODE userInfo:nil];
     }
+    return foundLegalMove;
 }
 
 - (BOOL)undoMoves:(int)numberOfMoves
@@ -138,16 +139,15 @@ NSString* const moveRegex =
     return YES;
 }
 
-- (void)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error
+- (BOOL)doMoves:(NSArray *)moves error:(NSError *__autoreleasing *)error
 {
     for(SFMMove *move in moves){
-        NSError *e = nil;
-        [self doMove:move error:&e];
-        if(e){
-            *error = e;
-            break;
+        BOOL ok = [self doMove:move error:error];
+        if (!ok) {
+            return NO;
         }
     }
+    return YES;
 }
 
 /*!
@@ -189,7 +189,10 @@ NSString* const moveRegex =
                 SFMMove *move = [[self class] moveObjFromLibMove:m];
                 currentNode.next = [[SFMNode alloc] initWithMove:move annotation:moveAnnotation andParent:currentNode];
                 currentNode = currentNode.next;
-                [self doMove:move error:nil];
+                BOOL ok = [self doMove:move error:error];
+                if (!ok) {
+                    return nil;
+                }
             }
         }
     }
