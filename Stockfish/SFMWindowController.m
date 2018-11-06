@@ -119,7 +119,7 @@
 - (IBAction)doBestLine:(id)sender
 {
     if (self.engine.isAnalyzing) {
-        [self doMoves:((SFMUCILine *)self.engine.lines[@(1)]).moves];
+        [self doMoves:((SFMUCILine *)self.engine.lines[@(1)]).moves positionAtStart:YES];
     }
 }
 - (IBAction)increaseVariations:(id)sender {
@@ -449,11 +449,11 @@
 }
 
 - (void)doMove:(SFMMove *)move {
-    [self doMoves:@[move]];
+    [self doMoves:@[move] positionAtStart:NO];
 }
 
-- (void)doMoves:(NSArray<SFMMove *> *)moves {
-    [self doMoves:moves fromIndex:0];
+- (void)doMoves:(NSArray<SFMMove *> *)moves positionAtStart:(BOOL)positionAtStart {
+    [self doMoves:moves fromIndex:0 positionAtStart:positionAtStart];
 }
 
 /*!
@@ -469,7 +469,8 @@
  * which case that is done asynchronously and we will come back here to
  * finish the job.
  */
-- (void)doMoves:(NSArray<SFMMove *> *)moves fromIndex:(NSUInteger)index {
+- (void)doMoves:(NSArray<SFMMove *> *)moves fromIndex:(NSUInteger)fromIndex positionAtStart:(BOOL)positionAtStart {
+    NSUInteger index = fromIndex;
     while (index < moves.count) {
         SFMMove * move = moves[index];
 
@@ -485,7 +486,7 @@
                         [weakSelf doMovesComplete];
                     }
                     else {
-                        [weakSelf doMoves:moves fromIndex:(index + 1)];
+                        [weakSelf doMoves:moves fromIndex:(index + 1) positionAtStart:positionAtStart];
                     }
                 }];
                 return;
@@ -496,7 +497,16 @@
         }
         index++;
     }
+    if (positionAtStart && fromIndex < moves.count) {
+        [self goBackNMoves:moves.count - fromIndex];
+    }
     [self doMovesComplete];
+}
+
+-(void)goBackNMoves:(NSUInteger)n {
+    for (int i = 0; i < n; i++) {
+        [self.currentGame goBackOneMove];
+    }
 }
 
 - (void)doMoveWithOverwritePrompt:(SFMMove *)move onCompletion:(void(^)(BOOL wasCancelled))onCompletion {
