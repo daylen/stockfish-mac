@@ -12,9 +12,11 @@
 
 @interface SFMDocument : NSDocument
 
+@property (nonatomic, readonly) BOOL isInInitialState;
+
 /**
- * Only call this before creating the document window,
- * otherwise things are going to get messy.
+ * This will update the document window, if one has been
+ * created already.
  */
 - (void)setPgnFile:(SFMPGNFile * _Nonnull)pgnFile;
 

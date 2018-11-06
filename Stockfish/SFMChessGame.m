@@ -72,6 +72,10 @@
     return tmp;
 }
 
+- (BOOL)isInInitialState {
+    return self.moveText == nil;
+}
+
 - (BOOL)parseMoveText:(NSError *__autoreleasing *)error {
     if(!_moveTextParsed){
         _currentNode = [SFMParser parseMoveText:_moveText position:[self.startPosition copy] error:error];

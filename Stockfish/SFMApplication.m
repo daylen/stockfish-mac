@@ -37,10 +37,27 @@
         return;
     }
 
-    SFMDocument *doc = (SFMDocument *)[dc openUntitledDocumentAndDisplay:NO error:&err];
+    SFMDocument *doc = [self findBlankDocument];
+    if (doc == nil) {
+        doc = (SFMDocument *)[dc openUntitledDocumentAndDisplay:NO error:&err];
+    }
     doc.pgnFile = game;
-    [doc makeWindowControllers];
-    [doc showWindows];
+    if (doc.windowControllers.count == 0) {
+        [doc makeWindowControllers];
+        [doc showWindows];
+    }
+}
+
+- (SFMDocument * _Nullable)findBlankDocument
+{
+    NSDocumentController *dc = NSDocumentController.sharedDocumentController;
+    NSArray<SFMDocument *> * docs = dc.documents;
+    for (SFMDocument * doc in docs) {
+        if (!doc.isDocumentEdited && doc.isInInitialState) {
+            return doc;
+        }
+    }
+    return nil;
 }
 
 - (void)showHelp:(id)sender

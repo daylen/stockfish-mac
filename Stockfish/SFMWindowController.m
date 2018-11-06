@@ -205,20 +205,23 @@
     self.boardView.delegate = self;
     self.boardView.dataSource = self;
     
+    [self.gameListView setDelegate:self];
+    [self.gameListView setDataSource:self];
+    [self.gameListView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
+
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     self.engine.delegate = self;
     
+    [self handlePGNFile];
+}
+
+- (void)handlePGNFile
+{
     [self loadGameAtIndex:0];
     
     // Decide whether to show or hide the game sidebar
-    if ([self.pgnFile.games count] > 1) {
-        [self.gameListView setDelegate:self];
-        [self.gameListView setDataSource:self];
-        [self.gameListView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleSourceList];
-    } else {
-        [self.mainSplitView.subviews[0] removeFromSuperview];
-    }
-    
+    BOOL showSidebar = (self.pgnFile.games.count > 1);
+    self.mainSplitView.subviews[0].hidden = !showSidebar;
 }
 
 - (void)loadGameAtIndex:(int)index

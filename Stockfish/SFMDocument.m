@@ -70,6 +70,21 @@
 - (void)setPgnFile:(SFMPGNFile * _Nonnull)pgnFile
 {
     _pgnFile = pgnFile;
+
+    for (SFMWindowController * win in self.windowControllers) {
+        win.pgnFile = pgnFile;
+        [win handlePGNFile];
+    }
+}
+
+- (BOOL)isInInitialState
+{
+    for (SFMChessGame * game in self.pgnFile.games) {
+        if (!game.isInInitialState) {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 @end

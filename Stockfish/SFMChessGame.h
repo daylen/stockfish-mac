@@ -31,6 +31,8 @@
 @property (readonly) SFMNode *currentNode;
 @property (nonatomic) NSUndoManager *undoManager;
 
+@property (nonatomic, readonly) BOOL isInInitialState;
+
 #pragma mark - Init
 
 /*!
