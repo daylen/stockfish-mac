@@ -15,4 +15,6 @@
 
 @property SFMPGNFile *pgnFile;
 
+- (void)handlePGNFile;
+
 @end

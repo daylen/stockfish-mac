@@ -7,11 +7,12 @@
 //
 
 #import "SFMParser.h"
+#import "Constants.h"
 #import "SFMChessGame.h"
 
 @implementation SFMParser
 
-+ (NSMutableArray *)parseGamesFromString:(NSString *)str
++ (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     NSMutableArray *games = [[NSMutableArray alloc] init];
     
@@ -44,6 +45,10 @@
             if (readingTags) {
                 readingTags = NO;
             }
+
+            if (moves == nil) {
+                moves = [NSMutableString new];
+            }
             
             [moves appendFormat:@"%@ ", line];
         }
@@ -51,29 +56,52 @@
     // Upon reaching the end of the file we need to add the last game
     SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]];
     [games addObject:game];
+
+    for (SFMChessGame *game in games) {
+        NSError *err = nil;
+        BOOL ok = [game parseMoveText:&err];
+        if (!ok) {
+            return nil;
+        }
+    }
+
     return games;
-    
 }
 
-+ (SFMNode *)parseMoveText:(NSString *)moveText position:(SFMPosition *)position{
++ (SFMNode * _Nullable)parseMoveText:(NSString * _Nullable)moveText position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error {
     SFMNode *head = [[SFMNode alloc] init];
+    if (moveText == nil || [moveText isEqualToString:@""]) {
+        return head;
+    }
     NSMutableCharacterSet *charactersToTrim = [[NSMutableCharacterSet alloc] init];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"*"]];
-    return [self parseString:[moveText stringByTrimmingCharactersInSet:charactersToTrim] fromNode:head position:position];
+    return [self parseString:[moveText stringByTrimmingCharactersInSet:charactersToTrim] fromNode:head position:position error:error];
 }
 
-+ (SFMNode *)parseString:(NSString *)str fromNode:(SFMNode *)node position:(SFMPosition *)position
++ (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     NSArray *tokens = [self tokenizeString:str];
+    if (tokens.count == 0) {
+        if (error != NULL) {
+            *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+        }
+        return nil;
+    }
     SFMNode *currentNode = node;
     for(NSString *token in tokens){
-        currentNode = [self parseToken:token fromNode:currentNode position:position];
+        currentNode = [self parseToken:token fromNode:currentNode position:position error:error];
+        if (currentNode == nil) {
+            if (error != NULL && *error == nil) {
+                *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+            }
+            return nil;
+        }
     }
     return node;
 }
 
-+ (SFMNode *)parseToken:(NSString *)token fromNode:(SFMNode *)node position:(SFMPosition *)position
++ (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     SFMNode *currentNode = node;
     if([token characterAtIndex:0] == '{'){ //comment
@@ -82,16 +110,21 @@
     else if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
-        [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy]];
+        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] error:error];
+        if (parsedNode == nil) {
+            return nil;
+        }
         [dummy.next setParent:currentNode.parent];
         [currentNode.variations addObject:dummy.next];
-        [position doMove:node.move error:nil];
+        [position doMove:node.move error:error];
+        if (error != NULL && *error != nil) {
+            return nil;
+        }
     }
     else{ //plain moves
-        NSError *e = nil;
-        currentNode = [position nodeForSan:token parentNode:currentNode error:&e];
-        if(e){
-            // TODO: handle
+        currentNode = [position nodeForSan:token parentNode:currentNode error:error];
+        if (currentNode == nil) {
+            return nil;
         }
     }
     return currentNode;

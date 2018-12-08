@@ -66,17 +66,25 @@
 
 - (SFMNode *)startNode{
     SFMNode *tmp = _currentNode;
-    while(!tmp.isTopNode){
+    while(tmp != nil && !tmp.isTopNode){
         tmp = tmp.parent;
     }
     return tmp;
 }
 
-- (void)parseMoveText:(NSError *__autoreleasing *)error {
+- (BOOL)isInInitialState {
+    return self.moveText == nil;
+}
+
+- (BOOL)parseMoveText:(NSError *__autoreleasing *)error {
     if(!_moveTextParsed){
-        _currentNode = [SFMParser parseMoveText:_moveText position:[self.startPosition copy]];
+        _currentNode = [SFMParser parseMoveText:_moveText position:[self.startPosition copy] error:error];
+        if (_currentNode == nil) {
+            return NO;
+        }
         _moveTextParsed = YES;
     }
+    return YES;
 }
 
 #pragma mark - State Modification

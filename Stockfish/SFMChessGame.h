@@ -31,6 +31,8 @@
 @property (readonly) SFMNode *currentNode;
 @property (nonatomic) NSUndoManager *undoManager;
 
+@property (nonatomic, readonly) BOOL isInInitialState;
+
 #pragma mark - Init
 
 /*!
@@ -53,7 +55,7 @@
  If the game was created using move text, call this before calling any other methods.
  @param error
  */
-- (void)parseMoveText:(NSError * __autoreleasing *)error;
+- (BOOL)parseMoveText:(NSError * __autoreleasing *)error;
 
 #pragma mark - State Modification
 

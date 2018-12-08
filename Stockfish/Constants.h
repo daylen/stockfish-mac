@@ -18,6 +18,7 @@
 
 #define GAME_ERROR_DOMAIN @"SFMGameErrorDomain"
 #define NOT_AT_END_CODE 0
+#define GAME_PARSE_ERROR_CODE 1
 
 // For the board view
 #define EXTERIOR_BOARD_MARGIN 40
