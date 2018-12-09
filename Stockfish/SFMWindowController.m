@@ -326,7 +326,7 @@
         SFMUCILine *line = lines[pvNum];
         
         // First line
-        NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentNode.ply / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]]}];
+        NSAttributedString *boldPv  = [[NSAttributedString alloc] initWithString:[engine.gameToAnalyze.position sanForMovesArray:line.moves html:NO breakLines:NO num:(int) engine.gameToAnalyze.currentNode.ply / 2 + 1] attributes:@{NSFontAttributeName: [NSFont boldSystemFontOfSize:[NSFont systemFontSize]], NSForegroundColorAttributeName: [NSColor labelColor]}];
         
         // Second line
         NSMutableArray /* of NSString */ *statusComponents = [[NSMutableArray alloc] init];
@@ -348,7 +348,7 @@
         // 5. Nodes
         [statusComponents addObject:[SFMFormatter nodesAsText:line.nodes]];
         
-        NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
+        NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]], NSForegroundColorAttributeName: [NSColor labelColor]}];
         
         
         [combined appendAttributedString:boldPv];

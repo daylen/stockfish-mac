@@ -290,7 +290,7 @@ NSString* const moveRegex =
     
     NSString *lineSan = @(line_to_san(*position.position, line, 0, NO, ply / 2 + 1).c_str());
     
-    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan];
+    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan attributes:@{NSForegroundColorAttributeName: [NSColor labelColor]}];
     [self setMoveAttributes:attributedString nodes:nodes];
     if(node.comment != nil){
         [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:[node.comment stringByAppendingString:@" "] attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
@@ -410,15 +410,19 @@ NSString* const moveRegex =
 }
 
 - (NSColor*) currentMoveBackgroundColor{
-    return [NSColor darkGrayColor];
+    if (@available(macOS 10.14, *)) {
+        return [NSColor selectedContentBackgroundColor];
+    } else {
+        return [NSColor darkGrayColor];
+    }
 }
 
 - (NSColor*)variationForegroundColor{
-    return [NSColor darkGrayColor];
+    return [NSColor secondaryLabelColor];
 }
 
 - (NSColor*)commentForegroundColor{
-    return [NSColor grayColor];
+    return [NSColor secondaryLabelColor];
 }
 
 /*!
