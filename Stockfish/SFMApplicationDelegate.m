@@ -15,7 +15,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     NSLog(@"Started app");
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{ @"NSApplicationCrashOnExceptions": @YES }];
-    [Fabric with:@[[Crashlytics class]]];
+//    [Fabric with:@[[Crashlytics class]]];
 }
 
 @end
