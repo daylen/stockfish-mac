@@ -205,6 +205,11 @@
                                     <action selector="doBestMove:" target="-1" id="RV1-zN-XAN"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Do Best Line" keyEquivalent="l" id="xkB-YK-oX8">
+                                <connections>
+                                    <action selector="doBestLine:" target="-1" id="CwT-Mm-AOg"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="Vzb-qg-RZu"/>
                             <menuItem title="Increase Variations" keyEquivalent="+" id="Egv-bl-mcY">
                                 <connections>

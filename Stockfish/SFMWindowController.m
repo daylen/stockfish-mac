@@ -33,6 +33,8 @@
 @property SFMChessGame *currentGame;
 @property SFMUCIEngine *engine;
 
+@property (nonatomic) BOOL isUndoRedoing;
+
 @end
 
 @implementation SFMWindowController
@@ -112,6 +114,12 @@
 {
     if (self.engine.isAnalyzing) {
         [self doMove:[((SFMUCILine *)self.engine.lines[@(1)]).moves firstObject]];
+    }
+}
+- (IBAction)doBestLine:(id)sender
+{
+    if (self.engine.isAnalyzing) {
+        [self doMoves:((SFMUCILine *)self.engine.lines[@(1)]).moves positionAtStart:YES];
     }
 }
 - (IBAction)increaseVariations:(id)sender {
@@ -222,6 +230,32 @@
     // Decide whether to show or hide the game sidebar
     BOOL showSidebar = (self.pgnFile.games.count > 1);
     self.mainSplitView.subviews[0].hidden = !showSidebar;
+
+    self.isUndoRedoing = NO;
+
+    NSNotificationCenter *nc = NSNotificationCenter.defaultCenter;
+    [nc addObserver:self
+           selector:@selector(beginUndoRedo:)
+               name:NSUndoManagerWillUndoChangeNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(endUndoRedo:)
+               name:NSUndoManagerDidUndoChangeNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(beginUndoRedo:)
+               name:NSUndoManagerWillRedoChangeNotification
+             object:nil];
+    [nc addObserver:self
+           selector:@selector(endUndoRedo:)
+               name:NSUndoManagerDidRedoChangeNotification
+             object:nil];
+}
+
+- (void)dealloc
+{
+    NSNotificationCenter *nc = NSNotificationCenter.defaultCenter;
+    [nc removeObserver:self];
 }
 
 - (void)loadGameAtIndex:(int)index
@@ -253,7 +287,7 @@
         } else {
             [menuItem setTitle:@"Start Infinite Analysis"];
         }
-    } else if ([menuItem action] == @selector(doBestMove:)) {
+    } else if ([menuItem action] == @selector(doBestMove:) || [menuItem action] == @selector(doBestLine:)) {
         return self.engine.isAnalyzing;
     } else if ([menuItem action] == @selector(firstMove:) || [menuItem action] == @selector(previousMove:)) {
         return ![self.currentGame atBeginning];
@@ -379,6 +413,26 @@
 #pragma mark - SFMChessGameDelegate
 
 - (void)chessGameStateDidChange:(SFMChessGame *)chessGame {
+    // When we are undoing, we must only do one syncToViewsAndEngine
+    // call, at the end of the batch.  Otherwise, we'll send multiple
+    // board changes to the engine back-to-back, and it gets out of sync.
+    // This isn't an issue for most commands because they are single
+    // changes anyway, but Do Best Line can insert multiple moves at once.
+    if (!self.isUndoRedoing) {
+        [self syncToViewsAndEngine];
+    }
+}
+
+#pragma mark - Undo / redo handling
+
+- (void)beginUndoRedo:(id)sender
+{
+    self.isUndoRedoing = true;
+}
+
+- (void)endUndoRedo:(id)sender
+{
+    self.isUndoRedoing = false;
     [self syncToViewsAndEngine];
 }
 
@@ -395,22 +449,67 @@
 }
 
 - (void)doMove:(SFMMove *)move {
-    if(![self.currentGame atEnd]){
-        SFMNode *existingVariation = [self.currentGame.currentNode.next existingVariationForMove:move];
-        if(existingVariation){
-            [self.currentGame goToNode:existingVariation];
-            [self syncToViewsAndEngine];
+    [self doMoves:@[move] positionAtStart:NO];
+}
+
+- (void)doMoves:(NSArray<SFMMove *> *)moves positionAtStart:(BOOL)positionAtStart {
+    [self doMoves:moves fromIndex:0 positionAtStart:positionAtStart];
+}
+
+/*!
+ * Re-sync, now that we have handled the batch of moves.
+ */
+- (void)doMovesComplete {
+    [self syncToViewsAndEngine];
+}
+
+/*!
+ * Do as many moves as possible from the given array, starting at the given
+ * index.  We may need to prompt the user to create a new variation, in
+ * which case that is done asynchronously and we will come back here to
+ * finish the job.
+ */
+- (void)doMoves:(NSArray<SFMMove *> *)moves fromIndex:(NSUInteger)fromIndex positionAtStart:(BOOL)positionAtStart {
+    NSUInteger index = fromIndex;
+    while (index < moves.count) {
+        SFMMove * move = moves[index];
+
+        if(![self.currentGame atEnd]){
+            SFMNode *existingVariation = [self.currentGame.currentNode.next existingVariationForMove:move];
+            if(existingVariation){
+                [self.currentGame goToNode:existingVariation];
+            }
+            else{
+                typeof(self) __weak weakSelf = self;
+                [self doMoveWithOverwritePrompt:move onCompletion:^(BOOL wasCancelled) {
+                    if (wasCancelled) {
+                        [weakSelf doMovesComplete];
+                    }
+                    else {
+                        [weakSelf doMoves:moves fromIndex:(index + 1) positionAtStart:positionAtStart];
+                    }
+                }];
+                return;
+            }
         }
         else{
-            [self doMoveWithOverwritePrompt:move];
+            [self doMoveForced:move];
         }
+        index++;
     }
-    else{
-        [self doMoveForced:move];
+    if (positionAtStart && fromIndex < moves.count) {
+        [self goBackNMoves:moves.count - fromIndex];
+    }
+    [self doMovesComplete];
+}
+
+-(void)goBackNMoves:(NSUInteger)n {
+    for (int i = 0; i < n; i++) {
+        [self.currentGame goBackOneMove];
     }
 }
 
-- (void)doMoveWithOverwritePrompt:(SFMMove *)move {
+- (void)doMoveWithOverwritePrompt:(SFMMove *)move onCompletion:(void(^)(BOOL wasCancelled))onCompletion {
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:@"Overwrite game history?"];
     [alert addButtonWithTitle:@"Create variation"];
@@ -422,14 +521,17 @@
             case NSAlertFirstButtonReturn:
                 // Create variation
                 [self doMoveForced:move];
+                onCompletion(NO);
                 break;
             case NSAlertSecondButtonReturn:
                 // Cancel
+                onCompletion(YES);
                 break;
             case NSAlertThirdButtonReturn:
                 // Overwrite
                 [self.currentGame removeSubtreeFromNode:self.currentGame.currentNode.next];
                 [self doMoveForced:move];
+                onCompletion(NO);
                 break;
         }
     }];
@@ -446,7 +548,6 @@
     
     [self checkIfGameOver];
     [self.document updateChangeCount:NSChangeDone];
-    [self syncToViewsAndEngine];
 }
 
 #pragma mark - SFMBoardViewDataSource
