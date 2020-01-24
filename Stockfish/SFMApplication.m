@@ -26,6 +26,15 @@
     NSString *str = [pb stringForType:NSPasteboardTypeString];
     str = [str stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
+    if (str == nil) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Could not understand clipboard"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setInformativeText:@"The clipboard does not contain text.  Copy a valid PGN or FEN and try again."];
+        [alert runModal];
+        return;
+    }
+
     NSError *err = nil;
     SFMPGNFile *game = [SFMPGNFile gameFromPgnOrFen:str error:&err];
     if (game == nil) {
