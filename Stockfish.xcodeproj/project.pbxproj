@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -56,6 +56,7 @@
 		7745E5001A4F978C00E5ED35 /* SFMPreferenceCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7745E4FF1A4F978C00E5ED35 /* SFMPreferenceCellView.m */; };
 		7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7745E5011A4F99F000E5ED35 /* SFMPreferenceCellView.xib */; };
 		7745E5061A4FA25900E5ED35 /* SFMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 7745E5051A4FA25900E5ED35 /* SFMUserDefaults.m */; };
+		774755AA24E2834E0080EFC3 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 774755A924E2834E0080EFC3 /* Sentry */; };
 		7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.m */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.m */; };
 		775A3B691A4BC6AF00C3CD59 /* SFMBoardViewTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 775A3B681A4BC6AF00C3CD59 /* SFMBoardViewTest.m */; };
@@ -242,6 +243,7 @@
 			files = (
 				779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */,
 				77050672187CE43300BA4635 /* Cocoa.framework in Frameworks */,
+				774755AA24E2834E0080EFC3 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -547,6 +549,9 @@
 			dependencies = (
 			);
 			name = Stockfish;
+			packageProductDependencies = (
+				774755A924E2834E0080EFC3 /* Sentry */,
+			);
 			productName = Stockfish;
 			productReference = 7705066E187CE43300BA4635 /* Stockfish.app */;
 			productType = "com.apple.product-type.application";
@@ -604,6 +609,9 @@
 				Base,
 			);
 			mainGroup = 77050665187CE43300BA4635;
+			packageReferences = (
+				774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
 			productRefGroup = 7705066F187CE43300BA4635 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -924,7 +932,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
@@ -955,7 +966,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1085,7 +1099,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1157,6 +1174,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		774755A924E2834E0080EFC3 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 77050666187CE43300BA4635 /* Project object */;
 }
