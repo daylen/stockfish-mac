@@ -165,7 +165,7 @@
     // Draw coordinates
     NSString *str;
     NSMutableParagraphStyle *pStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
-    [pStyle setAlignment:NSCenterTextAlignment];
+    [pStyle setAlignment:NSTextAlignmentCenter];
     for (int i = 0; i < 8; i++) {
         // Down
         str = [NSString stringWithFormat:@"%d", self.boardIsFlipped ? (i + 1) : (8 - i)];

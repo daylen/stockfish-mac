@@ -296,7 +296,7 @@
     } else if ([menuItem action] == @selector(decreaseVariations:)) {
         return self.engine.multipv != 1;
     } else if ([menuItem action] == @selector(toggleShowArrows:)) {
-        [menuItem setState:[SFMUserDefaults arrowsEnabled] ? NSOnState : NSOffState];
+        [menuItem setState:[SFMUserDefaults arrowsEnabled] ? NSControlStateValueOn : NSControlStateValueOff];
     }
     return YES;
 }
@@ -561,7 +561,7 @@
     [alert addButtonWithTitle:@"Knight"];
     [alert setMessageText:@"Pawn Promotion"];
     [alert setInformativeText:@"What would you like to promote your pawn to?"];
-    [alert setAlertStyle:NSWarningAlertStyle];
+    [alert setAlertStyle:NSAlertStyleWarning];
     NSInteger choice = [alert runModal];
     switch (choice) {
         case 1000:

@@ -15,6 +15,7 @@
 #import "NSArray+ArrayUtils.h"
 #import "SFMUCIOption.h"
 #import "SFMUserDefaults.h"
+#include <stdatomic.h>
 
 typedef NS_ENUM(NSInteger, SFMCPURating) {
     SFMCPURating64Bit,
@@ -39,7 +40,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 
 @implementation SFMUCIEngine
 
-static volatile int32_t instancesAnalyzing = 0;
+static _Atomic(int) instancesAnalyzing = 0;
 
 #pragma mark - Setters
 
@@ -53,7 +54,7 @@ static volatile int32_t instancesAnalyzing = 0;
             [self setUciOption:@"MultiPV" integerValue:self.multipv];
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);
-            OSAtomicIncrement32(&instancesAnalyzing);
+            atomic_fetch_add(&instancesAnalyzing, 1);
             [self.bookmarkUrl startAccessingSecurityScopedResource];
             [self sendCommandToEngine:@"go infinite"];
         } else {
@@ -67,7 +68,7 @@ static volatile int32_t instancesAnalyzing = 0;
     if (self.isAnalyzing) {
         self.isAnalyzing = NO;
         dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            _gameToAnalyze = gameToAnalyze;
+            self->_gameToAnalyze = gameToAnalyze;
             self.isAnalyzing = YES;
         });
 
@@ -83,7 +84,7 @@ static volatile int32_t instancesAnalyzing = 0;
     if (self.isAnalyzing) {
         self.isAnalyzing = NO;
         dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            _multipv = multipv;
+            self->_multipv = multipv;
             self.isAnalyzing = YES;
         });
     } else {
@@ -170,7 +171,7 @@ static volatile int32_t instancesAnalyzing = 0;
     } else if ([tokens containsObject:@"bestmove"]) {
         // Stopped analysis
         dispatch_group_leave(_analysisGroup);
-        OSAtomicDecrement32(&instancesAnalyzing);
+        atomic_fetch_sub(&instancesAnalyzing, 1);
     } else if ([tokens containsObject:@"id"] && [tokens containsObject:@"name"]) {
         // Engine ID
         [self.delegate uciEngine:self didGetEngineName:[str substringFromIndex:[str rangeOfString:@"id name"].length + 1]];
@@ -336,7 +337,7 @@ static volatile int32_t instancesAnalyzing = 0;
     if (self.isAnalyzing) {
         // Apparently if you don't balance out your dispatch calls, you'll get very weird crashes
         dispatch_group_leave(_analysisGroup);
-        OSAtomicDecrement32(&instancesAnalyzing);
+        atomic_fetch_sub(&instancesAnalyzing, 1);
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.engineTask interrupt];
