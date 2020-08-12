@@ -150,7 +150,6 @@ static _Atomic(int) instancesAnalyzing = 0;
     if ([str isEqualToString:@""]) {
         return;
     }
-    NSLog(@"Engine: %@", str);
     
     NSArray *tokens = [str componentsSeparatedByString:@" "];
     
