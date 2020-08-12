@@ -16,11 +16,13 @@
 #import "SFMUCIOption.h"
 #import "SFMUserDefaults.h"
 #include <stdatomic.h>
+#include <sys/sysctl.h>
 
 typedef NS_ENUM(NSInteger, SFMCPURating) {
-    SFMCPURating64Bit,
-    SFMCPURatingSSE42,
-    SFMCPURatingBMI2
+    SFMCPURatingX86_64,
+    SFMCPURatingX86_64_SSE42,
+    SFMCPURatingX86_64_BMI2,
+    SFMCPURatingX86_64_AVX512
 };
 
 @interface SFMUCIEngine()
@@ -32,6 +34,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 @property (nonatomic) NSURL *bookmarkUrl;
 
 @property (readwrite, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *lines;
+@property (readwrite, nonatomic) NSString *nnueInfo;
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
 @property dispatch_group_t analysisGroup;
@@ -52,6 +55,7 @@ static _Atomic(int) instancesAnalyzing = 0;
         if (isAnalyzing) {
             NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
             [self setUciOption:@"MultiPV" integerValue:self.multipv];
+            [self setUciOption:@"Use NNUE" stringValue:self.useNnue ? @"true" : @"false"];
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);
             atomic_fetch_add(&instancesAnalyzing, 1);
@@ -89,6 +93,18 @@ static _Atomic(int) instancesAnalyzing = 0;
         });
     } else {
         _multipv = multipv;
+    }
+}
+
+- (void)setUseNnue:(BOOL)useNnue {
+    if (self.isAnalyzing) {
+        self.isAnalyzing = NO;
+        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            self->_useNnue = useNnue;
+            self.isAnalyzing = YES;
+        });
+    } else {
+        _useNnue = useNnue;
     }
 }
 
@@ -134,6 +150,7 @@ static _Atomic(int) instancesAnalyzing = 0;
     if ([str isEqualToString:@""]) {
         return;
     }
+    NSLog(@"Engine: %@", str);
     
     NSArray *tokens = [str componentsSeparatedByString:@" "];
     
@@ -191,6 +208,18 @@ static _Atomic(int) instancesAnalyzing = 0;
         if ([self.delegate respondsToSelector:@selector(uciEngine:didGetOptions:)]) {
             [self.delegate uciEngine:self didGetOptions:self.options];
         }
+    } else if ([tokens containsObject:@"string"] && [tokens containsObject:@"evaluation"]) {
+        if ([tokens containsObject:@"NNUE"]) {
+            for (NSString *token in tokens) {
+                if ([token containsString:@".nnue"]) {
+                    self.nnueInfo = token;
+                }
+            }
+            [self.delegate uciEngine:self didGetInfoString:_nnueInfo];
+        } else {
+            self.nnueInfo = @"";
+            [self.delegate uciEngine:self didGetInfoString:_nnueInfo];
+        }
     } else {
         // Ignore
     }
@@ -209,17 +238,21 @@ static _Atomic(int) instancesAnalyzing = 0;
 
 + (NSString *)bestEnginePath {
     SFMCPURating cpuRating = [SFMUCIEngine cpuRating];
-    if (cpuRating == SFMCPURatingBMI2) {
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-bmi2" ofType:@""];
-    } else if (cpuRating == SFMCPURatingSSE42) {
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-sse42" ofType:@""];
-    } else {
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-64" ofType:@""];
-    }
+    if (cpuRating == SFMCPURatingX86_64_AVX512)
+        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-avx512" ofType:@""];
+    if (cpuRating == SFMCPURatingX86_64_BMI2)
+        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-bmi2" ofType:@""];
+    
+    // SSE4.2 implies support for POPCNT.
+    if (cpuRating == SFMCPURatingX86_64_SSE42)
+        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-sse41-popcnt" ofType:@""];
+    
+    return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64" ofType:@""];
 }
 
 - (instancetype)initWithPathToEngine:(NSString *)path applyPreferences:(BOOL)shouldApplyPreferences;
 {
+    NSLog(@"Launching engine with path %@", path);
     if (self = [super init]) {
         _engineTask = [[NSTask alloc] init];
         NSPipe *inPipe = [[NSPipe alloc] init];
@@ -228,6 +261,8 @@ static _Atomic(int) instancesAnalyzing = 0;
         _engineTask.launchPath = path;
         _engineTask.standardInput = inPipe;
         _engineTask.standardOutput = outPipe;
+        // Set current directory so that the engine can locate the .nnue file.
+        _engineTask.currentDirectoryURL = [[NSBundle mainBundle] resourceURL];
         
         _readHandle = [outPipe fileHandleForReading];
         _writeHandle = [inPipe fileHandleForWriting];
@@ -261,21 +296,20 @@ static _Atomic(int) instancesAnalyzing = 0;
  */
 + (SFMCPURating)cpuRating
 {
-    NSPipe *outputPipe = [[NSPipe alloc] init];
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/usr/sbin/sysctl"];
-    [task setStandardOutput:outputPipe];
-    [task setArguments:@[@"-n", @"machdep.cpu"]];
-    [task launch];
-    [task waitUntilExit];
-    NSData *data = [[outputPipe fileHandleForReading] availableData];
-    NSString *cpuCapabilities = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    if ([cpuCapabilities sfm_containsString:@"BMI2"]) {
-        return SFMCPURatingBMI2;
-    } else if ([cpuCapabilities sfm_containsString:@"POPCNT"]) {
-        return SFMCPURatingSSE42;
-    }
-    return SFMCPURating64Bit;
+    int ret = 0;
+    size_t size = sizeof(ret);
+    
+    sysctlbyname("hw.optional.avx512bw", &ret, &size, NULL, 0);
+    if (ret) return SFMCPURatingX86_64_AVX512;
+    
+    sysctlbyname("hw.optional.bmi2", &ret, &size, NULL, 0);
+    if (ret) return SFMCPURatingX86_64_BMI2;
+    
+    sysctlbyname("hw.optional.sse4_2", &ret, &size, NULL, 0);
+    if (ret) return SFMCPURatingX86_64_SSE42;
+    
+    // Assuming x86-64.
+    return SFMCPURatingX86_64;
 }
 
 #pragma mark - Instances

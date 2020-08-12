@@ -134,6 +134,10 @@
         self.boardView.arrows = nil;
     }
 }
+- (IBAction)toggleUseNnue:(id)sender {
+    [SFMUserDefaults setUseNnue:![SFMUserDefaults useNnue]];
+    self.engine.useNnue = [SFMUserDefaults useNnue];
+}
 
 #pragma mark - Helper methods
 - (void)syncToViewsAndEngine
@@ -219,6 +223,7 @@
 
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     self.engine.delegate = self;
+    self.engine.useNnue = [SFMUserDefaults useNnue];
     
     [self handlePGNFile];
 }
@@ -297,6 +302,8 @@
         return self.engine.multipv != 1;
     } else if ([menuItem action] == @selector(toggleShowArrows:)) {
         [menuItem setState:[SFMUserDefaults arrowsEnabled] ? NSControlStateValueOn : NSControlStateValueOff];
+    } else if ([menuItem action] == @selector(toggleUseNnue:)) {
+        [menuItem setState:[SFMUserDefaults useNnue] ? NSControlStateValueOn : NSControlStateValueOff];
     }
     return YES;
 }
@@ -306,6 +313,10 @@
 
 - (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name {
     self.engineTextField.stringValue = name;
+}
+
+- (void)uciEngine:(id)engine didGetInfoString:(NSString *)string {
+    // no op
 }
 
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth {
@@ -332,6 +343,9 @@
     if (self.engine.multipv != 1) {
         [statusComponents addObject:[NSString stringWithFormat:@"MultiPV=%lu", self.engine.multipv]];
     }
+    
+    // 6. NNUE info
+    [statusComponents addObject:self.engine.nnueInfo];
     
     self.engineStatusTextField.stringValue = [statusComponents componentsJoinedByString:@"    "];
     

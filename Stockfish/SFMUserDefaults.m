@@ -14,6 +14,7 @@
 #define UCI_SKILL_LEVEL @"uci_skill_level"
 #define SANDBOX_BOOKMARK_DATA @"sandbox_bookmark_data"
 #define ARROWS_ENABLED @"arrows_enabled"
+#define USE_NNUE @"use_nnue"
 
 @implementation SFMUserDefaults
 
@@ -37,7 +38,7 @@
 }
 + (NSInteger)contemptValue {
     if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_CONTEMPT]) {
-        [SFMUserDefaults setContemptValue:20];
+        [SFMUserDefaults setContemptValue:24];
     }
     return [[NSUserDefaults standardUserDefaults] integerForKey:UCI_CONTEMPT];
 }
@@ -70,6 +71,17 @@
 
 + (void)setArrowsEnabled:(BOOL)enabled {
     [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:ARROWS_ENABLED];
+}
+
++ (BOOL)useNnue {
+    if (![[NSUserDefaults standardUserDefaults] objectForKey:USE_NNUE]) {
+        [SFMUserDefaults setUseNnue:YES];
+    }
+    return [[NSUserDefaults standardUserDefaults] boolForKey:USE_NNUE];
+}
+
++ (void)setUseNnue:(BOOL)val {
+    [[NSUserDefaults standardUserDefaults] setBool:val forKey:USE_NNUE];
 }
 
 @end

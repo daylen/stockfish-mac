@@ -57,6 +57,11 @@
 		7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7745E5011A4F99F000E5ED35 /* SFMPreferenceCellView.xib */; };
 		7745E5061A4FA25900E5ED35 /* SFMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 7745E5051A4FA25900E5ED35 /* SFMUserDefaults.m */; };
 		774755AA24E2834E0080EFC3 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 774755A924E2834E0080EFC3 /* Sentry */; };
+		774755AF24E28EA20080EFC3 /* stockfish-x86-64 in Resources */ = {isa = PBXBuildFile; fileRef = 774755AB24E28EA20080EFC3 /* stockfish-x86-64 */; };
+		774755B024E28EA20080EFC3 /* stockfish-x86-64-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = 774755AC24E28EA20080EFC3 /* stockfish-x86-64-bmi2 */; };
+		774755B124E28EA20080EFC3 /* stockfish-x86-64-sse41-popcnt in Resources */ = {isa = PBXBuildFile; fileRef = 774755AD24E28EA20080EFC3 /* stockfish-x86-64-sse41-popcnt */; };
+		774755B224E28EA20080EFC3 /* stockfish-x86-64-avx512 in Resources */ = {isa = PBXBuildFile; fileRef = 774755AE24E28EA20080EFC3 /* stockfish-x86-64-avx512 */; };
+		774755B424E351C00080EFC3 /* nn-112bb1c8cdb5.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 774755B324E350C70080EFC3 /* nn-112bb1c8cdb5.nnue */; };
 		7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.m */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.m */; };
 		775A3B691A4BC6AF00C3CD59 /* SFMBoardViewTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 775A3B681A4BC6AF00C3CD59 /* SFMBoardViewTest.m */; };
@@ -75,9 +80,6 @@
 		7795E2F71A4D1E6100736550 /* NSArray+ArrayUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7795E2F61A4D1E6100736550 /* NSArray+ArrayUtils.m */; };
 		779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.m */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
-		77A0615B23DADC530089EEE2 /* stockfish-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = 77A0615823DADC530089EEE2 /* stockfish-bmi2 */; };
-		77A0615C23DADC530089EEE2 /* stockfish-sse42 in Resources */ = {isa = PBXBuildFile; fileRef = 77A0615923DADC530089EEE2 /* stockfish-sse42 */; };
-		77A0615D23DADC530089EEE2 /* stockfish-64 in Resources */ = {isa = PBXBuildFile; fileRef = 77A0615A23DADC530089EEE2 /* stockfish-64 */; };
 		77AE06B61FFB2EDA00AD4C72 /* SFMApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
@@ -187,6 +189,11 @@
 		7745E5021A4F99F000E5ED35 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/SFMPreferenceCellView.xib; sourceTree = "<group>"; };
 		7745E5041A4FA25900E5ED35 /* SFMUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMUserDefaults.h; path = Stockfish/SFMUserDefaults.h; sourceTree = "<group>"; };
 		7745E5051A4FA25900E5ED35 /* SFMUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMUserDefaults.m; path = Stockfish/SFMUserDefaults.m; sourceTree = "<group>"; };
+		774755AB24E28EA20080EFC3 /* stockfish-x86-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64"; sourceTree = "<group>"; };
+		774755AC24E28EA20080EFC3 /* stockfish-x86-64-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-bmi2"; sourceTree = "<group>"; };
+		774755AD24E28EA20080EFC3 /* stockfish-x86-64-sse41-popcnt */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-sse41-popcnt"; sourceTree = "<group>"; };
+		774755AE24E28EA20080EFC3 /* stockfish-x86-64-avx512 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-avx512"; sourceTree = "<group>"; };
+		774755B324E350C70080EFC3 /* nn-112bb1c8cdb5.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-112bb1c8cdb5.nnue"; sourceTree = "<group>"; };
 		7748D07E18868CD3009E021E /* SFMUCIEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMUCIEngine.h; path = Stockfish/SFMUCIEngine.h; sourceTree = "<group>"; };
 		7748D07F18868CD3009E021E /* SFMUCIEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = SFMUCIEngine.m; path = Stockfish/SFMUCIEngine.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7752FF4518810B30003E82B3 /* SFMBoardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMBoardView.h; path = Stockfish/SFMBoardView.h; sourceTree = "<group>"; };
@@ -219,9 +226,6 @@
 		7795E2F61A4D1E6100736550 /* NSArray+ArrayUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSArray+ArrayUtils.m"; path = "Stockfish/NSArray+ArrayUtils.m"; sourceTree = "<group>"; };
 		779925D8188273C800EAAEDD /* SFMChessGameTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMChessGameTest.m; sourceTree = "<group>"; };
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		77A0615823DADC530089EEE2 /* stockfish-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-bmi2"; sourceTree = "<group>"; };
-		77A0615923DADC530089EEE2 /* stockfish-sse42 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-sse42"; sourceTree = "<group>"; };
-		77A0615A23DADC530089EEE2 /* stockfish-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-64"; sourceTree = "<group>"; };
 		77AE06B01FFB2D8A00AD4C72 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		77AE06B11FFB2D8A00AD4C72 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		77AE06B41FFB2EDA00AD4C72 /* SFMApplicationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SFMApplicationDelegate.h; sourceTree = "<group>"; };
@@ -265,7 +269,7 @@
 				775A3B6E1A4BD00600C3CD59 /* Enums */,
 				775A3B6D1A4BCFEF00C3CD59 /* Utils */,
 				7744CCB21A4A0DA1009D349D /* Wrappers */,
-				7748D07D18868CA0009E021E /* Engine Binaries */,
+				7748D07D18868CA0009E021E /* Engine */,
 				77924AF8187E57740019C56E /* Constants.h */,
 				773DE97018822DF8009156C3 /* Piece PDFs */,
 				7752FF4818810B34003E82B3 /* View */,
@@ -478,14 +482,16 @@
 			name = Wrappers;
 			sourceTree = "<group>";
 		};
-		7748D07D18868CA0009E021E /* Engine Binaries */ = {
+		7748D07D18868CA0009E021E /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				77A0615A23DADC530089EEE2 /* stockfish-64 */,
-				77A0615823DADC530089EEE2 /* stockfish-bmi2 */,
-				77A0615923DADC530089EEE2 /* stockfish-sse42 */,
+				774755B324E350C70080EFC3 /* nn-112bb1c8cdb5.nnue */,
+				774755AB24E28EA20080EFC3 /* stockfish-x86-64 */,
+				774755AE24E28EA20080EFC3 /* stockfish-x86-64-avx512 */,
+				774755AC24E28EA20080EFC3 /* stockfish-x86-64-bmi2 */,
+				774755AD24E28EA20080EFC3 /* stockfish-x86-64-sse41-popcnt */,
 			);
-			name = "Engine Binaries";
+			name = Engine;
 			sourceTree = "<group>";
 		};
 		7752FF4818810B34003E82B3 /* View */ = {
@@ -628,28 +634,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */,
+				774755B124E28EA20080EFC3 /* stockfish-x86-64-sse41-popcnt in Resources */,
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
-				77A0615C23DADC530089EEE2 /* stockfish-sse42 in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
-				77A0615B23DADC530089EEE2 /* stockfish-bmi2 in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
-				77A0615D23DADC530089EEE2 /* stockfish-64 in Resources */,
 				7705068D187CE43400BA4635 /* Images.xcassets in Resources */,
 				77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */,
 				7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */,
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
+				774755B224E28EA20080EFC3 /* stockfish-x86-64-avx512 in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
 				773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */,
 				773DE98518822DF8009156C3 /* queen_b.pdf in Resources */,
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
 				77764F071888B80C00A7C4CC /* Preferences.xib in Resources */,
 				773DE98618822DF8009156C3 /* queen_w.pdf in Resources */,
+				774755B024E28EA20080EFC3 /* stockfish-x86-64-bmi2 in Resources */,
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
+				774755AF24E28EA20080EFC3 /* stockfish-x86-64 in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
 				773DE98418822DF8009156C3 /* pawn_w.pdf in Resources */,
+				774755B424E351C00080EFC3 /* nn-112bb1c8cdb5.nnue in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

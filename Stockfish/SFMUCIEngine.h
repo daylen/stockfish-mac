@@ -14,6 +14,7 @@
 @protocol SFMUCIEngineDelegate <NSObject>
 
 - (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name;
+- (void)uciEngine:(SFMUCIEngine *)engine didGetInfoString:(NSString *)string;
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move
            number:(NSInteger)moveNumber depth:(NSInteger)depth;
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewLine:(NSDictionary *)lines;
@@ -30,8 +31,10 @@
 @property (nonatomic) BOOL isAnalyzing;
 @property (nonatomic) SFMChessGame *gameToAnalyze;
 @property (nonatomic) NSUInteger multipv;
+@property (nonatomic) BOOL useNnue;
 
 @property (readonly, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *lines;
+@property (readonly, nonatomic) NSString *nnueInfo;
 
 - (instancetype)initStockfish;
 - (instancetype)initOptionsProbe;

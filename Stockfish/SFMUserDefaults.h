@@ -26,4 +26,7 @@
 + (BOOL)arrowsEnabled;
 + (void)setArrowsEnabled:(BOOL)enabled;
 
++ (BOOL)useNnue;
++ (void)setUseNnue:(BOOL)val;
+
 @end

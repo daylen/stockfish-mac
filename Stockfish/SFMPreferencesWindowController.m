@@ -137,6 +137,9 @@
 - (void)uciEngine:(SFMUCIEngine *)engine didGetEngineName:(NSString *)name {
     // no op
 }
+- (void)uciEngine:(SFMUCIEngine *)engine didGetInfoString:(NSString *)string {
+    // no op
+}
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move
            number:(NSInteger)moveNumber depth:(NSInteger)depth {
     // no op
