@@ -147,27 +147,29 @@
     int tokenStartIndex = 0;
     for (int i = 0; i < [str length]; i++) {
         ch = [str characterAtIndex:i];
+        bool currentlyInComment = [[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", '}']];
         
-        if(ch == '(' || ch == '{'){
-            if([stack count] == 0 && i - tokenStartIndex > 0){
+        if ((ch == '(' || ch == '{') && !currentlyInComment) {
+            if ([stack count] == 0 && i - tokenStartIndex > 0) {
                 [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex)]];
                 tokenStartIndex = i;
             }
             [stack addObject:[NSString stringWithFormat:@"%c", ch == '(' ? ')' : '}']];
-        }
-        else if(ch == ')' || ch == '}'){
-            if([stack count] == 0 || ![[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", ch]]){
-                [NSException raise:@"Invalid move text" format:@"Move text is invalid." arguments:nil];
+        } else if (ch == ')' || ch == '}') {
+            if (ch == ')' && currentlyInComment) continue;
+            if ([stack count] == 0 || ![[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", ch]]) {
+                // TODO: Should bubble up the specific error.
+                return [NSArray new];
             }
             [stack removeLastObject];
-            if([stack count] == 0){
+            if ([stack count] == 0) {
                 [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex + 1)]];
                 tokenStartIndex = i + 1;
             }
         }
     }
     
-    if(tokenStartIndex < [str length]){
+    if (tokenStartIndex < [str length]) {
         [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, [str length] - tokenStartIndex)]];
     }
     
