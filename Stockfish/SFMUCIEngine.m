@@ -22,7 +22,7 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
     SFMCPURatingX86_64,
     SFMCPURatingX86_64_SSE42,
     SFMCPURatingX86_64_BMI2,
-    SFMCPURatingX86_64_AVX512
+    SFMCPURatingX86_64_AVX512BW
 };
 
 @interface SFMUCIEngine()
@@ -237,8 +237,9 @@ static _Atomic(int) instancesAnalyzing = 0;
 
 + (NSString *)bestEnginePath {
     SFMCPURating cpuRating = [SFMUCIEngine cpuRating];
-    if (cpuRating == SFMCPURatingX86_64_AVX512)
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-avx512" ofType:@""];
+    // In general AVX512BW does not necessarily imply VNNI--Skylake-SP, Skylake-X, and Cannon Lake support AVX512BW but not VNNI. However no Macs use those processor generations.
+    if (cpuRating == SFMCPURatingX86_64_AVX512BW)
+        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-vnni" ofType:@""];
     if (cpuRating == SFMCPURatingX86_64_BMI2)
         return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-bmi2" ofType:@""];
     
@@ -299,7 +300,7 @@ static _Atomic(int) instancesAnalyzing = 0;
     size_t size = sizeof(ret);
     
     sysctlbyname("hw.optional.avx512bw", &ret, &size, NULL, 0);
-    if (ret) return SFMCPURatingX86_64_AVX512;
+    if (ret) return SFMCPURatingX86_64_AVX512BW;
     
     sysctlbyname("hw.optional.bmi2", &ret, &size, NULL, 0);
     if (ret) return SFMCPURatingX86_64_BMI2;
