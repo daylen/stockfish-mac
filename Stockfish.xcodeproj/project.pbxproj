@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -56,7 +56,6 @@
 		7745E5001A4F978C00E5ED35 /* SFMPreferenceCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7745E4FF1A4F978C00E5ED35 /* SFMPreferenceCellView.m */; };
 		7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7745E5011A4F99F000E5ED35 /* SFMPreferenceCellView.xib */; };
 		7745E5061A4FA25900E5ED35 /* SFMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 7745E5051A4FA25900E5ED35 /* SFMUserDefaults.m */; };
-		774755AA24E2834E0080EFC3 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 774755A924E2834E0080EFC3 /* Sentry */; };
 		7748D08018868CD3009E021E /* SFMUCIEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 7748D07F18868CD3009E021E /* SFMUCIEngine.m */; };
 		7752FF4718810B30003E82B3 /* SFMBoardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7752FF4618810B30003E82B3 /* SFMBoardView.m */; };
 		775A3B691A4BC6AF00C3CD59 /* SFMBoardViewTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 775A3B681A4BC6AF00C3CD59 /* SFMBoardViewTest.m */; };
@@ -76,15 +75,16 @@
 		779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.m */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
 		77AE06B61FFB2EDA00AD4C72 /* SFMApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */; };
+		77C7D5E92555B7C9003B94D1 /* stockfish-x86-64-vnni256 in Resources */ = {isa = PBXBuildFile; fileRef = 77C7D5E62555B7C9003B94D1 /* stockfish-x86-64-vnni256 */; };
+		77C7D5EA2555B7C9003B94D1 /* stockfish-arm64 in Resources */ = {isa = PBXBuildFile; fileRef = 77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */; };
+		77C7D5EB2555B7C9003B94D1 /* nn-cb26f10b1fd9.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 77C7D5E82555B7C9003B94D1 /* nn-cb26f10b1fd9.nnue */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
 		77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 77E215BD188BA99900E935D0 /* Binaries.entitlements */; };
 		77F42E73188B8405003A4AC6 /* SFMApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F42E72188B8405003A4AC6 /* SFMApplication.m */; };
-		BAB10AE624E789A400B270F2 /* stockfish-x86-64-vnni in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE124E789A400B270F2 /* stockfish-x86-64-vnni */; };
 		BAB10AE724E789A400B270F2 /* stockfish-x86-64-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE224E789A400B270F2 /* stockfish-x86-64-bmi2 */; };
 		BAB10AE824E789A400B270F2 /* stockfish-x86-64-sse41-popcnt in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE324E789A400B270F2 /* stockfish-x86-64-sse41-popcnt */; };
 		BAB10AE924E789A400B270F2 /* stockfish-x86-64 in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE424E789A400B270F2 /* stockfish-x86-64 */; };
-		BAB10AEA24E789A400B270F2 /* nn-82215d0fd0df.nnue in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE524E789A400B270F2 /* nn-82215d0fd0df.nnue */; };
 		BB5FC6061F6D510500CDD57A /* SFMNode.m in Sources */ = {isa = PBXBuildFile; fileRef = BB5FC6051F6D510500CDD57A /* SFMNode.m */; };
 /* End PBXBuildFile section */
 
@@ -223,17 +223,18 @@
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		77AE06B41FFB2EDA00AD4C72 /* SFMApplicationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SFMApplicationDelegate.h; sourceTree = "<group>"; };
 		77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SFMApplicationDelegate.m; sourceTree = "<group>"; };
+		77C7D5E62555B7C9003B94D1 /* stockfish-x86-64-vnni256 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-vnni256"; sourceTree = "<group>"; };
+		77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-arm64"; sourceTree = "<group>"; };
+		77C7D5E82555B7C9003B94D1 /* nn-cb26f10b1fd9.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-cb26f10b1fd9.nnue"; sourceTree = "<group>"; };
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
 		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
 		77E215BD188BA99900E935D0 /* Binaries.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Binaries.entitlements; sourceTree = "<group>"; };
 		77F42E71188B8405003A4AC6 /* SFMApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFMApplication.h; sourceTree = "<group>"; };
 		77F42E72188B8405003A4AC6 /* SFMApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMApplication.m; sourceTree = "<group>"; };
-		BAB10AE124E789A400B270F2 /* stockfish-x86-64-vnni */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-vnni"; sourceTree = "<group>"; };
 		BAB10AE224E789A400B270F2 /* stockfish-x86-64-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-bmi2"; sourceTree = "<group>"; };
 		BAB10AE324E789A400B270F2 /* stockfish-x86-64-sse41-popcnt */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-sse41-popcnt"; sourceTree = "<group>"; };
 		BAB10AE424E789A400B270F2 /* stockfish-x86-64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64"; sourceTree = "<group>"; };
-		BAB10AE524E789A400B270F2 /* nn-82215d0fd0df.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-82215d0fd0df.nnue"; sourceTree = "<group>"; };
 		BB5FC6041F6D510500CDD57A /* SFMNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMNode.h; path = Stockfish/SFMNode.h; sourceTree = "<group>"; };
 		BB5FC6051F6D510500CDD57A /* SFMNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMNode.m; path = Stockfish/SFMNode.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -245,7 +246,6 @@
 			files = (
 				779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */,
 				77050672187CE43300BA4635 /* Cocoa.framework in Frameworks */,
-				774755AA24E2834E0080EFC3 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -481,11 +481,12 @@
 		7748D07D18868CA0009E021E /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				BAB10AE524E789A400B270F2 /* nn-82215d0fd0df.nnue */,
+				77C7D5E82555B7C9003B94D1 /* nn-cb26f10b1fd9.nnue */,
+				77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */,
+				77C7D5E62555B7C9003B94D1 /* stockfish-x86-64-vnni256 */,
 				BAB10AE424E789A400B270F2 /* stockfish-x86-64 */,
 				BAB10AE224E789A400B270F2 /* stockfish-x86-64-bmi2 */,
 				BAB10AE324E789A400B270F2 /* stockfish-x86-64-sse41-popcnt */,
-				BAB10AE124E789A400B270F2 /* stockfish-x86-64-vnni */,
 			);
 			name = Engine;
 			sourceTree = "<group>";
@@ -552,7 +553,6 @@
 			);
 			name = Stockfish;
 			packageProductDependencies = (
-				774755A924E2834E0080EFC3 /* Sentry */,
 			);
 			productName = Stockfish;
 			productReference = 7705066E187CE43300BA4635 /* Stockfish.app */;
@@ -583,7 +583,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SFM;
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Daylen Yang";
 				TargetAttributes = {
 					7705066D187CE43300BA4635 = {
@@ -612,7 +612,6 @@
 			);
 			mainGroup = 77050665187CE43300BA4635;
 			packageReferences = (
-				774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = 7705066F187CE43300BA4635 /* Products */;
 			projectDirPath = "";
@@ -634,6 +633,7 @@
 				BAB10AE824E789A400B270F2 /* stockfish-x86-64-sse41-popcnt in Resources */,
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
+				77C7D5E92555B7C9003B94D1 /* stockfish-x86-64-vnni256 in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
 				773DE98118822DF8009156C3 /* knight_b.pdf in Resources */,
@@ -643,17 +643,17 @@
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
 				773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */,
+				77C7D5EA2555B7C9003B94D1 /* stockfish-arm64 in Resources */,
 				773DE98518822DF8009156C3 /* queen_b.pdf in Resources */,
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
 				77764F071888B80C00A7C4CC /* Preferences.xib in Resources */,
 				773DE98618822DF8009156C3 /* queen_w.pdf in Resources */,
 				BAB10AE724E789A400B270F2 /* stockfish-x86-64-bmi2 in Resources */,
+				77C7D5EB2555B7C9003B94D1 /* nn-cb26f10b1fd9.nnue in Resources */,
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
-				BAB10AEA24E789A400B270F2 /* nn-82215d0fd0df.nnue in Resources */,
 				773DE98418822DF8009156C3 /* pawn_w.pdf in Resources */,
-				BAB10AE624E789A400B270F2 /* stockfish-x86-64-vnni in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -839,6 +839,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -892,6 +893,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -926,7 +928,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -936,12 +938,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.2.3;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -960,7 +959,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -970,12 +969,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.2.3;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -988,7 +984,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1014,7 +1010,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1054,6 +1050,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1093,7 +1090,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1103,12 +1100,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stockfish/Stockfish-Prefix.pch";
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.2.3;
+				MARKETING_VERSION = 2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1122,7 +1116,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stockfish.app/Contents/MacOS/Stockfish";
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1178,25 +1172,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.2.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		774755A924E2834E0080EFC3 /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 774755A824E2834E0080EFC3 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 77050666187CE43300BA4635 /* Project object */;
 }
