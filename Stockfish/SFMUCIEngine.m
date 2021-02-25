@@ -19,10 +19,9 @@
 #include <sys/sysctl.h>
 
 typedef NS_ENUM(NSInteger, SFMCPURating) {
-    SFMCPURatingX86_64,
-    SFMCPURatingX86_64_SSE42,
+    SFMCPURatingX86_64_SSE41_POPCNT,
     SFMCPURatingX86_64_BMI2,
-    SFMCPURatingX86_64_AVX512BW,
+    SFMCPURatingX86_64_AVX512_VNNI,
     SFMCPURatingArm64
 };
 
@@ -241,17 +240,13 @@ static _Atomic(int) instancesAnalyzing = 0;
     if (cpuRating == SFMCPURatingArm64)
         return [[NSBundle mainBundle] pathForResource:@"stockfish-arm64" ofType:@""];
 
-    // In general AVX512BW does not necessarily imply VNNI--Skylake-SP, Skylake-X, and Cannon Lake support AVX512BW but not VNNI. However no Macs use those processor generations.
     // VNNI 256 is faster than VNNI 512: https://github.com/official-stockfish/Stockfish/pull/3038#issuecomment-679002949
-    if (cpuRating == SFMCPURatingX86_64_AVX512BW)
+    if (cpuRating == SFMCPURatingX86_64_AVX512_VNNI)
         return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-vnni256" ofType:@""];
     if (cpuRating == SFMCPURatingX86_64_BMI2)
         return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-bmi2" ofType:@""];
-    // SSE4.2 implies support for POPCNT.
-    if (cpuRating == SFMCPURatingX86_64_SSE42)
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-sse41-popcnt" ofType:@""];
 
-    return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64" ofType:@""];
+    return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-sse41-popcnt" ofType:@""];
 }
 
 - (instancetype)initWithPathToEngine:(NSString *)path applyPreferences:(BOOL)shouldApplyPreferences;
@@ -306,17 +301,27 @@ static _Atomic(int) instancesAnalyzing = 0;
     sysctlbyname("hw.optional.arm64", &ret, &size, NULL, 0);
     if (ret) return SFMCPURatingArm64;
     
-    sysctlbyname("hw.optional.avx512bw", &ret, &size, NULL, 0);
-    if (ret) return SFMCPURatingX86_64_AVX512BW;
+    // IFMA implies VNNI.
+    sysctlbyname("hw.optional.avx512ifma", &ret, &size, NULL, 0);
+    if (ret) return SFMCPURatingX86_64_AVX512_VNNI;
+    
+    // 2019 Mac Pro uses Cascade Lake Xeon W which doesn't support IFMA but does support VNNI.
+    size_t len = 0;
+    sysctlbyname("hw.model", NULL, &len, NULL, 0);
+    BOOL isMacProWithVnni = NO;
+    if (len) {
+        char *model = malloc(len*sizeof(char));
+        sysctlbyname("hw.model", model, &len, NULL, 0);
+        if (strcmp(model, "MacPro7,1") == 0) isMacProWithVnni = YES;
+        free(model);
+    }
+    if (isMacProWithVnni) return SFMCPURatingX86_64_AVX512_VNNI;
     
     sysctlbyname("hw.optional.bmi2", &ret, &size, NULL, 0);
     if (ret) return SFMCPURatingX86_64_BMI2;
     
-    sysctlbyname("hw.optional.sse4_2", &ret, &size, NULL, 0);
-    if (ret) return SFMCPURatingX86_64_SSE42;
-    
-    // Assuming x86-64.
-    return SFMCPURatingX86_64;
+    // All Macs running Mojave (10.14) or later support SSE4.1 and POPCNT.
+    return SFMCPURatingX86_64_SSE41_POPCNT;
 }
 
 #pragma mark - Instances
