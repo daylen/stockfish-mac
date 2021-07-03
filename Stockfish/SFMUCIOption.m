@@ -36,7 +36,7 @@
 }
 
 + (BOOL)isOptionSupported:(NSString *)name {
-    NSArray *supported = @[@"Contempt", @"Threads", @"Hash", @"MultiPV", @"Skill Level", @"SyzygyPath"];
+    NSArray *supported = @[@"Threads", @"Hash", @"MultiPV", @"Skill Level", @"SyzygyPath"];
     return [supported containsObject:name];
 }
 

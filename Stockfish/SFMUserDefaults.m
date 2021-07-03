@@ -10,7 +10,6 @@
 
 #define UCI_THREADS @"uci_threads"
 #define UCI_HASH @"uci_hash"
-#define UCI_CONTEMPT @"uci_contempt"
 #define UCI_SKILL_LEVEL @"uci_skill_level"
 #define SANDBOX_BOOKMARK_DATA @"sandbox_bookmark_data"
 #define ARROWS_ENABLED @"arrows_enabled"
@@ -20,7 +19,7 @@
 
 + (NSInteger)threadsValue {
     if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_THREADS]) {
-        [SFMUserDefaults setThreadsValue:1];
+        [SFMUserDefaults setThreadsValue:2];
     }
     return [[NSUserDefaults standardUserDefaults] integerForKey:UCI_THREADS];
 }
@@ -29,21 +28,12 @@
 }
 + (NSInteger)hashValue {
     if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_HASH]) {
-        [SFMUserDefaults setHashValue:128];
+        [SFMUserDefaults setHashValue:512];
     }
     return [[NSUserDefaults standardUserDefaults] integerForKey:UCI_HASH];
 }
 + (void)setHashValue:(NSInteger)val {
     [[NSUserDefaults standardUserDefaults] setInteger:val forKey:UCI_HASH];
-}
-+ (NSInteger)contemptValue {
-    if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_CONTEMPT]) {
-        [SFMUserDefaults setContemptValue:24];
-    }
-    return [[NSUserDefaults standardUserDefaults] integerForKey:UCI_CONTEMPT];
-}
-+ (void)setContemptValue:(NSInteger)val {
-    [[NSUserDefaults standardUserDefaults] setInteger:val forKey:UCI_CONTEMPT];
 }
 + (NSInteger)skillLevelValue {
     if (![[NSUserDefaults standardUserDefaults] objectForKey:UCI_SKILL_LEVEL]) {

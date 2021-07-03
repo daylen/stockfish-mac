@@ -18,7 +18,6 @@
 
 @property (weak) IBOutlet SFMPreferenceCellView *threadsCell;
 @property (weak) IBOutlet SFMPreferenceCellView *hashCell;
-@property (weak) IBOutlet SFMPreferenceCellView *contemptCell;
 @property (weak) IBOutlet SFMPreferenceCellView *skillCell;
 @property (weak) IBOutlet NSButton *chooseButton;
 @property (weak) IBOutlet NSButton *recommendedSettingsButton;
@@ -32,13 +31,11 @@
 - (void)awakeFromNib {
     self.threadsCell.label.stringValue = @"Threads";
     self.hashCell.label.stringValue = @"Hash (MB)";
-    self.contemptCell.label.stringValue = @"Contempt";
     self.skillCell.label.stringValue = @"Skill Level";
     
     // Hidden because we haven't set the slider limits yet
     self.threadsCell.hidden = YES;
     self.hashCell.hidden = YES;
-    self.contemptCell.hidden = YES;
     self.skillCell.hidden = YES;
     self.chooseButton.hidden = YES;
     self.recommendedSettingsButton.hidden = YES;
@@ -52,7 +49,6 @@
     if ([SFMUCIEngine instancesAnalyzing] != 0) {
         self.threadsCell.enabled = NO;
         self.hashCell.enabled = NO;
-        self.contemptCell.enabled = NO;
         self.skillCell.enabled = NO;
         self.chooseButton.enabled = NO;
         self.recommendedSettingsButton.enabled = NO;
@@ -71,7 +67,6 @@
     // Save the preferences
     [SFMUserDefaults setThreadsValue:self.threadsCell.currValue];
     [SFMUserDefaults setHashValue:self.hashCell.currValue];
-    [SFMUserDefaults setContemptValue:self.contemptCell.currValue];
     [SFMUserDefaults setSkillLevelValue:self.skillCell.currValue];
     [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
 }
@@ -112,7 +107,6 @@
 - (IBAction)clickedUseRecommended:(NSButton *)sender {
     self.threadsCell.currValue = self.threadsCell.max / 2;
     self.hashCell.currValue = self.hashCell.max / 2;
-    self.contemptCell.currValue = 0;
     self.skillCell.currValue = self.skillCell.max;
     [[NSNotificationCenter defaultCenter] postNotificationName:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
 }
@@ -154,9 +148,7 @@
         } else if (option.type == SFMUCIOptionTypeHash) {
             [self applyLimits:option toSlider:self.hashCell currValue:[SFMUserDefaults hashValue]];
         } else if (option.type == SFMUCIOptionTypeNumber) {
-            if ([option.name isEqualToString:@"Contempt"]) {
-                [self applyLimits:option toSlider:self.contemptCell currValue:[SFMUserDefaults contemptValue]];
-            } else if ([option.name isEqualToString:@"Skill Level"]) {
+            if ([option.name isEqualToString:@"Skill Level"]) {
                 [self applyLimits:option toSlider:self.skillCell currValue:[SFMUserDefaults skillLevelValue]];
             }
         }

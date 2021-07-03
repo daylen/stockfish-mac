@@ -14,9 +14,6 @@
 + (NSInteger)hashValue;
 + (void)setHashValue:(NSInteger)val;
 
-+ (NSInteger)contemptValue;
-+ (void)setContemptValue:(NSInteger)val;
-
 + (NSInteger)skillLevelValue;
 + (void)setSkillLevelValue:(NSInteger)val;
 

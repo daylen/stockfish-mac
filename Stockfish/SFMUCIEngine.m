@@ -348,7 +348,6 @@ static _Atomic(int) instancesAnalyzing = 0;
     };
     [self setUciOption:@"Threads" integerValue:[SFMUserDefaults threadsValue]];
     [self setUciOption:@"Hash" integerValue:[SFMUserDefaults hashValue]];
-    [self setUciOption:@"Contempt" integerValue:[SFMUserDefaults contemptValue]];
     [self setUciOption:@"Skill Level" integerValue:[SFMUserDefaults skillLevelValue]];
     
     // Syzygy Path
