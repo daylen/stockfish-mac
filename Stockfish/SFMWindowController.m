@@ -138,7 +138,11 @@
     [SFMUserDefaults setUseNnue:![SFMUserDefaults useNnue]];
     self.engine.useNnue = [SFMUserDefaults useNnue];
 }
+- (IBAction)toggleShowWdl:(id)sender {
+    [SFMUserDefaults setShowWDL:![SFMUserDefaults showWdl]];
+    self.engine.showWdl = [SFMUserDefaults showWdl];
 
+}
 #pragma mark - Helper methods
 - (void)syncToViewsAndEngine
 {
@@ -224,7 +228,7 @@
     self.engine = [[SFMUCIEngine alloc] initStockfish];
     self.engine.delegate = self;
     self.engine.useNnue = [SFMUserDefaults useNnue];
-    
+    self.engine.showWdl = [SFMUserDefaults showWdl];
     [self handlePGNFile];
 }
 
@@ -304,6 +308,8 @@
         [menuItem setState:[SFMUserDefaults arrowsEnabled] ? NSControlStateValueOn : NSControlStateValueOff];
     } else if ([menuItem action] == @selector(toggleUseNnue:)) {
         [menuItem setState:[SFMUserDefaults useNnue] ? NSControlStateValueOn : NSControlStateValueOff];
+    } else if ([menuItem action] == @selector(toggleShowWdl:)) {
+        [menuItem setState:[SFMUserDefaults showWdl] ? NSControlStateValueOn : NSControlStateValueOff];
     }
     return YES;
 }
@@ -389,12 +395,17 @@
         if (line.tbHits) {
             [statusComponents addObject:[NSString stringWithFormat:@"TB=%lu", line.tbHits]];
         }
-        
+
         // 4. Time
         [statusComponents addObject:[SFMFormatter millisecondsToClock:line.time]];
         
         // 5. Nodes
         [statusComponents addObject:[SFMFormatter nodesAsText:line.nodes]];
+
+        // 6. WDL
+        if (engine.showWdl) {
+            [statusComponents addObject:[NSString stringWithFormat:@"\n   Win=%1.1f%% Draw=%1.1f%% Loss=%1.1f%%", (float)line.wdlWin/10, (float)line.wdlDraw/10, (float)line.wdlLoss/10 ]];
+        }
         
         NSAttributedString *secondLine = [[NSAttributedString alloc] initWithString:[statusComponents componentsJoinedByString:@"    "] attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:[NSFont systemFontSize]], NSForegroundColorAttributeName: [NSColor labelColor]}];
         

@@ -22,7 +22,9 @@
 @property (nonatomic) NSInteger tbHits;
 @property (nonatomic) long long time; // milliseconds
 @property (nonatomic) NSArray *moves;
-
+@property (nonatomic) NSInteger wdlWin;
+@property (nonatomic) NSInteger wdlDraw;
+@property (nonatomic) NSInteger wdlLoss;
 - (instancetype)initWithTokens:(NSArray *)tokens position:(SFMPosition *)position;
 
 @end
