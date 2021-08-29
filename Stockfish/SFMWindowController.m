@@ -203,6 +203,22 @@
     return YES;
 }
 
+- (void)updateArrowsFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
+    if(![SFMUserDefaults arrowsEnabled]) {
+        return;
+    }
+    
+    NSMutableArray<SFMMove *> *const arrows = [NSMutableArray new];
+    
+    for (SFMUCILine *const line in [linesDict allValues]) {
+        if(line.moves.count) {
+            [arrows addObject: [line.moves firstObject]];
+        }
+    }
+    
+    self.boardView.arrows = arrows;
+}
+
 #pragma mark - Init
 - (void)windowDidLoad
 {
@@ -357,12 +373,9 @@
     if (pv) {
         // Update the status text
         [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:pv.depth];
-        
-        // Draw an arrow
-        if ([pv.moves count] > 0 && [SFMUserDefaults arrowsEnabled]) {
-            self.boardView.arrows = @[[pv.moves firstObject]];
-        }
     }
+    
+    [self updateArrowsFromLines:lines];
     
     NSMutableAttributedString *combined = [[NSMutableAttributedString alloc] init];
     
