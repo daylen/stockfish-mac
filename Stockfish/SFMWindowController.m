@@ -222,27 +222,30 @@ const CGFloat kMaxWeight = 1;
     return weight;
 }
 
-- (CGFloat)weakestScoreFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
-    const CGFloat strongestScore = linesDict[@(1)].score;   
-    const CGFloat maybeWeakestScore = linesDict[@(linesDict.count)].score; // not necessarily the weakest score
-
-    CGFloat weakestScore = maybeWeakestScore;
-    // White's favor
-    if(maybeWeakestScore < strongestScore) {
-        for(SFMUCILine *const line in [linesDict allValues]) {
-            if(line.score < weakestScore) {
-                weakestScore = line.score;
-            }
-        }
-    } else { // Black's favor
-        for(SFMUCILine *const line in [linesDict allValues]) {
-            if(line.score > weakestScore) {
-                weakestScore = line.score;
-            }
-        }
+- (NSArray<SFMUCILine *> *)sortedLinesByScore:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
+    if(linesDict.count <= 1) {
+        return linesDict.allValues;
     }
     
-    return weakestScore;
+    const CGFloat maybeStrongestScore = linesDict[@(1)].score;
+    const CGFloat maybeWeakestScore = linesDict[@(linesDict.count)].score;
+    
+    NSComparisonResult strongestScoreComparisonResult;
+    NSComparisonResult notStrongestScoreComparisonResult;
+    
+    // White's favor
+    if(maybeStrongestScore > maybeWeakestScore) {
+        strongestScoreComparisonResult = NSOrderedAscending;
+        notStrongestScoreComparisonResult = NSOrderedDescending;
+    } else { // Black's favor
+        strongestScoreComparisonResult = NSOrderedDescending;
+        notStrongestScoreComparisonResult = NSOrderedAscending;
+    }
+    
+    return [linesDict.allValues sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(SFMUCILine *_Nonnull obj1, SFMUCILine *_Nonnull obj2) {
+        return obj1.score == obj2.score ? NSOrderedSame :
+        obj1.score > obj2.score ? strongestScoreComparisonResult : notStrongestScoreComparisonResult;
+    }];
 }
 
 - (void)updateArrowsFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
@@ -250,16 +253,16 @@ const CGFloat kMaxWeight = 1;
         return;
     }
     
+    NSArray<SFMUCILine *> *const sortedLines = [self sortedLinesByScore:linesDict];
+    const CGFloat strongestScore = sortedLines.firstObject.score;
+    const CGFloat weakestScore = sortedLines.lastObject.score;
     NSMutableArray<SFMArrowMove *> *const arrowMoves = [NSMutableArray new];
     
-    const CGFloat strongestScore = linesDict[@(1)].score;
-    const CGFloat weakestScore = [self weakestScoreFromLines:linesDict];
-
-    for (SFMUCILine *const line in [linesDict allValues]) {
+    for (SFMUCILine *const line in sortedLines) {
         if(line.moves.count) {
             const CGFloat weight = [self weightFromScore:line.score
-                                                weakestScore:weakestScore
-                                                strongestScore:strongestScore];
+                                            weakestScore:weakestScore
+                                          strongestScore:strongestScore];
             SFMArrowMove *const arrowMove = [[SFMArrowMove alloc]
                                              initWithMove:[line.moves firstObject]
                                              weight:weight];
