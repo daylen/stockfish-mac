@@ -15,7 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SFMArrowMove : NSObject <NSCopying>
 
 @property (readonly) SFMMove *move;
-@property (readonly, assign) CGFloat weight; // [0, 1]
+
+/// Describes relative thickness of arrow in [0, 1]
+@property (readonly, assign) CGFloat weight;
 
 - (instancetype)initWithMove:(SFMMove *)move weight:(CGFloat)arrowWeight;
 

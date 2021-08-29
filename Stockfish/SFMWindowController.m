@@ -16,6 +16,9 @@
 #import "SFMPosition.h"
 #import "SFMUserDefaults.h"
 
+const CGFloat kMinWeight = 0.25;
+const CGFloat kMaxWeight = 1;
+
 @interface SFMWindowController ()
 
 @property (weak) IBOutlet NSSplitView *mainSplitView;
@@ -204,6 +207,20 @@
     return YES;
 }
 
+/**
+ Maps scores from [minScore, maxScore] to [kMinWeight, kMaxWeight]
+ */
+- (CGFloat)weightFromScore:(const CGFloat)score minScore:(const CGFloat)minScore maxScore:(const CGFloat)maxScore {
+    if(maxScore == minScore) {
+        return kMaxWeight;
+    }
+    
+    const CGFloat scoreProportion = (score - minScore) / (maxScore - minScore); // maps [minScore, maxScore] -> [0, 1]
+    const CGFloat weight = (kMaxWeight - kMinWeight) * scoreProportion + kMinWeight; // [0, 1] -> [minWeight, maxWeight]
+    
+    return weight;
+}
+
 - (void)updateArrowsFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
     if(![SFMUserDefaults arrowsEnabled]) {
         return;
@@ -211,13 +228,17 @@
     
     NSMutableArray<SFMArrowMove *> *const arrowMoves = [NSMutableArray new];
     
-    const CGFloat topVariationScore = linesDict[@(1)].score;
-    
+    const CGFloat maxScore = linesDict[@(1)].score;
+    const CGFloat minScore = linesDict[@(linesDict.count)].score; // bug: not necessarily the min score
+
     for (SFMUCILine *const line in [linesDict allValues]) {
         if(line.moves.count) {
+            const CGFloat weight = [self weightFromScore:line.score
+                                                minScore:minScore
+                                                maxScore:maxScore];
             SFMArrowMove *const arrowMove = [[SFMArrowMove alloc]
                                              initWithMove:[line.moves firstObject]
-                                             weight:((CGFloat) line.score) / topVariationScore];
+                                             weight:weight];
             [arrowMoves addObject: arrowMove];
         }
     }
