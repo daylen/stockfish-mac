@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2763275B26DB5DC40014A2D4 /* SFMArrowMove.m in Sources */ = {isa = PBXBuildFile; fileRef = 2763275A26DB5DC40014A2D4 /* SFMArrowMove.m */; };
 		77050672187CE43300BA4635 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050671187CE43300BA4635 /* Cocoa.framework */; };
 		7705067C187CE43300BA4635 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7705067A187CE43300BA4635 /* InfoPlist.strings */; };
 		7705067E187CE43300BA4635 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7705067D187CE43300BA4635 /* main.m */; };
@@ -98,6 +99,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2763275926DB5DC40014A2D4 /* SFMArrowMove.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SFMArrowMove.h; path = Stockfish/SFMArrowMove.h; sourceTree = "<group>"; };
+		2763275A26DB5DC40014A2D4 /* SFMArrowMove.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SFMArrowMove.m; path = Stockfish/SFMArrowMove.m; sourceTree = "<group>"; };
 		7705066E187CE43300BA4635 /* Stockfish.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stockfish.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77050671187CE43300BA4635 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		77050674187CE43300BA4635 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -408,26 +411,28 @@
 		7715B8AD187E8981006F2366 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				BB5FC6041F6D510500CDD57A /* SFMNode.h */,
-				BB5FC6051F6D510500CDD57A /* SFMNode.m */,
+				2763275926DB5DC40014A2D4 /* SFMArrowMove.h */,
+				2763275A26DB5DC40014A2D4 /* SFMArrowMove.m */,
+				77924AEB187DED010019C56E /* SFMChessGame.h */,
+				77924AEC187DED010019C56E /* SFMChessGame.m */,
 				77CA8B031889C42F004402D2 /* SFMFormatter.h */,
 				77CA8B041889C42F004402D2 /* SFMFormatter.m */,
 				77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */,
 				77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */,
-				7748D07E18868CD3009E021E /* SFMUCIEngine.h */,
-				7748D07F18868CD3009E021E /* SFMUCIEngine.m */,
-				7745E4FB1A4F7C8A00E5ED35 /* SFMUCIOption.h */,
-				7745E4FC1A4F7C8A00E5ED35 /* SFMUCIOption.m */,
-				7795E2EC1A4CF72C00736550 /* SFMUCILine.h */,
-				7795E2ED1A4CF72C00736550 /* SFMUCILine.m */,
 				7744CCB31A4A2043009D349D /* SFMMove.h */,
 				7744CCB41A4A2043009D349D /* SFMMove.m */,
+				BB5FC6041F6D510500CDD57A /* SFMNode.h */,
+				BB5FC6051F6D510500CDD57A /* SFMNode.m */,
 				77924AFB187E72940019C56E /* SFMParser.h */,
 				77924AFC187E72940019C56E /* SFMParser.m */,
 				77924AE8187DECEB0019C56E /* SFMPGNFile.h */,
 				77924AE9187DECEB0019C56E /* SFMPGNFile.m */,
-				77924AEB187DED010019C56E /* SFMChessGame.h */,
-				77924AEC187DED010019C56E /* SFMChessGame.m */,
+				7748D07E18868CD3009E021E /* SFMUCIEngine.h */,
+				7748D07F18868CD3009E021E /* SFMUCIEngine.m */,
+				7795E2EC1A4CF72C00736550 /* SFMUCILine.h */,
+				7795E2ED1A4CF72C00736550 /* SFMUCILine.m */,
+				7745E4FB1A4F7C8A00E5ED35 /* SFMUCIOption.h */,
+				7745E4FC1A4F7C8A00E5ED35 /* SFMUCIOption.m */,
 				7745E5041A4FA25900E5ED35 /* SFMUserDefaults.h */,
 				7745E5051A4FA25900E5ED35 /* SFMUserDefaults.m */,
 			);
@@ -699,6 +704,7 @@
 				7744CCA61A49EA54009D349D /* misc.cpp in Sources */,
 				7744CCB11A49EF45009D349D /* SFMPosition.mm in Sources */,
 				7734B674189506F500FC4D79 /* SFMArrowView.m in Sources */,
+				2763275B26DB5DC40014A2D4 /* SFMArrowMove.m in Sources */,
 				77924AFD187E72940019C56E /* SFMParser.m in Sources */,
 				77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */,
 				7795E2EE1A4CF72C00736550 /* SFMUCILine.m in Sources */,

@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
+#import "SFMArrowMove.h"
 #import "SFMPosition.h"
 #import "SFMBoardView.h"
 #import "Constants.h"
@@ -31,7 +32,7 @@
 #pragma mark - State
 
 @property (nonatomic) NSMutableDictionary /* <NSNumber(SFMSquare), SFMPieceView> */ *pieceViews;
-@property (nonatomic) NSMutableDictionary /* <SFMMove, SFMArrowView> */ *arrowViews;
+@property (nonatomic) NSMutableDictionary<SFMArrowMove *, SFMArrowView *> *arrowViews;
 
 @property (nonatomic) NSArray /* of NSNumber(SFMSquare) */ *highlightedSquares;
 
@@ -92,15 +93,16 @@
     }];
     [self.arrowViews removeAllObjects];
     
-    for (SFMMove *move in _arrows) {
-        if (move.from == move.to) {
+    for (SFMArrowMove *arrowMove in _arrows) {
+        if (arrowMove.move.from == arrowMove.move.to) {
             NSLog(@"Yikes! The from and to for this arrow is the same.");
             continue;
         }
         
-        SFMArrowView *view = [[SFMArrowView alloc] initWithFrame:self.bounds];
-        self.arrowViews[move] = view;
-        [self addSubview:view];
+        SFMArrowView *arrowView = [[SFMArrowView alloc] initWithFrame:self.bounds];
+        arrowView.weight = arrowMove.weight;
+        self.arrowViews[arrowMove] = arrowView;
+        [self addSubview:arrowView];
     }
     
     [self resizeSubviewsWithOldSize:NSMakeSize(0, 0)];
@@ -121,19 +123,17 @@
                                     self.squareSideLength, self.squareSideLength);
         }];
     }
-    [self.arrowViews enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        SFMMove *move = key;
-        SFMArrowView *view = obj;
-        view.fromPoint = [self coordinatesForSquare:move.from
+    [self.arrowViews enumerateKeysAndObjectsUsingBlock:^(SFMArrowMove *arrowMove, SFMArrowView *arrowView, BOOL *stop) {
+        arrowView.fromPoint = [self coordinatesForSquare:arrowMove.move.from
                                          leftOffset:self.leftInset + self.squareSideLength / 2
                                           topOffset:self.topInset + self.squareSideLength / 2
                                          sideLength:self.squareSideLength];
-        view.toPoint = [self coordinatesForSquare:move.to
+        arrowView.toPoint = [self coordinatesForSquare:arrowMove.move.to
                                        leftOffset:self.leftInset + self.squareSideLength / 2
                                         topOffset:self.topInset + self.squareSideLength / 2
                                        sideLength:self.squareSideLength];
-        view.squareSideLength = self.squareSideLength;
-        [view setNeedsDisplay:YES];
+        arrowView.squareSideLength = self.squareSideLength;
+        [arrowView setNeedsDisplay:YES];
     }];
 }
 

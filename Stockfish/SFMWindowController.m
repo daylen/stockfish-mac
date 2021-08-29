@@ -9,6 +9,7 @@
 #import "SFMWindowController.h"
 #import "SFMChessGame.h"
 #import "Constants.h"
+#import "SFMArrowMove.h"
 #import "SFMFormatter.h"
 #import "SFMMove.h"
 #import "SFMUCILine.h"
@@ -208,15 +209,20 @@
         return;
     }
     
-    NSMutableArray<SFMMove *> *const arrows = [NSMutableArray new];
+    NSMutableArray<SFMArrowMove *> *const arrowMoves = [NSMutableArray new];
+    
+    const CGFloat topVariationScore = linesDict[@(1)].score;
     
     for (SFMUCILine *const line in [linesDict allValues]) {
         if(line.moves.count) {
-            [arrows addObject: [line.moves firstObject]];
+            SFMArrowMove *const arrowMove = [[SFMArrowMove alloc]
+                                             initWithMove:[line.moves firstObject]
+                                             weight:((CGFloat) line.score) / topVariationScore];
+            [arrowMoves addObject: arrowMove];
         }
     }
     
-    self.boardView.arrows = arrows;
+    self.boardView.arrows = arrowMoves;
 }
 
 #pragma mark - Init
