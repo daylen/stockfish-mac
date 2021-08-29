@@ -208,17 +208,41 @@ const CGFloat kMaxWeight = 1;
 }
 
 /**
- Maps scores from [minScore, maxScore] to [kMinWeight, kMaxWeight]
+ Maps scores from [weakestScore, strongestScore] to [kMinWeight, kMaxWeight].
+ Agnostic about Black vs White scores; Black's strongest score is more negative, whereas White's strongest score is more positive, etc.
  */
-- (CGFloat)weightFromScore:(const CGFloat)score minScore:(const CGFloat)minScore maxScore:(const CGFloat)maxScore {
-    if(maxScore == minScore) {
+- (CGFloat)weightFromScore:(const CGFloat)score weakestScore:(const CGFloat)weakestScore strongestScore:(const CGFloat)strongestScore {
+    if(strongestScore == weakestScore) {
         return kMaxWeight;
     }
     
-    const CGFloat scoreProportion = (score - minScore) / (maxScore - minScore); // maps [minScore, maxScore] -> [0, 1]
+    const CGFloat scoreProportion = (score - weakestScore) / (strongestScore - weakestScore); // maps [weakestScore, strongestScore] -> [0, 1]
     const CGFloat weight = (kMaxWeight - kMinWeight) * scoreProportion + kMinWeight; // [0, 1] -> [minWeight, maxWeight]
     
     return weight;
+}
+
+- (CGFloat)weakestScoreFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
+    const CGFloat strongestScore = linesDict[@(1)].score;   
+    const CGFloat maybeWeakestScore = linesDict[@(linesDict.count)].score; // not necessarily the weakest score
+
+    CGFloat weakestScore = maybeWeakestScore;
+    // White's favor
+    if(maybeWeakestScore < strongestScore) {
+        for(SFMUCILine *const line in [linesDict allValues]) {
+            if(line.score < weakestScore) {
+                weakestScore = line.score;
+            }
+        }
+    } else { // Black's favor
+        for(SFMUCILine *const line in [linesDict allValues]) {
+            if(line.score > weakestScore) {
+                weakestScore = line.score;
+            }
+        }
+    }
+    
+    return weakestScore;
 }
 
 - (void)updateArrowsFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
@@ -228,14 +252,14 @@ const CGFloat kMaxWeight = 1;
     
     NSMutableArray<SFMArrowMove *> *const arrowMoves = [NSMutableArray new];
     
-    const CGFloat maxScore = linesDict[@(1)].score;
-    const CGFloat minScore = linesDict[@(linesDict.count)].score; // bug: not necessarily the min score
+    const CGFloat strongestScore = linesDict[@(1)].score;
+    const CGFloat weakestScore = [self weakestScoreFromLines:linesDict];
 
     for (SFMUCILine *const line in [linesDict allValues]) {
         if(line.moves.count) {
             const CGFloat weight = [self weightFromScore:line.score
-                                                minScore:minScore
-                                                maxScore:maxScore];
+                                                weakestScore:weakestScore
+                                                strongestScore:strongestScore];
             SFMArrowMove *const arrowMove = [[SFMArrowMove alloc]
                                              initWithMove:[line.moves firstObject]
                                              weight:weight];
