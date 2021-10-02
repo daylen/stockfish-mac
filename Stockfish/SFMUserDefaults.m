@@ -14,7 +14,8 @@
 #define SANDBOX_BOOKMARK_DATA @"sandbox_bookmark_data"
 #define ARROWS_ENABLED @"arrows_enabled"
 #define USE_NNUE @"use_nnue"
-
+#define SHOW_WDL @"show_wdl"
+/// <#Description#>
 @implementation SFMUserDefaults
 
 + (NSInteger)threadsValue {
@@ -74,4 +75,13 @@
     [[NSUserDefaults standardUserDefaults] setBool:val forKey:USE_NNUE];
 }
 
++(BOOL)showWdl {
+    if (![[NSUserDefaults standardUserDefaults] objectForKey:SHOW_WDL]) {
+        [SFMUserDefaults setUseNnue:YES];
+    }
+    return [[NSUserDefaults standardUserDefaults] boolForKey:SHOW_WDL];
+}
++ (void)setShowWDL:(BOOL)val {
+    [[NSUserDefaults standardUserDefaults] setBool:val forKey:SHOW_WDL];
+}
 @end

@@ -56,6 +56,7 @@ static _Atomic(int) instancesAnalyzing = 0;
             NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
             [self setUciOption:@"MultiPV" integerValue:self.multipv];
             [self setUciOption:@"Use NNUE" stringValue:self.useNnue ? @"true" : @"false"];
+            [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);
             atomic_fetch_add(&instancesAnalyzing, 1);
@@ -108,6 +109,17 @@ static _Atomic(int) instancesAnalyzing = 0;
     }
 }
 
+- (void)setShowWdl:(BOOL)showWdl {
+    if (self.isAnalyzing) {
+        self.isAnalyzing = NO;
+        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            self->_showWdl = showWdl;
+            self.isAnalyzing = YES;
+        });
+    } else {
+        _showWdl = showWdl;
+    }
+}
 #pragma mark - Engine I/O
 
 /*!
@@ -150,7 +162,7 @@ static _Atomic(int) instancesAnalyzing = 0;
     if ([str isEqualToString:@""]) {
         return;
     }
-    
+    NSLog(@"Str is: %@", str);
     NSArray *tokens = [str componentsSeparatedByString:@" "];
     
     if ([tokens containsObject:@"currmove"]) {

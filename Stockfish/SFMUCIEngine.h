@@ -32,7 +32,7 @@
 @property (nonatomic) SFMChessGame *gameToAnalyze;
 @property (nonatomic) NSUInteger multipv;
 @property (nonatomic) BOOL useNnue;
-
+@property (nonatomic) BOOL showWdl;
 @property (readonly, nonatomic) NSDictionary /* <NSNumber, SFMUCILine> */ *lines;
 @property (readonly, nonatomic) NSString *nnueInfo;
 

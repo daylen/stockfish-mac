@@ -26,4 +26,7 @@
 + (BOOL)useNnue;
 + (void)setUseNnue:(BOOL)val;
 
++ (BOOL)showWdl;
++ (void)setShowWDL:(BOOL)val;
+
 @end
