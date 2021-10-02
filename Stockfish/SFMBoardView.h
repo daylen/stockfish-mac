@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Daylen Yang. All rights reserved.
 //
 
+@class SFMArrowMove;
 @class SFMPosition;
 @class SFMBoardView;
 @class SFMMove;
@@ -54,6 +55,6 @@
 /*!
  The arrows to display.
  */
-@property (nonatomic) NSArray /* of SFMMove */ *arrows;
+@property (nonatomic) NSArray<SFMArrowMove *> *arrows;
 
 @end

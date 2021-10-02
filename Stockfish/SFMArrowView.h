@@ -11,5 +11,6 @@
 @property CGPoint fromPoint;
 @property CGPoint toPoint;
 @property CGFloat squareSideLength;
+@property CGFloat weight;
 
 @end

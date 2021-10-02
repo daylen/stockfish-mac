@@ -15,7 +15,7 @@
 {
     [[NSColor colorWithSRGBRed:1 green:0 blue:0 alpha:0.5] set];
     
-    CGFloat arrowLineWidth = self.squareSideLength * 0.2;
+    CGFloat arrowLineWidth = self.squareSideLength * 0.2 * self.weight;
     
     NSBezierPath *path = [NSBezierPath bezierPathWithArrowFromPoint:self.fromPoint
                                                             toPoint:self.toPoint

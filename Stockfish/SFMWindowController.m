@@ -9,11 +9,15 @@
 #import "SFMWindowController.h"
 #import "SFMChessGame.h"
 #import "Constants.h"
+#import "SFMArrowMove.h"
 #import "SFMFormatter.h"
 #import "SFMMove.h"
 #import "SFMUCILine.h"
 #import "SFMPosition.h"
 #import "SFMUserDefaults.h"
+
+const CGFloat kMinWeight = 0.25;
+const CGFloat kMaxWeight = 1;
 
 @interface SFMWindowController ()
 
@@ -207,6 +211,72 @@
     return YES;
 }
 
+/**
+ Maps scores from [weakestScore, strongestScore] to [kMinWeight, kMaxWeight].
+ Agnostic about Black vs White scores; Black's strongest score is more negative, whereas White's strongest score is more positive, etc.
+ */
+- (CGFloat)weightFromScore:(const CGFloat)score weakestScore:(const CGFloat)weakestScore strongestScore:(const CGFloat)strongestScore {
+    if(strongestScore == weakestScore) {
+        return kMaxWeight;
+    }
+    
+    const CGFloat scoreProportion = (score - weakestScore) / (strongestScore - weakestScore); // maps [weakestScore, strongestScore] -> [0, 1]
+    const CGFloat weight = (kMaxWeight - kMinWeight) * scoreProportion + kMinWeight; // [0, 1] -> [minWeight, maxWeight]
+    
+    return weight;
+}
+
+- (NSArray<SFMUCILine *> *)sortedLinesByScore:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
+    if(linesDict.count <= 1) {
+        return linesDict.allValues;
+    }
+    
+    const CGFloat maybeStrongestScore = linesDict[@(1)].score;
+    const CGFloat maybeWeakestScore = linesDict[@(linesDict.count)].score;
+    
+    NSComparisonResult strongestScoreComparisonResult;
+    NSComparisonResult notStrongestScoreComparisonResult;
+    
+    // White's favor
+    if(maybeStrongestScore > maybeWeakestScore) {
+        strongestScoreComparisonResult = NSOrderedAscending;
+        notStrongestScoreComparisonResult = NSOrderedDescending;
+    } else { // Black's favor
+        strongestScoreComparisonResult = NSOrderedDescending;
+        notStrongestScoreComparisonResult = NSOrderedAscending;
+    }
+    
+    return [linesDict.allValues sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(SFMUCILine *_Nonnull obj1, SFMUCILine *_Nonnull obj2) {
+        return obj1.score == obj2.score ? NSOrderedSame :
+        obj1.score > obj2.score ? strongestScoreComparisonResult : notStrongestScoreComparisonResult;
+    }];
+}
+
+- (void)updateArrowsFromLines:(NSDictionary<NSNumber *, SFMUCILine *> *const)linesDict {
+    if(![SFMUserDefaults arrowsEnabled]) {
+        return;
+    }
+    
+    NSArray<SFMUCILine *> *const sortedLines = [self sortedLinesByScore:linesDict];
+    const CGFloat strongestScore = sortedLines.firstObject.score;
+    const CGFloat weakestScore = sortedLines.lastObject.score;
+    NSMutableArray<SFMArrowMove *> *const arrowMoves = [NSMutableArray new];
+    
+    for (SFMUCILine *const line in sortedLines) {
+        if(line.moves.count) {
+            const CGFloat weight = [self weightFromScore:line.score
+                                            weakestScore:weakestScore
+                                          strongestScore:strongestScore];
+            SFMArrowMove *const arrowMove = [[SFMArrowMove alloc]
+                                             initWithMove:[line.moves firstObject]
+                                             weight:weight];
+            [arrowMoves addObject: arrowMove];
+        }
+    }
+    
+    self.boardView.arrows = arrowMoves;
+}
+
 #pragma mark - Init
 - (void)windowDidLoad
 {
@@ -363,12 +433,9 @@
     if (pv) {
         // Update the status text
         [self uciEngine:engine didGetNewCurrentMove:nil number:0 depth:pv.depth];
-        
-        // Draw an arrow
-        if ([pv.moves count] > 0 && [SFMUserDefaults arrowsEnabled]) {
-            self.boardView.arrows = @[[pv.moves firstObject]];
-        }
     }
+    
+    [self updateArrowsFromLines:lines];
     
     NSMutableAttributedString *combined = [[NSMutableAttributedString alloc] init];
     
