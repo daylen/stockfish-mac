@@ -162,7 +162,6 @@ static _Atomic(int) instancesAnalyzing = 0;
     if ([str isEqualToString:@""]) {
         return;
     }
-    NSLog(@"Str is: %@", str);
     NSArray *tokens = [str componentsSeparatedByString:@" "];
     
     if ([tokens containsObject:@"currmove"]) {
