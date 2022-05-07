@@ -116,7 +116,7 @@ const CGFloat kMaxWeight = 1;
 }
 - (IBAction)doBestMove:(id)sender
 {
-    if (self.engine.isAnalyzing) {
+    if (self.engine.isAnalyzing && self.engine.lines) {
         [self doMove:[((SFMUCILine *)self.engine.lines[@(1)]).moves firstObject]];
     }
 }
