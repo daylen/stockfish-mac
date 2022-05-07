@@ -249,15 +249,15 @@ static _Atomic(int) instancesAnalyzing = 0;
 + (NSString *)bestEnginePath {
     SFMCPURating cpuRating = [SFMUCIEngine cpuRating];
     if (cpuRating == SFMCPURatingArm64)
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-arm64" ofType:@""];
+        return [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"stockfish-arm64"];
 
     // VNNI 256 is faster than VNNI 512: https://github.com/official-stockfish/Stockfish/pull/3038#issuecomment-679002949
     if (cpuRating == SFMCPURatingX86_64_AVX512_VNNI)
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-vnni256" ofType:@""];
+        return [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"stockfish-x86-64-vnni256"];
     if (cpuRating == SFMCPURatingX86_64_BMI2)
-        return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-bmi2" ofType:@""];
+        return [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"stockfish-x86-64-bmi2"];
 
-    return [[NSBundle mainBundle] pathForResource:@"stockfish-x86-64-sse41-popcnt" ofType:@""];
+    return [[NSBundle mainBundle] pathForAuxiliaryExecutable:@"stockfish-x86-64-sse41-popcnt"];
 }
 
 - (instancetype)initWithPathToEngine:(NSString *)path applyPreferences:(BOOL)shouldApplyPreferences;

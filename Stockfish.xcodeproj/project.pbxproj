@@ -81,14 +81,10 @@
 		779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.m */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
 		77AE06B61FFB2EDA00AD4C72 /* SFMApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */; };
-		77C7D5E92555B7C9003B94D1 /* stockfish-x86-64-vnni256 in Resources */ = {isa = PBXBuildFile; fileRef = 77C7D5E62555B7C9003B94D1 /* stockfish-x86-64-vnni256 */; };
-		77C7D5EA2555B7C9003B94D1 /* stockfish-arm64 in Resources */ = {isa = PBXBuildFile; fileRef = 77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
 		77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 77E215BD188BA99900E935D0 /* Binaries.entitlements */; };
 		77F42E73188B8405003A4AC6 /* SFMApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F42E72188B8405003A4AC6 /* SFMApplication.m */; };
-		BAB10AE724E789A400B270F2 /* stockfish-x86-64-bmi2 in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE224E789A400B270F2 /* stockfish-x86-64-bmi2 */; };
-		BAB10AE824E789A400B270F2 /* stockfish-x86-64-sse41-popcnt in Resources */ = {isa = PBXBuildFile; fileRef = BAB10AE324E789A400B270F2 /* stockfish-x86-64-sse41-popcnt */; };
 		BB5FC6061F6D510500CDD57A /* SFMNode.m in Sources */ = {isa = PBXBuildFile; fileRef = BB5FC6051F6D510500CDD57A /* SFMNode.m */; };
 /* End PBXBuildFile section */
 
@@ -653,10 +649,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */,
-				BAB10AE824E789A400B270F2 /* stockfish-x86-64-sse41-popcnt in Resources */,
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
-				77C7D5E92555B7C9003B94D1 /* stockfish-x86-64-vnni256 in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
 				7724239128260EC0002EFCA8 /* nn-6877cd24400e.nnue in Resources */,
 				77050688187CE43400BA4635 /* SFMDocument.xib in Resources */,
@@ -667,12 +661,10 @@
 				773DE97F18822DF8009156C3 /* king_b.pdf in Resources */,
 				77050682187CE43400BA4635 /* Credits.rtf in Resources */,
 				773DE97D18822DF8009156C3 /* bishop_b.pdf in Resources */,
-				77C7D5EA2555B7C9003B94D1 /* stockfish-arm64 in Resources */,
 				773DE98518822DF8009156C3 /* queen_b.pdf in Resources */,
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
 				77764F071888B80C00A7C4CC /* Preferences.xib in Resources */,
 				773DE98618822DF8009156C3 /* queen_w.pdf in Resources */,
-				BAB10AE724E789A400B270F2 /* stockfish-x86-64-bmi2 in Resources */,
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
@@ -952,7 +944,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -983,7 +975,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1114,7 +1106,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
