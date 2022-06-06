@@ -293,7 +293,8 @@ NSString* const moveRegex =
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan attributes:@{NSForegroundColorAttributeName: [NSColor labelColor]}];
     [self setMoveAttributes:attributedString nodes:nodes];
     if(node.comment != nil){
-        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:[node.comment stringByAppendingString:@" "] attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
+        NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", node.comment];
+        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
     }
     
     return attributedString;
