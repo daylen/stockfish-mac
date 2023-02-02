@@ -267,7 +267,7 @@
                     <constraint firstItem="I7a-Lu-hEd" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="zRX-Jb-tb3"/>
                 </constraints>
             </view>
-            <toolbar key="toolbar" implicitIdentifier="27A8D2CF-22E7-4D12-A568-F8E64B1F53BE" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="small" id="Hl5-t8-Qo1">
+            <toolbar key="toolbar" implicitIdentifier="27A8D2CF-22E7-4D12-A568-F8E64B1F53BE" displayMode="iconOnly" sizeMode="small" id="Hl5-t8-Qo1">
                 <allowedToolbarItems>
                     <toolbarItem implicitItemIdentifier="27C6B455-9E4A-4A69-88E9-39686A2581AE" label="Flip Board" paletteLabel="Flip Board" tag="-1" image="Flip" id="xDU-Mj-c3h">
                         <size key="minSize" width="22" height="22"/>
