@@ -54,7 +54,6 @@ static _Atomic(int) instancesAnalyzing = 0;
         if (isAnalyzing) {
             NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
             [self setUciOption:@"MultiPV" integerValue:self.multipv];
-            [self setUciOption:@"Use NNUE" stringValue:self.useNnue ? @"true" : @"false"];
             [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
             [self sendCommandToEngine:[self.gameToAnalyze uciString]];
             dispatch_group_enter(_analysisGroup);

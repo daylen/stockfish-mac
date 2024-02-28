@@ -69,6 +69,8 @@
 		77764F071888B80C00A7C4CC /* Preferences.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77764F051888B80C00A7C4CC /* Preferences.xib */; };
 		77764F0A1888C04E00A7C4CC /* SFMPreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */; };
 		77764F101888D2C200A7C4CC /* SFMHardwareDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */; };
+		778A20C02B8F0D32006FFFC1 /* nn-b1a57edbea57.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 778A20BE2B8F0D32006FFFC1 /* nn-b1a57edbea57.nnue */; };
+		778A20C12B8F0D32006FFFC1 /* nn-baff1ede1f90.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 778A20BF2B8F0D32006FFFC1 /* nn-baff1ede1f90.nnue */; };
 		77924AEA187DECEB0019C56E /* SFMPGNFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AE9187DECEB0019C56E /* SFMPGNFile.m */; };
 		77924AED187DED010019C56E /* SFMChessGame.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.m */; };
 		77924AFD187E72940019C56E /* SFMParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.m */; };
@@ -79,7 +81,6 @@
 		779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 779925D8188273C800EAAEDD /* SFMChessGameTest.m */; };
 		779925DC1882914B00EAAEDD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779925DB1882914B00EAAEDD /* QuartzCore.framework */; };
 		77AE06B61FFB2EDA00AD4C72 /* SFMApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */; };
-		77B8232F2AEDCFB1000543AC /* nn-0000000000a0.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 77B8232E2AEDCF48000543AC /* nn-0000000000a0.nnue */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
 		77E215BE188BA99900E935D0 /* Binaries.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 77E215BD188BA99900E935D0 /* Binaries.entitlements */; };
@@ -221,6 +222,8 @@
 		77764F091888C04E00A7C4CC /* SFMPreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMPreferencesWindowController.m; sourceTree = "<group>"; };
 		77764F0E1888D2C200A7C4CC /* SFMHardwareDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMHardwareDetector.h; path = Stockfish/SFMHardwareDetector.h; sourceTree = "<group>"; };
 		77764F0F1888D2C200A7C4CC /* SFMHardwareDetector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMHardwareDetector.m; path = Stockfish/SFMHardwareDetector.m; sourceTree = "<group>"; };
+		778A20BE2B8F0D32006FFFC1 /* nn-b1a57edbea57.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-b1a57edbea57.nnue"; sourceTree = "<group>"; };
+		778A20BF2B8F0D32006FFFC1 /* nn-baff1ede1f90.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-baff1ede1f90.nnue"; sourceTree = "<group>"; };
 		778A271F188A7A1A00F57827 /* Stockfish.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Stockfish.entitlements; sourceTree = "<group>"; };
 		77924AE8187DECEB0019C56E /* SFMPGNFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMPGNFile.h; path = Stockfish/SFMPGNFile.h; sourceTree = "<group>"; };
 		77924AE9187DECEB0019C56E /* SFMPGNFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMPGNFile.m; path = Stockfish/SFMPGNFile.m; sourceTree = "<group>"; };
@@ -240,7 +243,6 @@
 		779925DB1882914B00EAAEDD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		77AE06B41FFB2EDA00AD4C72 /* SFMApplicationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SFMApplicationDelegate.h; sourceTree = "<group>"; };
 		77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SFMApplicationDelegate.m; sourceTree = "<group>"; };
-		77B8232E2AEDCF48000543AC /* nn-0000000000a0.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-0000000000a0.nnue"; sourceTree = "<group>"; };
 		77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-arm64"; sourceTree = "<group>"; };
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
@@ -498,7 +500,8 @@
 		7748D07D18868CA0009E021E /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				77B8232E2AEDCF48000543AC /* nn-0000000000a0.nnue */,
+				778A20BE2B8F0D32006FFFC1 /* nn-b1a57edbea57.nnue */,
+				778A20BF2B8F0D32006FFFC1 /* nn-baff1ede1f90.nnue */,
 				77C7D5E72555B7C9003B94D1 /* stockfish-arm64 */,
 				BAB10AE224E789A400B270F2 /* stockfish-x86-64-bmi2 */,
 				BAB10AE324E789A400B270F2 /* stockfish-x86-64-sse41-popcnt */,
@@ -644,8 +647,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				77B8232F2AEDCFB1000543AC /* nn-0000000000a0.nnue in Resources */,
 				7745E5031A4F99F000E5ED35 /* SFMPreferenceCellView.xib in Resources */,
+				778A20C12B8F0D32006FFFC1 /* nn-baff1ede1f90.nnue in Resources */,
 				773DE97E18822DF8009156C3 /* bishop_w.pdf in Resources */,
 				773DE98318822DF8009156C3 /* pawn_b.pdf in Resources */,
 				773DE98218822DF8009156C3 /* knight_w.pdf in Resources */,
@@ -661,6 +664,7 @@
 				7705068B187CE43400BA4635 /* MainMenu.xib in Resources */,
 				77764F071888B80C00A7C4CC /* Preferences.xib in Resources */,
 				773DE98618822DF8009156C3 /* queen_w.pdf in Resources */,
+				778A20C02B8F0D32006FFFC1 /* nn-b1a57edbea57.nnue in Resources */,
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
@@ -940,7 +944,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 41;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -952,7 +956,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.3.6;
+				MARKETING_VERSION = 2.3.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -971,7 +975,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 41;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -983,7 +987,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.3.6;
+				MARKETING_VERSION = 2.3.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1102,7 +1106,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 41;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1114,7 +1118,7 @@
 				INFOPLIST_FILE = "Stockfish/Stockfish-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.3.6;
+				MARKETING_VERSION = 2.3.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
