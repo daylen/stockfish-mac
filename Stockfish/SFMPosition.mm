@@ -10,6 +10,7 @@
 #import "Constants.h"
 #import "SFMMove.h"
 #import "SFMParser.h"
+#import "NSColor+ColorUtils.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -223,7 +224,7 @@ NSString* const moveRegex =
         currentNode = currentNode.next;
     }
     
-    if(currentNode != nil){
+    if (currentNode != nil) {
         SFMPosition *currentPosition = [position copy];
         // Make the moves up to the parent node
         int movesToParent = currentNode.ply - node.ply;
@@ -232,26 +233,25 @@ NSString* const moveRegex =
         }
         NSArray *movesDelta = [currentNode.parent reconstructMoves:movesToParent];
         [currentPosition doMoves:movesDelta error:nil];
-        // Only add first level variations on new lines
-        if(depth == 0 && [currentNode.variations count] > 0){
-            [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        }
-        
-        for(SFMNode *variation in currentNode.variations){
+
+        for (SFMNode *variation in currentNode.variations) {
             SFMPosition *copy = [currentPosition copy];
-            [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"( " attributes:[self variationStringAttributes]]];
+            NSString *startDepthNotation = [@"" stringByPaddingToLength:(depth+1)*4 withString:@"    " startingAtIndex:0];
+            NSString *variationStarterString = [NSString stringWithFormat:@"\n%@( ", startDepthNotation];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:variationStarterString attributes:[self variationStringAttributes]]];
             NSMutableAttributedString *variationString = [self moveTextForNode:variation andPosition:copy depth:depth + 1];
             [variationString addAttributes:[self variationStringAttributes] range:NSMakeRange(0, variationString.length)];
             [result appendAttributedString:variationString];
             [result appendAttributedString:[[NSAttributedString alloc] initWithString:@") " attributes:[self variationStringAttributes]]];
-            if(depth == 0){
-                [result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-            }
+
+            NSString *endDepthNotation = [@"" stringByPaddingToLength:depth*4 withString:@"    " startingAtIndex:0];
+            NSString *variationEndString = [NSString stringWithFormat:@"\n%@", endDepthNotation];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:variationEndString]];
         }
         
         [currentPosition doMove:currentNode.move error:nil];
         // recurse for the rest of the moves
-        if(currentNode.next != nil){
+        if (currentNode.next != nil) {
             [result appendAttributedString:[self moveTextForNode:currentNode.next andPosition:currentPosition depth:depth]];
         }
     }
@@ -293,7 +293,8 @@ NSString* const moveRegex =
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan attributes:@{NSForegroundColorAttributeName: [NSColor labelColor]}];
     [self setMoveAttributes:attributedString nodes:nodes];
     if(node.comment != nil){
-        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:[node.comment stringByAppendingString:@" "] attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
+        NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", node.comment];
+        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
     }
     
     return attributedString;
@@ -421,8 +422,8 @@ NSString* const moveRegex =
     return [NSColor secondaryLabelColor];
 }
 
-- (NSColor*)commentForegroundColor{
-    return [NSColor secondaryLabelColor];
+- (NSColor*) commentForegroundColor {
+    return [NSColor colorWithHex:0x208020 alpha:1.0];
 }
 
 /*!
