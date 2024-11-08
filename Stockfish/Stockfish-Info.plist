@@ -15,7 +15,7 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>public.pgn</string>
+				<string>com.apple.chess.pgn</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>SFMDocument</string>
@@ -49,5 +49,27 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>SFMApplication</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>PGN File</string>
+			<key>UTTypeIcons</key>
+			<dict/>
+			<key>UTTypeIdentifier</key>
+			<string>com.apple.chess.pgn</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>pgn</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>
