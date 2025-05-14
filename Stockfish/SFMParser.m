@@ -130,6 +130,11 @@
     return currentNode;
 }
 
++ (BOOL)isValidToken:(NSString*)token
+{
+    return token != nil && ![@"(null)" isEqualToString:token];
+}
+
 /*!
  Splits the string into tokens at the same depth. A token can be: move sequence, variation or comment
  */
@@ -173,7 +178,9 @@
         [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, [str length] - tokenStartIndex)]];
     }
     
-    return tokens;
+    return [tokens objectsAtIndexes:[tokens indexesOfObjectsPassingTest:^BOOL(id token, NSUInteger idx, BOOL * stop) {
+        return [SFMParser isValidToken:token];
+    }]];
 }
 
 + (BOOL)isLetter:(char)c

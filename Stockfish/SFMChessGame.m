@@ -269,7 +269,11 @@
     
     [str appendString:@"\n"];
     [str appendString:[[self moveTextString] string]];
-    [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
+    if (self.tags[@"Result"] == nil) {
+        [str appendString:@"\n"];
+    } else {
+        [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
+    }
 
     return str;
 }
