@@ -1431,17 +1431,7 @@ void Position::undo_ep_move(Move m) {
   this->set_piece_bits(them, PAWN, capsq);
   board[capsq] = pawn_of_color(them);
 
-  // Remove moving piece from destination square:
-  this->clear_piece_bits(us, PAWN, to);
-  board[to] = EMPTY;
-
-  // Replace moving piece at source square:
-  this->set_piece_bits(us, PAWN, from);
-  board[from] = pawn_of_color(us);
-
-  // Update piece list:
-  pieceList[us][PAWN][index[to]] = from;
-  index[from] = index[to];
+  this->move_piece(to, from);
   this->add_to_piece_list(them, PAWN, capsq);
 }
 
