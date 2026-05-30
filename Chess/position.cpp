@@ -56,6 +56,88 @@ Value Position::EgPieceSquareTable[16][64];
 
 
 ////
+//// Board mutation helpers
+////
+
+void Position::set_piece_bits(Color c, PieceType pt, Square s) {
+  set_bit(&(byColorBB[c]), s);
+  set_bit(&(byTypeBB[pt]), s);
+  set_bit(&(byTypeBB[OccupiedBB]), s);
+}
+
+void Position::clear_piece_bits(Color c, PieceType pt, Square s) {
+  clear_bit(&(byColorBB[c]), s);
+  clear_bit(&(byTypeBB[pt]), s);
+  clear_bit(&(byTypeBB[OccupiedBB]), s);
+}
+
+void Position::clear_piece_bits_keep_occupied(Color c, PieceType pt, Square s) {
+  clear_bit(&(byColorBB[c]), s);
+  clear_bit(&(byTypeBB[pt]), s);
+}
+
+void Position::remove_from_piece_list(Color c, PieceType pt, Square s) {
+  pieceList[c][pt][index[s]] = pieceList[c][pt][pieceCount[c][pt] - 1];
+  index[pieceList[c][pt][index[s]]] = index[s];
+  pieceCount[c][pt]--;
+}
+
+void Position::add_to_piece_list(Color c, PieceType pt, Square s) {
+  pieceList[c][pt][pieceCount[c][pt]] = s;
+  index[s] = pieceCount[c][pt];
+  pieceCount[c][pt]++;
+}
+
+void Position::move_piece(Square from, Square to) {
+  Color c = this->color_of_piece_on(from);
+  PieceType pt = this->type_of_piece_on(from);
+  Piece p = board[from];
+
+  this->clear_piece_bits(c, pt, from);
+  this->set_piece_bits(c, pt, to);
+  board[to] = p;
+  board[from] = EMPTY;
+
+  pieceList[c][pt][index[from]] = to;
+  index[to] = index[from];
+
+  if(pt == KING)
+    kingSquare[c] = to;
+}
+
+Bitboard Position::ray_blockers(Color sliderSide, Square kingSq, Color pieceColor,
+                                Bitboard sliderMask) const {
+  Bitboard b1, b2, result, pinners, sliders;
+  Square s;
+
+  result = EmptyBoardBB;
+  b1 = this->occupied_squares();
+
+  sliders = this->rooks_and_queens(sliderSide) & sliderMask;
+  if(sliders & RookPseudoAttacks[kingSq]) {
+    b2 = this->rook_attacks(kingSq) & this->pieces_of_color(pieceColor);
+    pinners = rook_attacks_bb(kingSq, b1 ^ b2) & sliders;
+    while(pinners) {
+      s = pop_1st_bit(&pinners);
+      result |= (squares_between(s, kingSq) & b2);
+    }
+  }
+
+  sliders = this->bishops_and_queens(sliderSide) & sliderMask;
+  if(sliders & BishopPseudoAttacks[kingSq]) {
+    b2 = this->bishop_attacks(kingSq) & this->pieces_of_color(pieceColor);
+    pinners = bishop_attacks_bb(kingSq, b1 ^ b2) & sliders;
+    while(pinners) {
+      s = pop_1st_bit(&pinners);
+      result |= (squares_between(s, kingSq) & b2);
+    }
+  }
+
+  return result;
+}
+
+
+////
 //// Functions
 ////
 
@@ -299,70 +381,13 @@ void Position::copy(const Position &pos) {
 /// king) pieces for the given color.
 
 Bitboard Position::pinned_pieces(Color c) const {
-  Bitboard b1, b2, pinned, pinners, sliders;
-  Square ksq = this->king_square(c), s;
-  Color them = opposite_color(c);
-
-  pinned = EmptyBoardBB;
-  b1 = this->occupied_squares();
-
-  sliders = this->rooks_and_queens(them) & ~this->checkers();
-  if(sliders & RookPseudoAttacks[ksq]) {
-    b2 = this->rook_attacks(ksq) & this->pieces_of_color(c);
-    pinners = rook_attacks_bb(ksq, b1 ^ b2) & sliders;
-    while(pinners) {
-      s = pop_1st_bit(&pinners);
-      pinned |= (squares_between(s, ksq) & b2);
-    }
-  }
-
-  sliders = this->bishops_and_queens(them) & ~this->checkers();
-  if(sliders & BishopPseudoAttacks[ksq]) {
-    b2 = this->bishop_attacks(ksq) & this->pieces_of_color(c);
-    pinners = bishop_attacks_bb(ksq, b1 ^ b2) & sliders;
-    while(pinners) {
-      s = pop_1st_bit(&pinners);
-      pinned |= (squares_between(s, ksq) & b2);
-    }
-  }
-
-  return pinned;
+  return this->ray_blockers(opposite_color(c), this->king_square(c), c,
+                              ~this->checkers());
 }
 
-
-/// Position:discovered_check_candidates() returns a bitboard containing all
-/// pieces for the given side which are candidates for giving a discovered
-/// check.  The code is almost the same as the function for finding pinned
-/// pieces.
-
 Bitboard Position::discovered_check_candidates(Color c) const {
-  Bitboard b1, b2, dc, checkers, sliders;
-  Square ksq = this->king_square(opposite_color(c)), s;
-
-  dc = EmptyBoardBB;
-  b1 = this->occupied_squares();
-
-  sliders = this->rooks_and_queens(c);
-  if(sliders & RookPseudoAttacks[ksq]) {
-    b2 = this->rook_attacks(ksq) & this->pieces_of_color(c);
-    checkers = rook_attacks_bb(ksq, b1 ^ b2) & sliders;
-    while(checkers) {
-      s = pop_1st_bit(&checkers);
-      dc |= (squares_between(s, ksq) & b2);
-    }
-  }
-
-  sliders = this->bishops_and_queens(c);
-  if(sliders & BishopPseudoAttacks[ksq]) {
-    b2 = this->bishop_attacks(ksq) & this->pieces_of_color(c);
-    checkers = bishop_attacks_bb(ksq, b1 ^ b2) & sliders;
-    while(checkers) {
-      s = pop_1st_bit(&checkers);
-      dc |= (squares_between(s, ksq) & b2);
-    }
-  }
-
-  return dc;
+  return this->ray_blockers(c, this->king_square(opposite_color(c)), c,
+                              ~EmptyBoardBB);
 }
 
 
@@ -778,9 +803,7 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
     if(capture) {
       assert(capture != KING);
 
-      // Remove captured piece:
-      clear_bit(&(byColorBB[them]), to);
-      clear_bit(&(byTypeBB[capture]), to);
+      this->clear_piece_bits_keep_occupied(them, capture, to);
 
       // Update hash key:
       key ^= zobrist[them][capture][to];
@@ -800,13 +823,7 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
       // Update material hash key:
       materialKey ^= zobMaterial[them][capture][pieceCount[them][capture]];
 
-      // Update piece count:
-      pieceCount[them][capture]--;
-
-      // Update piece list:
-      pieceList[them][capture][index[to]] =
-        pieceList[them][capture][pieceCount[them][capture]];
-      index[pieceList[them][capture][index[to]]] = index[to];
+      this->remove_from_piece_list(them, capture, to);
 
       // Remember the captured piece, in order to be able to undo the move
       // correctly:
@@ -816,15 +833,7 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
       rule50 = 0;
     }
 
-    // Move the piece:
-    clear_bit(&(byColorBB[us]), from);
-    clear_bit(&(byTypeBB[piece]), from);
-    clear_bit(&(byTypeBB[0]), from); // HACK: byTypeBB[0] == occupied squares
-    set_bit(&(byColorBB[us]), to);
-    set_bit(&(byTypeBB[piece]), to);
-    set_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
-    board[to] = board[from];
-    board[from] = EMPTY;
+    this->move_piece(from, to);
 
     // Update hash key:
     key ^= zobrist[us][piece][from] ^ zobrist[us][piece][to];
@@ -835,13 +844,7 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
     egValue -= this->eg_pst(us, piece, from);
     egValue += this->eg_pst(us, piece, to);
 
-    // If the moving piece was a king, update the king square:
-    if(piece == KING)
-      kingSquare[us] = to;
-
     // If the move was a double pawn push, set the en passant square.
-    // This code is a bit ugly right now, and should be cleaned up later.
-    // FIXME
     if(epSquare != SQ_NONE) {
       key ^= zobEp[epSquare];
       epSquare = SQ_NONE;
@@ -861,10 +864,6 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
       // Update pawn hash key:
       pawnKey ^= zobrist[us][PAWN][from] ^ zobrist[us][PAWN][to];
     }
-
-    // Update piece lists:
-    pieceList[us][piece][index[from]] = to;
-    index[to] = index[from];
 
     // Update castle rights:
     key ^= zobCastle[castleRights];
@@ -976,20 +975,12 @@ void Position::do_castle_move(Move m) {
   }
 
   // Remove pieces from source squares:
-  clear_bit(&(byColorBB[us]), kfrom);
-  clear_bit(&(byTypeBB[KING]), kfrom);
-  clear_bit(&(byTypeBB[0]), kfrom); // HACK: byTypeBB[0] == occupied squares
-  clear_bit(&(byColorBB[us]), rfrom);
-  clear_bit(&(byTypeBB[ROOK]), rfrom);
-  clear_bit(&(byTypeBB[0]), rfrom); // HACK: byTypeBB[0] == occupied squares
+  this->clear_piece_bits(us, KING, kfrom);
+  this->clear_piece_bits(us, ROOK, rfrom);
 
   // Put pieces on destination squares:
-  set_bit(&(byColorBB[us]), kto);
-  set_bit(&(byTypeBB[KING]), kto);
-  set_bit(&(byTypeBB[0]), kto); // HACK: byTypeBB[0] == occupied squares
-  set_bit(&(byColorBB[us]), rto);
-  set_bit(&(byTypeBB[ROOK]), rto);
-  set_bit(&(byTypeBB[0]), rto); // HACK: byTypeBB[0] == occupied squares
+  this->set_piece_bits(us, KING, kto);
+  this->set_piece_bits(us, ROOK, rto);
 
   // Update board array:
   board[kfrom] = board[rfrom] = EMPTY;
@@ -1068,9 +1059,7 @@ void Position::do_promotion_move(Move m, UndoInfo &u) {
   if(capture) {
     assert(capture != KING);
 
-    // Remove captured piece:
-    clear_bit(&(byColorBB[them]), to);
-    clear_bit(&(byTypeBB[capture]), to);
+    this->clear_piece_bits_keep_occupied(them, capture, to);
 
     // Update hash key:
     key ^= zobrist[them][capture][to];
@@ -1087,13 +1076,7 @@ void Position::do_promotion_move(Move m, UndoInfo &u) {
     // Update material hash key:
     materialKey ^= zobMaterial[them][capture][pieceCount[them][capture]];
 
-    // Update piece count:
-    pieceCount[them][capture]--;
-
-    // Update piece list:
-    pieceList[them][capture][index[to]] =
-      pieceList[them][capture][pieceCount[them][capture]];
-    index[pieceList[them][capture][index[to]]] = index[to];
+    this->remove_from_piece_list(them, capture, to);
 
     // Remember the captured piece, in order to be able to undo the move
     // correctly:
@@ -1101,17 +1084,13 @@ void Position::do_promotion_move(Move m, UndoInfo &u) {
   }
 
   // Remove pawn:
-  clear_bit(&(byColorBB[us]), from);
-  clear_bit(&(byTypeBB[PAWN]), from);
-  clear_bit(&(byTypeBB[0]), from); // HACK: byTypeBB[0] == occupied squares
+  this->clear_piece_bits(us, PAWN, from);
   board[from] = EMPTY;
 
   // Insert promoted piece:
   promotion = move_promotion(m);
   assert(promotion >= KNIGHT && promotion <= QUEEN);
-  set_bit(&(byColorBB[us]), to);
-  set_bit(&(byTypeBB[promotion]), to);
-  set_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
+  this->set_piece_bits(us, promotion, to);
   board[to] = piece_of_color_and_type(us, promotion);
 
   // Update hash key:
@@ -1191,35 +1170,15 @@ void Position::do_ep_move(Move m) {
   assert(this->piece_on(capsq) == pawn_of_color(them));
 
   // Remove captured piece:
-  clear_bit(&(byColorBB[them]), capsq);
-  clear_bit(&(byTypeBB[PAWN]), capsq);
-  clear_bit(&(byTypeBB[0]), capsq); // HACK: byTypeBB[0] == occupied squares
+  this->clear_piece_bits(them, PAWN, capsq);
   board[capsq] = EMPTY;
-
-  // Remove moving piece from source square:
-  clear_bit(&(byColorBB[us]), from);
-  clear_bit(&(byTypeBB[PAWN]), from);
-  clear_bit(&(byTypeBB[0]), from); // HACK: byTypeBB[0] == occupied squares
-
-  // Put moving piece on destination square:
-  set_bit(&(byColorBB[us]), to);
-  set_bit(&(byTypeBB[PAWN]), to);
-  set_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
-  board[to] = board[from];
-  board[from] = EMPTY;
 
   // Update material hash key:
   materialKey ^= zobMaterial[them][PAWN][pieceCount[them][PAWN]];
 
-  // Update piece count:
-  pieceCount[them][PAWN]--;
+  this->remove_from_piece_list(them, PAWN, capsq);
 
-  // Update piece list:
-  pieceList[us][PAWN][index[from]] = to;
-  index[to] = index[from];
-  pieceList[them][PAWN][index[capsq]] =
-    pieceList[them][PAWN][pieceCount[them][PAWN]];
-  index[pieceList[them][PAWN][index[capsq]]] = index[capsq];
+  this->move_piece(from, to);
 
   // Update hash key:
   key ^= zobrist[us][PAWN][from] ^ zobrist[us][PAWN][to];
@@ -1287,44 +1246,21 @@ void Position::undo_move(Move m, const UndoInfo &u) {
 
     // Put the piece back at the source square:
     piece = this->type_of_piece_on(to);
-    set_bit(&(byColorBB[us]), from);
-    set_bit(&(byTypeBB[piece]), from);
-    set_bit(&(byTypeBB[0]), from); // HACK: byTypeBB[0] == occupied squares
-    board[from] = piece_of_color_and_type(us, piece);
-
-    // Clear the destination square
-    clear_bit(&(byColorBB[us]), to);
-    clear_bit(&(byTypeBB[piece]), to);
-    clear_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
-
-    // If the moving piece was a king, update the king square:
-    if(piece == KING)
-      kingSquare[us] = from;
-
-    // Update piece list:
-    pieceList[us][piece][index[to]] = from;
-    index[from] = index[to];
+    this->move_piece(to, from);
 
     capture = u.capture;
 
     if(capture) {
       assert(capture != KING);
       // Replace the captured piece:
-      set_bit(&(byColorBB[them]), to);
-      set_bit(&(byTypeBB[capture]), to);
-      set_bit(&(byTypeBB[0]), to);
+      this->set_piece_bits(them, capture, to);
       board[to] = piece_of_color_and_type(them, capture);
 
       // Update material:
       if(capture != PAWN)
         npMaterial[them] += piece_value_midgame(capture);
 
-      // Update piece list:
-      pieceList[them][capture][pieceCount[them][capture]] = to;
-      index[to] = pieceCount[them][capture];
-
-      // Update piece count:
-      pieceCount[them][capture]++;
+      this->add_to_piece_list(them, capture, to);
     }
     else
       board[to] = EMPTY;
@@ -1369,20 +1305,12 @@ void Position::undo_castle_move(Move m) {
   assert(this->piece_on(rto) == rook_of_color(us));
 
   // Remove pieces from destination squares:
-  clear_bit(&(byColorBB[us]), kto);
-  clear_bit(&(byTypeBB[KING]), kto);
-  clear_bit(&(byTypeBB[0]), kto); // HACK: byTypeBB[0] == occupied squares
-  clear_bit(&(byColorBB[us]), rto);
-  clear_bit(&(byTypeBB[ROOK]), rto);
-  clear_bit(&(byTypeBB[0]), rto); // HACK: byTypeBB[0] == occupied squares
+  this->clear_piece_bits(us, KING, kto);
+  this->clear_piece_bits(us, ROOK, rto);
 
   // Put pieces on source squares:
-  set_bit(&(byColorBB[us]), kfrom);
-  set_bit(&(byTypeBB[KING]), kfrom);
-  set_bit(&(byTypeBB[0]), kfrom); // HACK: byTypeBB[0] == occupied squares
-  set_bit(&(byColorBB[us]), rfrom);
-  set_bit(&(byTypeBB[ROOK]), rfrom);
-  set_bit(&(byTypeBB[0]), rfrom); // HACK: byTypeBB[0] == occupied squares
+  this->set_piece_bits(us, KING, kfrom);
+  this->set_piece_bits(us, ROOK, rfrom);
 
   // Update board:
   board[rto] = board[kto] = EMPTY;
@@ -1430,14 +1358,10 @@ void Position::undo_promotion_move(Move m, const UndoInfo &u) {
   promotion = move_promotion(m);
   assert(this->piece_on(to)==piece_of_color_and_type(us, promotion));
   assert(promotion >= KNIGHT && promotion <= QUEEN);
-  clear_bit(&(byColorBB[us]), to);
-  clear_bit(&(byTypeBB[promotion]), to);
-  clear_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
+  this->clear_piece_bits(us, promotion, to);
 
   // Insert pawn at source square:
-  set_bit(&(byColorBB[us]), from);
-  set_bit(&(byTypeBB[PAWN]), from);
-  set_bit(&(byTypeBB[0]), from); // HACK: byTypeBB[0] == occupied squares
+  this->set_piece_bits(us, PAWN, from);
   board[from] = pawn_of_color(us);
 
   // Update material:
@@ -1459,9 +1383,7 @@ void Position::undo_promotion_move(Move m, const UndoInfo &u) {
     assert(capture != KING);
 
     // Insert captured piece:
-    set_bit(&(byColorBB[them]), to);
-    set_bit(&(byTypeBB[capture]), to);
-    set_bit(&(byTypeBB[0]), to); // HACK: byTypeBB[0] == occupied squares
+    this->set_piece_bits(them, capture, to);
     board[to] = piece_of_color_and_type(them, capture);
 
     // Update material.  Because the move is a promotion move, we know
@@ -1469,12 +1391,7 @@ void Position::undo_promotion_move(Move m, const UndoInfo &u) {
     assert(capture != PAWN);
     npMaterial[them] += piece_value_midgame(capture);
 
-    // Update piece list:
-    pieceList[them][capture][pieceCount[them][capture]] = to;
-    index[to] = pieceCount[them][capture];
-
-    // Update piece count:
-    pieceCount[them][capture]++;
+    this->add_to_piece_list(them, capture, to);
   }
   else
     board[to] = EMPTY;
@@ -1511,31 +1428,21 @@ void Position::undo_ep_move(Move m) {
   assert(this->piece_on(capsq) == EMPTY);
 
   // Replace captured piece:
-  set_bit(&(byColorBB[them]), capsq);
-  set_bit(&(byTypeBB[PAWN]), capsq);
-  set_bit(&(byTypeBB[0]), capsq);
+  this->set_piece_bits(them, PAWN, capsq);
   board[capsq] = pawn_of_color(them);
 
   // Remove moving piece from destination square:
-  clear_bit(&(byColorBB[us]), to);
-  clear_bit(&(byTypeBB[PAWN]), to);
-  clear_bit(&(byTypeBB[0]), to);
+  this->clear_piece_bits(us, PAWN, to);
   board[to] = EMPTY;
 
   // Replace moving piece at source square:
-  set_bit(&(byColorBB[us]), from);
-  set_bit(&(byTypeBB[PAWN]), from);
-  set_bit(&(byTypeBB[0]), from);
+  this->set_piece_bits(us, PAWN, from);
   board[from] = pawn_of_color(us);
 
   // Update piece list:
   pieceList[us][PAWN][index[to]] = from;
   index[from] = index[to];
-  pieceList[them][PAWN][pieceCount[them][PAWN]] = capsq;
-  index[capsq] = pieceCount[them][PAWN];
-
-  // Update piece count:
-  pieceCount[them][PAWN]++;
+  this->add_to_piece_list(them, PAWN, capsq);
 }
 
 
@@ -1756,14 +1663,8 @@ void Position::put_piece(Piece p, Square s) {
   PieceType pt = type_of_piece(p);
 
   board[s] = p;
-  index[s] = pieceCount[c][pt];
-  pieceList[c][pt][index[s]] = s;
-
-  set_bit(&(byTypeBB[pt]), s);
-  set_bit(&(byColorBB[c]), s);
-  set_bit(&byTypeBB[0], s); // HACK: byTypeBB[0] contains all occupied squares.
-
-  pieceCount[c][pt]++;
+  this->set_piece_bits(c, pt, s);
+  this->add_to_piece_list(c, pt, s);
 
   if(pt == KING)
     kingSquare[c] = s;

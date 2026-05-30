@@ -319,11 +319,24 @@ public:
   static bool is_valid_fen(const std::string &str);
 
 private:
+  // byTypeBB[OccupiedBB] holds a bitboard of all occupied squares
+  static const int OccupiedBB = 0;
+
   // Initialization helper functions (used while setting up a position)
   void clear();
   void put_piece(Piece p, Square s);
   void allow_oo(Color c);
   void allow_ooo(Color c);
+
+  // Board mutation helpers (used while making and unmaking moves)
+  void set_piece_bits(Color c, PieceType pt, Square s);
+  void clear_piece_bits(Color c, PieceType pt, Square s);
+  void clear_piece_bits_keep_occupied(Color c, PieceType pt, Square s);
+  void remove_from_piece_list(Color c, PieceType pt, Square s);
+  void add_to_piece_list(Color c, PieceType pt, Square s);
+  void move_piece(Square from, Square to);
+  Bitboard ray_blockers(Color sliderSide, Square kingSq, Color pieceColor,
+                        Bitboard sliderMask) const;
 
   // Helper functions for doing and undoing moves
   void do_castle_move(Move m);
@@ -421,7 +434,7 @@ inline Color Position::side_to_move() const {
 }
 
 inline Bitboard Position::occupied_squares() const {
-  return byTypeBB[0];
+  return byTypeBB[OccupiedBB];
 }
 
 inline Bitboard Position::empty_squares() const {
