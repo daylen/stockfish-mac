@@ -52,19 +52,24 @@ static const unsigned long long SFMMaxEngineBinarySize = 50 * 1024 * 1024;
     return entitlements;
 }
 
+- (NSDictionary *)binariesEntitlements
+{
+    NSURL *url = [[NSBundle mainBundle] URLForResource:@"Binaries" withExtension:@"entitlements"];
+    return [NSDictionary dictionaryWithContentsOfURL:url error:NULL];
+}
+
 - (void)testEmbeddedEnginesInheritTheAppSandbox
 {
+    NSDictionary *binariesEntitlements = [self binariesEntitlements];
+    XCTAssertGreaterThan([binariesEntitlements count], 0, @"Binaries.entitlements is not readable from the app bundle");
+
     NSArray<NSURL *> *engines = [self embeddedEngineURLs];
     XCTAssertGreaterThan([engines count], 0, @"No engine binaries are embedded in the app");
 
     for (NSURL *engine in engines) {
-        NSString *name = [engine lastPathComponent];
-        NSDictionary *entitlements = [self entitlementsForBinaryAtURL:engine];
-        XCTAssertNotNil(entitlements, @"%@ carries no entitlements; re-sign it with Binaries.entitlements", name);
-        XCTAssertEqualObjects(entitlements[@"com.apple.security.app-sandbox"], @YES,
-                              @"%@ is missing com.apple.security.app-sandbox", name);
-        XCTAssertEqualObjects(entitlements[@"com.apple.security.inherit"], @YES,
-                              @"%@ is missing com.apple.security.inherit, so it cannot launch from the sandboxed app", name);
+        XCTAssertEqualObjects([self entitlementsForBinaryAtURL:engine], binariesEntitlements,
+                              @"%@ is not signed with exactly Binaries.entitlements; macOS terminates an inheriting helper that carries any other App Sandbox entitlement",
+                              [engine lastPathComponent]);
     }
 }
 
