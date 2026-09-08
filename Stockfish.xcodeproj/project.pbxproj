@@ -78,8 +78,7 @@
 		77AE06B61FFB2EDA00AD4C72 /* SFMApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 77AE06B51FFB2EDA00AD4C72 /* SFMApplicationDelegate.m */; };
 		77CA8B051889C42F004402D2 /* SFMFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B041889C42F004402D2 /* SFMFormatter.m */; };
 		77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77CA8B061889C499004402D2 /* SFMFormatterTest.m */; };
-		77D646862CD6CCC700B8F446 /* nn-37f18f62d772.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 77D646802CD6CCC700B8F446 /* nn-37f18f62d772.nnue */; };
-		77D646872CD6CCC700B8F446 /* nn-1111cefa1111.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 77D646812CD6CCC700B8F446 /* nn-1111cefa1111.nnue */; };
+		77D646862CD6CCC700B8F446 /* nn-1a298aa575a0.nnue in Resources */ = {isa = PBXBuildFile; fileRef = 77D646802CD6CCC700B8F446 /* nn-1a298aa575a0.nnue */; };
 		77D646902CD6D02D00B8F446 /* stockfish-arm64 in Embed Helper Tools */ = {isa = PBXBuildFile; fileRef = 77D6468A2CD6CCEE00B8F446 /* stockfish-arm64 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		77D646912CD6D03C00B8F446 /* stockfish-x86-64-bmi2 in Embed Helper Tools */ = {isa = PBXBuildFile; fileRef = 77D6468B2CD6CCEE00B8F446 /* stockfish-x86-64-bmi2 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		77D646922CD6D04100B8F446 /* stockfish-x86-64-sse41-popcnt in Embed Helper Tools */ = {isa = PBXBuildFile; fileRef = 77D6468C2CD6CCEE00B8F446 /* stockfish-x86-64-sse41-popcnt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -244,8 +243,7 @@
 		77CA8B031889C42F004402D2 /* SFMFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMFormatter.h; path = Stockfish/SFMFormatter.h; sourceTree = "<group>"; };
 		77CA8B041889C42F004402D2 /* SFMFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatter.m; path = Stockfish/SFMFormatter.m; sourceTree = "<group>"; };
 		77CA8B061889C499004402D2 /* SFMFormatterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMFormatterTest.m; path = StockfishTests/SFMFormatterTest.m; sourceTree = SOURCE_ROOT; };
-		77D646802CD6CCC700B8F446 /* nn-37f18f62d772.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-37f18f62d772.nnue"; sourceTree = "<group>"; };
-		77D646812CD6CCC700B8F446 /* nn-1111cefa1111.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-1111cefa1111.nnue"; sourceTree = "<group>"; };
+		77D646802CD6CCC700B8F446 /* nn-1a298aa575a0.nnue */ = {isa = PBXFileReference; lastKnownFileType = file; path = "nn-1a298aa575a0.nnue"; sourceTree = "<group>"; };
 		77D6468A2CD6CCEE00B8F446 /* stockfish-arm64 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-arm64"; sourceTree = "<group>"; };
 		77D6468B2CD6CCEE00B8F446 /* stockfish-x86-64-bmi2 */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-bmi2"; sourceTree = "<group>"; };
 		77D6468C2CD6CCEE00B8F446 /* stockfish-x86-64-sse41-popcnt */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = "stockfish-x86-64-sse41-popcnt"; sourceTree = "<group>"; };
@@ -500,8 +498,7 @@
 		7748D07D18868CA0009E021E /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				77D646802CD6CCC700B8F446 /* nn-37f18f62d772.nnue */,
-				77D646812CD6CCC700B8F446 /* nn-1111cefa1111.nnue */,
+				77D646802CD6CCC700B8F446 /* nn-1a298aa575a0.nnue */,
 				77D6468A2CD6CCEE00B8F446 /* stockfish-arm64 */,
 				77D6468B2CD6CCEE00B8F446 /* stockfish-x86-64-bmi2 */,
 				77D6468C2CD6CCEE00B8F446 /* stockfish-x86-64-sse41-popcnt */,
@@ -667,8 +664,7 @@
 				773DE98018822DF8009156C3 /* king_w.pdf in Resources */,
 				773DE98718822DF8009156C3 /* rook_b.pdf in Resources */,
 				773DE98818822DF8009156C3 /* rook_w.pdf in Resources */,
-				77D646862CD6CCC700B8F446 /* nn-37f18f62d772.nnue in Resources */,
-				77D646872CD6CCC700B8F446 /* nn-1111cefa1111.nnue in Resources */,
+				77D646862CD6CCC700B8F446 /* nn-1a298aa575a0.nnue in Resources */,
 				773DE98418822DF8009156C3 /* pawn_w.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -949,7 +945,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 45;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -966,7 +962,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
-				MARKETING_VERSION = 2.3.9;
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -985,7 +981,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 45;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
@@ -1003,7 +999,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
-				MARKETING_VERSION = 2.3.9;
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1128,7 +1124,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 45;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = NR8F7ZFLA3;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1145,7 +1141,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
-				MARKETING_VERSION = 2.3.9;
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.daylenyang.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
