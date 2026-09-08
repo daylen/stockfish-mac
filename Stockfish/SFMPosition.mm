@@ -10,7 +10,6 @@
 #import "Constants.h"
 #import "SFMMove.h"
 #import "SFMParser.h"
-#import "NSColor+ColorUtils.h"
 
 #include "../Chess/position.h"
 #include "../Chess/bitboard.h"
@@ -423,7 +422,7 @@ NSString* const moveRegex =
 }
 
 - (NSColor*) commentForegroundColor {
-    return [NSColor colorWithHex:0x208020 alpha:1.0];
+    return [NSColor secondaryLabelColor];
 }
 
 /*!
