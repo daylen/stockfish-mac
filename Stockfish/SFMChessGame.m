@@ -11,6 +11,8 @@
 #import "SFMParser.h"
 #import "SFMNode.h"
 
+static NSString * const SFMUnknownResult = @"*";
+
 @interface SFMChessGame()
 
 @property (nonatomic, readonly) SFMNode *startNode;
@@ -36,7 +38,7 @@
                   @"Round": @"1",
                   @"White": @"?",
                   @"Black": @"?",
-                  @"Result": @"*"};
+                  @"Result": SFMUnknownResult};
         _currentNode = [[SFMNode alloc] init];
         _position = [[SFMPosition alloc] init];
         _undoManager = [[NSUndoManager alloc] init];
@@ -269,11 +271,8 @@
     
     [str appendString:@"\n"];
     [str appendString:[[self moveTextString] string]];
-    if (self.tags[@"Result"] == nil) {
-        [str appendString:@"\n"];
-    } else {
-        [str appendFormat:@"%@\n\n", self.tags[@"Result"]];
-    }
+    NSString *result = self.tags[@"Result"];
+    [str appendFormat:@"%@\n\n", [result length] > 0 ? result : SFMUnknownResult];
 
     return str;
 }

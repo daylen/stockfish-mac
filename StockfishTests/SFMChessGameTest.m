@@ -52,6 +52,25 @@
     XCTAssertEqualObjects([[game moveTextString] string], @"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ");
 }
 
+- (void)testPgnStringAlwaysWritesGameTerminationMarker
+{
+    NSArray *tagsAndExpectedMarker = @[
+                                       @[@{@"Event": @"A"}, @"*"],
+                                       @[@{@"Event": @"A", @"Result": @""}, @"*"],
+                                       @[@{@"Event": @"A", @"Result": @"1-0"}, @"1-0"],
+                                       ];
+    for (NSArray *testCase in tagsAndExpectedMarker) {
+        NSDictionary *tags = testCase[0];
+        NSString *expectedMarker = testCase[1];
+        SFMChessGame *game = [[SFMChessGame alloc] initWithTags:tags moveText:@"1. e4 e5"];
+        [game parseMoveText:nil];
+        NSString *pgn = [game pgnString];
+        XCTAssertEqual([pgn rangeOfString:@"(null)"].location, (NSUInteger)NSNotFound);
+        XCTAssertTrue([pgn hasSuffix:[expectedMarker stringByAppendingString:@"\n\n"]],
+                      @"Expected termination marker %@ for tags %@, got: %@", expectedMarker, tags, pgn);
+    }
+}
+
 - (void)testUciStringOutput
 {
     SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{} moveText:@"1. e4 e5"];

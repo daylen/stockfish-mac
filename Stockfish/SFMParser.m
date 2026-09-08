@@ -70,13 +70,17 @@
 
 + (SFMNode * _Nullable)parseMoveText:(NSString * _Nullable)moveText position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error {
     SFMNode *head = [[SFMNode alloc] init];
-    if (moveText == nil || [moveText isEqualToString:@""]) {
+    if (moveText == nil) {
         return head;
     }
     NSMutableCharacterSet *charactersToTrim = [[NSMutableCharacterSet alloc] init];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"*"]];
-    return [self parseString:[moveText stringByTrimmingCharactersInSet:charactersToTrim] fromNode:head position:position error:error];
+    NSString *moves = [moveText stringByTrimmingCharactersInSet:charactersToTrim];
+    if ([moves length] == 0) {
+        return head;
+    }
+    return [self parseString:moves fromNode:head position:position error:error];
 }
 
 + (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
@@ -112,6 +116,10 @@
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
         SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] error:error];
         if (parsedNode == nil) {
+            return nil;
+        }
+        BOOL variationHasNoMoves = dummy.next == nil;
+        if (variationHasNoMoves) {
             return nil;
         }
         [dummy.next setParent:currentNode.parent];
