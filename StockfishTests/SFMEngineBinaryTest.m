@@ -75,7 +75,9 @@ static const unsigned long long SFMMaxEngineBinarySize = 50 * 1024 * 1024;
 
     for (NSURL *engine in engines) {
         NSNumber *fileSize = nil;
-        [engine getResourceValue:&fileSize forKey:NSURLFileSizeKey error:nil];
+        NSError *error = nil;
+        [engine getResourceValue:&fileSize forKey:NSURLFileSizeKey error:&error];
+        XCTAssertNotNil(fileSize, @"Could not read the size of %@: %@", [engine lastPathComponent], error);
         XCTAssertLessThan([fileSize unsignedLongLongValue], SFMMaxEngineBinarySize,
                           @"%@ is large enough to contain the evaluation network; check that the build still applies -DNNUE_EMBEDDING_OFF",
                           [engine lastPathComponent]);
