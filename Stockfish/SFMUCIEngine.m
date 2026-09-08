@@ -15,6 +15,7 @@
 #import "NSArray+ArrayUtils.h"
 #import "SFMUCIOption.h"
 #import "SFMUserDefaults.h"
+#include <fcntl.h>
 #include <stdatomic.h>
 #include <sys/sysctl.h>
 
@@ -37,6 +38,9 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
 @property dispatch_group_t analysisGroup;
+@property (nonatomic) NSUInteger outstandingAnalysisGroupEntries;
+@property (nonatomic) BOOL engineDidTerminate;
+@property (nonatomic) NSMutableData *pendingOutput;
 
 @end
 
@@ -47,23 +51,27 @@ static _Atomic(int) instancesAnalyzing = 0;
 #pragma mark - Setters
 
 - (void)setIsAnalyzing:(BOOL)isAnalyzing {
-    if (_isAnalyzing != isAnalyzing) {
-        _isAnalyzing = isAnalyzing;
-        self.lines = nil;
-        
-        if (isAnalyzing) {
-            NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
-            [self setUciOption:@"MultiPV" integerValue:self.multipv];
-            [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
-            [self sendCommandToEngine:[self.gameToAnalyze uciString]];
-            dispatch_group_enter(_analysisGroup);
-            atomic_fetch_add(&instancesAnalyzing, 1);
-            [self.bookmarkUrl startAccessingSecurityScopedResource];
-            [self sendCommandToEngine:@"go infinite"];
-        } else {
-            [self sendCommandToEngine:@"stop"];
-            [self.bookmarkUrl stopAccessingSecurityScopedResource];
+    @synchronized (self) {
+        if (_isAnalyzing == isAnalyzing) {
+            return;
         }
+        if (isAnalyzing && ![self enterAnalysisGroup]) {
+            return;
+        }
+        _isAnalyzing = isAnalyzing;
+    }
+    self.lines = nil;
+
+    if (isAnalyzing) {
+        NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
+        [self setUciOption:@"MultiPV" integerValue:self.multipv];
+        [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
+        [self sendCommandToEngine:[self.gameToAnalyze uciString]];
+        [self.bookmarkUrl startAccessingSecurityScopedResource];
+        [self sendCommandToEngine:@"go infinite"];
+    } else {
+        [self sendCommandToEngine:@"stop"];
+        [self.bookmarkUrl stopAccessingSecurityScopedResource];
     }
 }
 
@@ -118,6 +126,42 @@ static _Atomic(int) instancesAnalyzing = 0;
         _showWdl = showWdl;
     }
 }
+#pragma mark - Analysis group
+
+- (BOOL)enterAnalysisGroup
+{
+    @synchronized (self) {
+        if (self.engineDidTerminate) {
+            return NO;
+        }
+        self.outstandingAnalysisGroupEntries += 1;
+        dispatch_group_enter(_analysisGroup);
+        atomic_fetch_add(&instancesAnalyzing, 1);
+        return YES;
+    }
+}
+
+- (void)leaveAnalysisGroupOnce
+{
+    @synchronized (self) {
+        if (self.outstandingAnalysisGroupEntries == 0) {
+            return;
+        }
+        self.outstandingAnalysisGroupEntries -= 1;
+        dispatch_group_leave(_analysisGroup);
+        atomic_fetch_sub(&instancesAnalyzing, 1);
+    }
+}
+
+- (void)leaveAllAnalysisGroupEntries
+{
+    @synchronized (self) {
+        while (self.outstandingAnalysisGroupEntries > 0) {
+            [self leaveAnalysisGroupOnce];
+        }
+    }
+}
+
 #pragma mark - Engine I/O
 
 /*!
@@ -128,24 +172,81 @@ static _Atomic(int) instancesAnalyzing = 0;
 - (void)sendCommandToEngine:(NSString *)string
 {
     NSAssert([string sfm_containsString:@"\n"] == NO, @"UCI command contains new line");
+    if (!self.engineTask.isRunning) {
+        return;
+    }
     NSString *strWithNewLine = [NSString stringWithFormat:@"%@\n", string];
-    [self.writeHandle writeData:[strWithNewLine dataUsingEncoding:NSUTF8StringEncoding]];
+    @try {
+        [self.writeHandle writeData:[strWithNewLine dataUsingEncoding:NSUTF8StringEncoding]];
+    } @catch (NSException *exception) {
+        [self handleEngineTermination];
+    }
 }
 
 - (void)dataIsAvailable:(NSNotification *)notification
 {
-    NSString *output = [[NSString alloc] initWithData:[self.readHandle availableData]
-                                             encoding:NSUTF8StringEncoding];
-    if ([output sfm_containsString:@"\n"]) {
-        NSArray *lines = [output componentsSeparatedByString:@"\n"];
-        for (NSString *str in lines) {
-            [self processEngineOutput:str];
-        }
-    } else {
-        [self processEngineOutput:output];
+    NSData *availableData = [self.readHandle availableData];
+    BOOL engineClosedItsOutput = availableData.length == 0;
+    if (engineClosedItsOutput) {
+        [self handleEngineTermination];
+        return;
     }
-    
+
+    [self.pendingOutput appendData:availableData];
+    for (NSString *line in [self takeCompleteLines]) {
+        [self processEngineOutput:line];
+    }
+
     [self.readHandle waitForDataInBackgroundAndNotify];
+}
+
+- (NSArray<NSString *> *)takeCompleteLines
+{
+    NSMutableArray<NSString *> *lines = [[NSMutableArray alloc] init];
+    const char newline = '\n';
+    NSData *separator = [NSData dataWithBytes:&newline length:1];
+    NSUInteger lineStart = 0;
+
+    while (YES) {
+        NSRange unconsumed = NSMakeRange(lineStart, self.pendingOutput.length - lineStart);
+        NSRange separatorRange = [self.pendingOutput rangeOfData:separator options:0 range:unconsumed];
+        if (separatorRange.location == NSNotFound) {
+            break;
+        }
+        NSData *lineData = [self.pendingOutput subdataWithRange:NSMakeRange(lineStart, separatorRange.location - lineStart)];
+        NSString *line = [[NSString alloc] initWithData:lineData encoding:NSUTF8StringEncoding];
+        if (line != nil) {
+            [lines addObject:line];
+        }
+        lineStart = NSMaxRange(separatorRange);
+    }
+
+    [self.pendingOutput replaceBytesInRange:NSMakeRange(0, lineStart) withBytes:NULL length:0];
+    return lines;
+}
+
+- (void)handleEngineTermination
+{
+    @synchronized (self) {
+        if (self.engineDidTerminate) {
+            return;
+        }
+        self.engineDidTerminate = YES;
+        [self leaveAllAnalysisGroupEntries];
+        _isAnalyzing = NO;
+    }
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSFileHandleDataAvailableNotification
+                                                  object:self.readHandle];
+    [self.bookmarkUrl stopAccessingSecurityScopedResource];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        id<SFMUCIEngineDelegate> delegate = self.delegate;
+        if ([delegate respondsToSelector:@selector(uciEngineDidQuit:)]) {
+            [delegate uciEngineDidQuit:self];
+        }
+    });
 }
 
 /*!
@@ -157,12 +258,18 @@ static _Atomic(int) instancesAnalyzing = 0;
 {
     NSAssert([str sfm_containsString:@"\n"] == NO, @"Cannot process output with new line");
     
-    if ([str isEqualToString:@""]) {
+    NSArray *tokens = [[str componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]
+                       filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]];
+    if ([tokens count] == 0) {
         return;
     }
-    NSArray *tokens = [str componentsSeparatedByString:@" "];
-    
-    if ([tokens containsObject:@"currmove"]) {
+
+    NSString *messageType = [tokens firstObject];
+    BOOL isInfoLine = [messageType isEqualToString:@"info"];
+    BOOL isFreeFormInfoString = isInfoLine && [tokens count] > 1 && [tokens[1] isEqualToString:@"string"];
+    BOOL isAnalysisInfoLine = isInfoLine && !isFreeFormInfoString;
+
+    if (isAnalysisInfoLine && [tokens containsObject:@"currmove"]) {
         // Current move update
         NSString *moveUci = [tokens sfm_objectAfterObject:@"currmove"];
         if (moveUci == nil) {
@@ -182,7 +289,7 @@ static _Atomic(int) instancesAnalyzing = 0;
             didGetNewCurrentMove:move
                           number:[moveNumber integerValue]
                            depth:[depth integerValue]];
-    } else if ([tokens containsObject:@"depth"] && [tokens containsObject:@"pv"]) {
+    } else if (isAnalysisInfoLine && [tokens containsObject:@"depth"] && [tokens containsObject:@"pv"]) {
         // New line
         NSMutableDictionary *newDict = [NSMutableDictionary dictionaryWithDictionary:self.lines];
         SFMUCILine *line = [[SFMUCILine alloc] initWithTokens:tokens position:self.gameToAnalyze.position];
@@ -193,14 +300,13 @@ static _Atomic(int) instancesAnalyzing = 0;
         newDict[@(line.variationNum)] = line;
         self.lines = newDict;
         [self.delegate uciEngine:self didGetNewLine:newDict];
-    } else if ([tokens containsObject:@"bestmove"]) {
+    } else if ([messageType isEqualToString:@"bestmove"]) {
         // Stopped analysis
-        dispatch_group_leave(_analysisGroup);
-        atomic_fetch_sub(&instancesAnalyzing, 1);
-    } else if ([tokens containsObject:@"id"] && [tokens containsObject:@"name"]) {
+        [self leaveAnalysisGroupOnce];
+    } else if ([messageType isEqualToString:@"id"] && [tokens containsObject:@"name"]) {
         // Engine ID
         [self.delegate uciEngine:self didGetEngineName:[str substringFromIndex:[str rangeOfString:@"id name"].length + 1]];
-    } else if ([tokens containsObject:@"option"] && [tokens containsObject:@"name"]) {
+    } else if ([messageType isEqualToString:@"option"] && [tokens containsObject:@"name"]) {
         // Option
         NSString *optionName = [[tokens sfm_objectsAfterObject:@"name" beforeObject:@"type"] componentsJoinedByString:@" "];
         if ([SFMUCIOption isOptionSupported:optionName]) {
@@ -211,12 +317,12 @@ static _Atomic(int) instancesAnalyzing = 0;
 
             [self.options addObject:option];
         }
-    } else if ([tokens containsObject:@"uciok"]) {
+    } else if ([messageType isEqualToString:@"uciok"]) {
         // All options printed
         if ([self.delegate respondsToSelector:@selector(uciEngine:didGetOptions:)]) {
             [self.delegate uciEngine:self didGetOptions:self.options];
         }
-    } else if ([tokens containsObject:@"string"] && [tokens containsObject:@"evaluation"]) {
+    } else if (isFreeFormInfoString && [tokens containsObject:@"evaluation"]) {
         if ([tokens containsObject:@"NNUE"]) {
             for (NSString *token in tokens) {
                 if ([token containsString:@".nnue"]) {
@@ -266,25 +372,35 @@ static _Atomic(int) instancesAnalyzing = 0;
         _engineTask.launchPath = path;
         _engineTask.standardInput = inPipe;
         _engineTask.standardOutput = outPipe;
+        _engineTask.standardError = outPipe;
         // Set current directory so that the engine can locate the .nnue file.
         _engineTask.currentDirectoryURL = [[NSBundle mainBundle] resourceURL];
         
         _readHandle = [outPipe fileHandleForReading];
         _writeHandle = [inPipe fileHandleForWriting];
+        fcntl(_writeHandle.fileDescriptor, F_SETNOSIGPIPE, 1);
         
+        _isAnalyzing = NO;
+        _gameToAnalyze = nil;
+        _pendingOutput = [[NSMutableData alloc] init];
+        _analysisGroup = dispatch_group_create();
+        _options = [[NSMutableArray alloc] init];
+        _multipv = 1;
+
         if (shouldApplyPreferences) {
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applyPreferencesToEngine:) name:SETTINGS_HAVE_CHANGED_NOTIFICATION object:nil];
         }
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataIsAvailable:) name:NSFileHandleDataAvailableNotification object:self.readHandle];
         [_readHandle waitForDataInBackgroundAndNotify];
         
+        __weak typeof(self) weakSelf = self;
+        _engineTask.terminationHandler = ^(NSTask *task) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [weakSelf handleEngineTermination];
+            });
+        };
+
         [_engineTask launch];
-        
-        _isAnalyzing = NO;
-        _gameToAnalyze = nil;
-        _analysisGroup = dispatch_group_create();
-        _options = [[NSMutableArray alloc] init];
-        _multipv = 1;
         
         [self sendCommandToEngine:@"uci"];
         if (shouldApplyPreferences) {
@@ -369,11 +485,8 @@ static _Atomic(int) instancesAnalyzing = 0;
 
 - (void)dealloc
 {
-    if (self.isAnalyzing) {
-        // Apparently if you don't balance out your dispatch calls, you'll get very weird crashes
-        dispatch_group_leave(_analysisGroup);
-        atomic_fetch_sub(&instancesAnalyzing, 1);
-    }
+    self.engineTask.terminationHandler = nil;
+    [self leaveAllAnalysisGroupEntries];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.engineTask interrupt];
     [self.engineTask terminate]; // Just for good measure
