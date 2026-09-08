@@ -86,6 +86,54 @@
     [self verifyNodeSubtree:parsed against:expected];
 }
 
+- (void)testExportedGameWithoutResultTagKeepsGameBoundary
+{
+    NSString *pgn = @"[Event \"A\"]\n[White \"First game\"]\n\n1/2-1/2\n\n[Event \"B\"]\n[White \"Second game\"]\n[Result \"*\"]\n\n1. e4 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual([games count], 2, @"Fixture should load as two games");
+
+    NSMutableString *exported = [NSMutableString new];
+    for (SFMChessGame *game in games) {
+        [exported appendString:[game pgnString]];
+    }
+
+    NSError *reimportError = nil;
+    NSMutableArray *reimported = [SFMParser parseGamesFromString:exported error:&reimportError];
+    XCTAssertNil(reimportError);
+    XCTAssertEqual([reimported count], 2, @"Round trip lost a game");
+    XCTAssertEqualObjects([(SFMChessGame *)reimported[0] tags][@"Event"], @"A");
+    XCTAssertEqualObjects([(SFMChessGame *)reimported[1] tags][@"Event"], @"B");
+}
+
+- (void)testMovelessGameWithTerminationMarkerParses
+{
+    NSString *pgn = @"[Event \"A\"]\n\n*\n\n[Event \"B\"]\n\n1. e4 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual([games count], 2);
+    XCTAssertEqualObjects([[(SFMChessGame *)games[0] moveTextString] string], @"");
+    XCTAssertEqualObjects([[(SFMChessGame *)games[1] moveTextString] string], @"1. e4 ");
+}
+
+- (void)testVariationWithoutMovesIsRejectedInsteadOfThrowing
+{
+    NSArray *malformedMoveTexts = @[@"1. e4 ( (null) ) *",
+                                    @"1. e4 ({comment}(null)) *",
+                                    @"1. e4 ({no moves here}) *"];
+    for (NSString *moveText in malformedMoveTexts) {
+        NSError *error = nil;
+        __block SFMNode *parsed = nil;
+        XCTAssertNoThrow(parsed = [SFMParser parseMoveText:moveText
+                                                  position:[[SFMPosition alloc] init]
+                                                     error:&error], @"Threw on %@", moveText);
+        XCTAssertNil(parsed, @"Accepted %@", moveText);
+        XCTAssertNotNil(error, @"No error reported for %@", moveText);
+    }
+}
+
 - (SFMNode*)buildNodeFromMoveArray:(NSArray*)moves parent:(SFMNode*)parent
 {
     SFMNode *head = [[SFMNode alloc] initWithMove:[moves firstObject] andParent:parent];
