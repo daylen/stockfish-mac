@@ -17,6 +17,7 @@
 		7705068B187CE43400BA4635 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77050689187CE43400BA4635 /* MainMenu.xib */; };
 		7705068D187CE43400BA4635 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7705068C187CE43400BA4635 /* Images.xcassets */; };
 		77050694187CE43400BA4635 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050693187CE43400BA4635 /* XCTest.framework */; };
+		77A1E9032D0100000000A103 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77A1E9022D0100000000A102 /* Security.framework */; };
 		77050695187CE43400BA4635 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77050671187CE43300BA4635 /* Cocoa.framework */; };
 		7705069D187CE43400BA4635 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7705069B187CE43400BA4635 /* InfoPlist.strings */; };
 		770506E0187CF2B100BA4635 /* SFMWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 770506DF187CF2B100BA4635 /* SFMWindowController.m */; };
@@ -70,6 +71,7 @@
 		77924AED187DED010019C56E /* SFMChessGame.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AEC187DED010019C56E /* SFMChessGame.m */; };
 		77924AFD187E72940019C56E /* SFMParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFC187E72940019C56E /* SFMParser.m */; };
 		77924AFF187E77770019C56E /* SFMParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77924AFE187E77770019C56E /* SFMParserTest.m */; };
+		77A1E9012D0100000000A101 /* SFMEngineBinaryTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 77A1E9002D0100000000A100 /* SFMEngineBinaryTest.m */; };
 		7795E2EE1A4CF72C00736550 /* SFMUCILine.m in Sources */ = {isa = PBXBuildFile; fileRef = 7795E2ED1A4CF72C00736550 /* SFMUCILine.m */; };
 		7795E2F41A4D0EA100736550 /* NSString+StringUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7795E2F31A4D0EA100736550 /* NSString+StringUtils.m */; };
 		7795E2F71A4D1E6100736550 /* NSArray+ArrayUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7795E2F61A4D1E6100736550 /* NSArray+ArrayUtils.m */; };
@@ -119,6 +121,7 @@
 		2763275A26DB5DC40014A2D4 /* SFMArrowMove.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SFMArrowMove.m; path = Stockfish/SFMArrowMove.m; sourceTree = "<group>"; };
 		7705066E187CE43300BA4635 /* Stockfish.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stockfish.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		77050671187CE43300BA4635 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		77A1E9022D0100000000A102 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		77050674187CE43300BA4635 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		77050675187CE43300BA4635 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		77050676187CE43300BA4635 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -231,6 +234,7 @@
 		77924AFB187E72940019C56E /* SFMParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMParser.h; path = Stockfish/SFMParser.h; sourceTree = "<group>"; };
 		77924AFC187E72940019C56E /* SFMParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMParser.m; path = Stockfish/SFMParser.m; sourceTree = "<group>"; };
 		77924AFE187E77770019C56E /* SFMParserTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMParserTest.m; sourceTree = "<group>"; };
+		77A1E9002D0100000000A100 /* SFMEngineBinaryTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFMEngineBinaryTest.m; sourceTree = "<group>"; };
 		7795E2EC1A4CF72C00736550 /* SFMUCILine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFMUCILine.h; path = Stockfish/SFMUCILine.h; sourceTree = "<group>"; };
 		7795E2ED1A4CF72C00736550 /* SFMUCILine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFMUCILine.m; path = Stockfish/SFMUCILine.m; sourceTree = "<group>"; };
 		7795E2F21A4D0EA100736550 /* NSString+StringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+StringUtils.h"; path = "Stockfish/NSString+StringUtils.h"; sourceTree = "<group>"; };
@@ -272,6 +276,7 @@
 			files = (
 				77050695187CE43400BA4635 /* Cocoa.framework in Frameworks */,
 				77050694187CE43400BA4635 /* XCTest.framework in Frameworks */,
+				77A1E9032D0100000000A103 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +318,7 @@
 				779925DB1882914B00EAAEDD /* QuartzCore.framework */,
 				77050671187CE43300BA4635 /* Cocoa.framework */,
 				77050693187CE43400BA4635 /* XCTest.framework */,
+				77A1E9022D0100000000A102 /* Security.framework */,
 				77050673187CE43300BA4635 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -365,6 +371,7 @@
 			children = (
 				77050699187CE43400BA4635 /* Supporting Files */,
 				77924AFE187E77770019C56E /* SFMParserTest.m */,
+				77A1E9002D0100000000A100 /* SFMEngineBinaryTest.m */,
 				77CA8B061889C499004402D2 /* SFMFormatterTest.m */,
 				779925D8188273C800EAAEDD /* SFMChessGameTest.m */,
 				7744CCC21A4AAC84009D349D /* SFMPositionTest.m */,
@@ -759,6 +766,7 @@
 				775A3B701A4BD3D100C3CD59 /* SFMItertoolsTest.m in Sources */,
 				779925D9188273C800EAAEDD /* SFMChessGameTest.m in Sources */,
 				77924AFF187E77770019C56E /* SFMParserTest.m in Sources */,
+				77A1E9012D0100000000A101 /* SFMEngineBinaryTest.m in Sources */,
 				77CA8B071889C499004402D2 /* SFMFormatterTest.m in Sources */,
 				7744CCC31A4AAC84009D349D /* SFMPositionTest.m in Sources */,
 			);
