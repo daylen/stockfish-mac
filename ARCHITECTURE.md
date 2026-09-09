@@ -22,9 +22,13 @@ The boundary now distinguishes two kinds of failure:
 
 A file is rejected only when nothing in it can be read.
 
-The distinction is carried by `REJECTED_MOVE_KEY` in the `userInfo` of the
-error `SFMPosition` raises, rather than by a separate error code, so the
-offending token travels with the failure it describes.
+The distinction is carried by the error code `SFMPosition` raises:
+`ILLEGAL_MOVE_CODE`, which already meant exactly this and is what
+`-doMove:error:` has always raised. `REJECTED_MOVE_KEY` in the `userInfo`
+carries the offending token alongside it, so the code says the move was
+illegal and the key says which one. A token is required before a game is
+truncated, because `-doMove:error:` reports an illegal move without naming
+one and truncating there would cut a game at a move its text never held.
 
 **Consequence: a partially read game must be written back out verbatim.**
 `SFMDocument` autosaves in place. Re-serializing such a game from its nodes

@@ -269,15 +269,6 @@ static NSString * const SFMUnknownResult = @"*";
     return self.rejectedMove != nil;
 }
 
-/*!
- The move text exactly as it was read from the file. Re-serializing a partially read
- game from its nodes would emit only the moves before the rejected one and drop the rest.
- */
-- (NSString *)unreadMoveTextAsWritten
-{
-    return self.moveText;
-}
-
 - (NSString *)pgnString
 {
     NSMutableString *str = [NSMutableString new];
@@ -291,7 +282,7 @@ static NSString * const SFMUnknownResult = @"*";
     
     [str appendString:@"\n"];
     if ([self wasOnlyPartiallyRead]) {
-        [str appendString:[self unreadMoveTextAsWritten]];
+        [str appendString:self.moveText];
         [str appendString:@"\n\n"];
         return str;
     }

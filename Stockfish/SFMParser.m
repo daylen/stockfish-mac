@@ -65,7 +65,7 @@
         }
     }
 
-    BOOL nothingIsReadable = [games count] > 0 && [readableGames count] == 0;
+    BOOL nothingIsReadable = [readableGames count] == 0;
     if (nothingIsReadable) {
         if (error != NULL) {
             *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
@@ -103,7 +103,6 @@
         }
         return nil;
     }
-    SFMNode *movesReadSoFar = node;
     SFMNode *currentNode = node;
     for(NSString *token in tokens){
         NSError *tokenError = nil;
@@ -120,11 +119,11 @@
             if (rejectedMove != NULL) {
                 *rejectedMove = illegalMove;
             }
-            return movesReadSoFar;
+            return node;
         }
         currentNode = parsedNode;
     }
-    return movesReadSoFar;
+    return node;
 }
 
 /*!
@@ -132,7 +131,9 @@
  */
 + (NSString * _Nullable)illegalMoveFromError:(NSError * _Nullable)error
 {
-    if (![[error domain] isEqualToString:POSITION_ERROR_DOMAIN]) {
+    BOOL reportsAnIllegalMove = [[error domain] isEqualToString:POSITION_ERROR_DOMAIN]
+        && [error code] == ILLEGAL_MOVE_CODE;
+    if (!reportsAnIllegalMove) {
         return nil;
     }
     return [error userInfo][REJECTED_MOVE_KEY];

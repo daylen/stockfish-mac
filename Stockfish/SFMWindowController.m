@@ -689,9 +689,8 @@ const CGFloat kMaxWeight = 1;
     
     white.stringValue = [NSString stringWithFormat:@"White: %@", game.tags[@"White"]];
     black.stringValue = [NSString stringWithFormat:@"Black: %@", game.tags[@"Black"]];
-    result.stringValue = game.rejectedMove
-        ? [NSString stringWithFormat:@"Result: %@ (incomplete)", game.tags[@"Result"]]
-        : [NSString stringWithFormat:@"Result: %@", game.tags[@"Result"]];
+    NSString *incompleteSuffix = game.rejectedMove ? @" (incomplete)" : @"";
+    result.stringValue = [NSString stringWithFormat:@"Result: %@%@", game.tags[@"Result"], incompleteSuffix];
     return view;
 }
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
