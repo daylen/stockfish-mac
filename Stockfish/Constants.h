@@ -16,8 +16,8 @@
 #define PARSE_ERROR_CODE 0
 #define ILLEGAL_MOVE_CODE 1
 
-// Set on a POSITION_ERROR_DOMAIN error when a SAN token names no legal move.
-// Its value is the rejected token.
+// Carries the rejected token on an ILLEGAL_MOVE_CODE error. The code says the move
+// was illegal; this says which one.
 #define REJECTED_MOVE_KEY @"SFMRejectedMove"
 
 #define GAME_ERROR_DOMAIN @"SFMGameErrorDomain"
