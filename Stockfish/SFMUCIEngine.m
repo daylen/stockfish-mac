@@ -250,6 +250,45 @@ static _Atomic(int) instancesAnalyzing = 0;
 }
 
 /*!
+ Retires the oldest outstanding "go" now that the engine has answered it with
+ "bestmove", and clears isAnalyzing if that answer ended the current search.
+
+ A search normally ends because we sent "stop", in which case isAnalyzing is
+ already NO. It can also end on its own: in a position with no legal moves
+ Stockfish answers "go infinite" with an immediate "bestmove (none)" instead of
+ waiting to be stopped. See Search::Worker::start_searching in
+ https://github.com/official-stockfish/Stockfish/blob/sf_19/src/search.cpp
+
+ The engine answers each "go" in order, so this "bestmove" belongs to the
+ current search only when no newer "go" is still outstanding. Stopping one
+ search and starting another leaves two outstanding, and the first answer must
+ not be mistaken for the end of the second search.
+ */
+- (void)noteSearchDidEnd
+{
+    BOOL didEndCurrentSearch = NO;
+    @synchronized (self) {
+        [self leaveAnalysisGroupOnce];
+        BOOL answersAnOlderSearch = self.outstandingAnalysisGroupEntries > 0;
+        if (_isAnalyzing && !answersAnOlderSearch) {
+            _isAnalyzing = NO;
+            didEndCurrentSearch = YES;
+        }
+    }
+    if (!didEndCurrentSearch) {
+        return;
+    }
+    [self.bookmarkUrl stopAccessingSecurityScopedResource];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        id<SFMUCIEngineDelegate> delegate = self.delegate;
+        if ([delegate respondsToSelector:@selector(uciEngineDidStopAnalyzing:)]) {
+            [delegate uciEngineDidStopAnalyzing:self];
+        }
+    });
+}
+
+/*!
  Processes a single line of output from the engine.
  
  @param str A string that does NOT contain a new line character.
@@ -302,7 +341,7 @@ static _Atomic(int) instancesAnalyzing = 0;
         [self.delegate uciEngine:self didGetNewLine:newDict];
     } else if ([messageType isEqualToString:@"bestmove"]) {
         // Stopped analysis
-        [self leaveAnalysisGroupOnce];
+        [self noteSearchDidEnd];
     } else if ([messageType isEqualToString:@"id"] && [tokens containsObject:@"name"]) {
         // Engine ID
         [self.delegate uciEngine:self didGetEngineName:[str substringFromIndex:[str rangeOfString:@"id name"].length + 1]];

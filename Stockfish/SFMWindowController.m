@@ -111,6 +111,9 @@ const CGFloat kMaxWeight = 1;
         [self syncToViewsAndEngine];
         self.engine.isAnalyzing = YES;
     }
+    [self syncGoStopButtonTitle];
+}
+- (void)syncGoStopButtonTitle {
     self.goStopButton.title = self.engine.isAnalyzing ? @"Stop" : @"Go";
 }
 - (IBAction)doBestMove:(id)sender
@@ -394,8 +397,12 @@ const CGFloat kMaxWeight = 1;
     // no op
 }
 
+- (void)uciEngineDidStopAnalyzing:(SFMUCIEngine *)engine {
+    [self syncGoStopButtonTitle];
+}
+
 - (void)uciEngineDidQuit:(SFMUCIEngine *)engine {
-    self.goStopButton.title = @"Go";
+    [self syncGoStopButtonTitle];
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:@"The chess engine quit"];
     [alert addButtonWithTitle:@"OK"];

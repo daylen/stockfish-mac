@@ -22,6 +22,7 @@
 @optional
 - (void)uciEngine:(SFMUCIEngine *)engine didGetOptions:(NSArray* /* of SFMUCIOption */)options;
 - (void)uciEngineDidQuit:(SFMUCIEngine *)engine;
+- (void)uciEngineDidStopAnalyzing:(SFMUCIEngine *)engine;
 
 @end
 
