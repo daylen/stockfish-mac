@@ -183,7 +183,8 @@ NSString* const moveRegex =
             if (m == MOVE_NONE) {
                 // Error
                 if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
-                                                                code:PARSE_ERROR_CODE userInfo:nil];
+                                                                code:PARSE_ERROR_CODE
+                                                            userInfo:@{REJECTED_MOVE_KEY: tok}];
                 return nil;
             } else {
                 SFMMove *move = [[self class] moveObjFromLibMove:m];
