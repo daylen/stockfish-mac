@@ -40,7 +40,7 @@
     SFMPosition *initialPosition = [[SFMPosition alloc] init];
     NSString *moveText = @"1. e4\ne5 2.\rNf3 Nc6\r\n3. Bb5";
     NSError *err = nil;
-    SFMNode *parsedNode = [SFMParser parseMoveText:moveText position:initialPosition error:&err];
+    SFMNode *parsedNode = [SFMParser parseMoveText:moveText position:initialPosition rejectedMove:NULL error:&err];
     XCTAssertNotNil(parsedNode);
     XCTAssertNil(err);
     NSArray *moves = @[
@@ -61,7 +61,7 @@
     NSString *moveText = @"1.e4 (1.c4 c5 {Wow} 2.g3) e5 2.Nf3 Nc6 3. Bb5";
     
     NSError *err = nil;
-    SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition error:&err];
+    SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition rejectedMove:NULL error:&err];
     XCTAssertNotNil(parsed);
     XCTAssertNil(err);
     NSArray *mainMoves = @[
@@ -128,6 +128,7 @@
         __block SFMNode *parsed = nil;
         XCTAssertNoThrow(parsed = [SFMParser parseMoveText:moveText
                                                   position:[[SFMPosition alloc] init]
+                                              rejectedMove:NULL
                                                      error:&error], @"Threw on %@", moveText);
         XCTAssertNil(parsed, @"Accepted %@", moveText);
         XCTAssertNotNil(error, @"No error reported for %@", moveText);
@@ -156,6 +157,92 @@
         actual = actual.next;
         expected = expected.next;
     }
+}
+
+
+- (void)testIllegalMoveKeepsRemainingGamesInFile
+{
+    NSString *pgn = @"[Event \"Rejected\"]\n[White \"Bad\"]\n\n1. e4 e5 2. Kd3 *\n\n"
+                     "[Event \"Complete\"]\n[White \"Good\"]\n\n1. e4 e5 2. Nf3 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+
+    XCTAssertNotNil(games, @"One illegal move discarded the whole file");
+    XCTAssertNil(error);
+    XCTAssertEqual([games count], 2, @"Lost a game to its neighbour's illegal move");
+    XCTAssertEqualObjects([(SFMChessGame *)games[0] tags][@"Event"], @"Rejected");
+    XCTAssertEqualObjects([(SFMChessGame *)games[1] tags][@"Event"], @"Complete");
+}
+
+- (void)testGameWithIllegalMoveKeepsTheMovesBeforeIt
+{
+    NSString *pgn = @"[Event \"Rejected\"]\n\n1. e4 e5 2. Kd3 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertEqual([games count], 1);
+
+    SFMChessGame *game = games[0];
+    XCTAssertEqualObjects(game.rejectedMove, @"Kd3", @"Game not marked with the move that stopped it");
+
+    NSString *moveText = [[game moveTextString] string];
+    XCTAssertTrue([moveText containsString:@"e4"], @"Dropped the moves before the illegal one");
+    XCTAssertTrue([moveText containsString:@"e5"], @"Dropped the moves before the illegal one");
+    XCTAssertFalse([moveText containsString:@"Kd3"], @"Kept the illegal move");
+}
+
+- (void)testCompleteGameIsNotMarkedAsRejected
+{
+    NSString *pgn = @"[Event \"Complete\"]\n\n1. e4 e5 2. Nf3 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertEqual([games count], 1);
+    XCTAssertNil([(SFMChessGame *)games[0] rejectedMove], @"Marked a complete game as incomplete");
+}
+
+- (void)testFileWhereEveryGameFailsStructurallyIsRejected
+{
+    NSString *pgn = @"[Event \"A\"]\n\n1. e4 ({no moves here}) *\n\n"
+                     "[Event \"B\"]\n\n1. e4 ({no moves here}) *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+
+    XCTAssertNil(games, @"Accepted a file with nothing usable in it");
+    XCTAssertNotNil(error, @"Reported no error for an unusable file");
+}
+
+- (void)testStructurallyBrokenGameDoesNotDiscardItsNeighbour
+{
+    NSString *pgn = @"[Event \"Broken\"]\n\n1. e4 ({no moves here}) *\n\n"
+                     "[Event \"Complete\"]\n\n1. e4 e5 2. Nf3 *\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+
+    XCTAssertNotNil(games);
+    XCTAssertEqual([games count], 1, @"Expected the broken game dropped and the valid one kept");
+    XCTAssertEqualObjects([(SFMChessGame *)games[0] tags][@"Event"], @"Complete");
+}
+
+
+- (void)testExportingAnIncompleteGamePreservesItsOriginalMoveText
+{
+    NSString *moveText = @"1. e4 e5 2. Kd3 e6 3. Nf3 Nc6 1-0";
+    NSString *pgn = [NSString stringWithFormat:@"[Event \"Rejected\"]\n[Result \"1-0\"]\n\n%@\n", moveText];
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertEqual([games count], 1);
+
+    SFMChessGame *game = games[0];
+    XCTAssertEqualObjects(game.rejectedMove, @"Kd3", @"Fixture no longer exercises a rejected move");
+
+    NSString *exported = [game pgnString];
+    XCTAssertTrue([exported containsString:@"Kd3"], @"Saving dropped the moves it could not read");
+    XCTAssertTrue([exported containsString:@"Nc6"], @"Saving dropped the moves after the rejected one");
+
+    NSError *reimportError = nil;
+    NSMutableArray *reimported = [SFMParser parseGamesFromString:exported error:&reimportError];
+    XCTAssertEqual([reimported count], 1, @"Export no longer reads back as one game");
+    XCTAssertEqualObjects([(SFMChessGame *)reimported[0] rejectedMove], @"Kd3",
+                          @"Round trip lost the truncation");
 }
 
 @end

@@ -33,6 +33,12 @@
 
 @property (nonatomic, readonly) BOOL isInInitialState;
 
+/*!
+ The SAN token that stopped the move text being read, or nil if the whole game was read.
+ A game with a rejected move holds the moves that came before it.
+ */
+@property (nonatomic, readonly) NSString *rejectedMove;
+
 #pragma mark - Init
 
 /*!
