@@ -30,12 +30,22 @@ illegal and the key says which one. A token is required before a game is
 truncated, because `-doMove:error:` reports an illegal move without naming
 one and truncating there would cut a game at a move its text never held.
 
-**Consequence: a partially read game must be written back out verbatim.**
-`SFMDocument` autosaves in place. Re-serializing such a game from its nodes
-would emit only the moves that parsed and silently discard the rest, turning a
-file this change made openable into one missing data. `-[SFMChessGame
-pgnString]` therefore returns the original move text for any game that was only
-partially read.
+**Consequence: a game whose move text was not fully read is written back out
+verbatim.** `SFMDocument` autosaves in place. Re-serializing such a game from
+its nodes would emit only the moves that parsed and silently discard the rest,
+turning a file this change made openable into one missing data. `-[SFMChessGame
+pgnString]` therefore returns the original move text while
+`hasUnreadMoveText` holds.
+
+That flag covers both a partially read game and one that could not be read at
+all, and the latter stays in `SFMPGNFile.games` rather than being filtered out:
+a game dropped from the list is a game deleted from the file the next time any
+of its neighbours is saved. Such a game cannot be displayed, so selecting it
+reports that its moves could not be read and leaves the window open.
+
+The flag is cleared by the first edit. From that point the move tree, not the
+text on disk, is what the game means, and continuing to write the original text
+would discard the user's own moves.
 
 **Alternatives weighed.** Dropping unreadable games entirely was simpler and
 kept every listed game trustworthy, but removed games with no trace. Keeping
