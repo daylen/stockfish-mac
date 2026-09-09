@@ -343,18 +343,33 @@ const CGFloat kMaxWeight = 1;
     self.currentGame = self.pgnFile.games[index];
     self.currentGame.delegate = self;
     NSError *error = nil;
-    [self.currentGame parseMoveText:&error];
-    if (error) {
-        [self close];
+    if (![self.currentGame parseMoveText:&error]) {
         NSAlert *alert = [[NSAlert alloc] init];
         [alert setMessageText:@"Could not open game"];
         [alert addButtonWithTitle:@"OK"];
-        [alert setInformativeText:@"Stockfish could not parse the move text. Edit your PGN file and try again."];
+        [alert setInformativeText:@"Stockfish could not read the moves in this game. The rest of the file is unaffected, and this game is left as it is on disk."];
         [alert runModal];
+        return;
     }
-    
+
+    if (self.currentGame.rejectedMove) {
+        [self warnThatGameStopsAtRejectedMove:self.currentGame];
+    }
+
     [self syncToViewsAndEngine];
     
+}
+
+- (void)warnThatGameStopsAtRejectedMove:(SFMChessGame *)game
+{
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"This game is incomplete"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setInformativeText:[NSString stringWithFormat:
+        @"The move %@ is not legal in the position it appears in, so the game stops there. "
+        @"The moves after it are kept in the file and are written back unchanged unless you edit this game.",
+        game.rejectedMove]];
+    [alert runModal];
 }
 
 #pragma mark - Menu items
@@ -689,7 +704,8 @@ const CGFloat kMaxWeight = 1;
     
     white.stringValue = [NSString stringWithFormat:@"White: %@", game.tags[@"White"]];
     black.stringValue = [NSString stringWithFormat:@"Black: %@", game.tags[@"Black"]];
-    result.stringValue = [NSString stringWithFormat:@"Result: %@", game.tags[@"Result"]];
+    NSString *incompleteSuffix = game.rejectedMove ? @" (incomplete)" : @"";
+    result.stringValue = [NSString stringWithFormat:@"Result: %@%@", game.tags[@"Result"], incompleteSuffix];
     return view;
 }
 - (void)tableViewSelectionDidChange:(NSNotification *)notification

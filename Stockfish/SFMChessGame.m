@@ -20,6 +20,8 @@ static NSString * const SFMUnknownResult = @"*";
 @property (nonatomic, readwrite) SFMPosition *position;
 @property (nonatomic, readonly) SFMPosition *startPosition;
 @property (nonatomic, copy) NSString *moveText;
+@property (nonatomic, readwrite) NSString *rejectedMove;
+@property (nonatomic, readwrite) BOOL hasUnreadMoveText;
 @property (nonatomic) BOOL moveTextParsed;
 
 @end
@@ -80,10 +82,17 @@ static NSString * const SFMUnknownResult = @"*";
 
 - (BOOL)parseMoveText:(NSError *__autoreleasing *)error {
     if(!_moveTextParsed){
-        _currentNode = [SFMParser parseMoveText:_moveText position:[self.startPosition copy] error:error];
+        NSString *rejected = nil;
+        _currentNode = [SFMParser parseMoveText:_moveText
+                                       position:[self.startPosition copy]
+                                   rejectedMove:&rejected
+                                          error:error];
         if (_currentNode == nil) {
+            self.hasUnreadMoveText = YES;
             return NO;
         }
+        self.rejectedMove = rejected;
+        self.hasUnreadMoveText = (rejected != nil);
         _moveTextParsed = YES;
     }
     return YES;
@@ -112,6 +121,7 @@ static NSString * const SFMUnknownResult = @"*";
     }
     
     _currentNode = newMove;
+    self.hasUnreadMoveText = NO;
     return YES;
 }
 
@@ -270,6 +280,11 @@ static NSString * const SFMUnknownResult = @"*";
     }
     
     [str appendString:@"\n"];
+    if (self.hasUnreadMoveText) {
+        [str appendString:self.moveText];
+        [str appendString:@"\n\n"];
+        return str;
+    }
     [str appendString:[[self moveTextString] string]];
     NSString *result = self.tags[@"Result"];
     [str appendFormat:@"%@\n\n", [result length] > 0 ? result : SFMUnknownResult];

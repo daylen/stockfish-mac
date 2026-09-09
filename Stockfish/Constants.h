@@ -16,6 +16,10 @@
 #define PARSE_ERROR_CODE 0
 #define ILLEGAL_MOVE_CODE 1
 
+// Carries the rejected token on an ILLEGAL_MOVE_CODE error. The code says the move
+// was illegal; this says which one.
+#define REJECTED_MOVE_KEY @"SFMRejectedMove"
+
 #define GAME_ERROR_DOMAIN @"SFMGameErrorDomain"
 #define NOT_AT_END_CODE 0
 #define GAME_PARSE_ERROR_CODE 1

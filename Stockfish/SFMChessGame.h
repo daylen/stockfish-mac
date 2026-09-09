@@ -33,6 +33,19 @@
 
 @property (nonatomic, readonly) BOOL isInInitialState;
 
+/*!
+ The SAN token that stopped the move text being read, or nil if the whole game was read
+ or if nothing in it could be read at all.
+ */
+@property (nonatomic, readonly) NSString *rejectedMove;
+
+/*!
+ YES while this game holds move text that was never fully read, so the text on disk says
+ more than the move tree does. Such a game is written back out as it came in, and stops
+ being one the moment it is edited: from then on the tree is what the game means.
+ */
+@property (nonatomic, readonly) BOOL hasUnreadMoveText;
+
 #pragma mark - Init
 
 /*!
