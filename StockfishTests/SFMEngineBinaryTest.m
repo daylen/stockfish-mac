@@ -52,10 +52,35 @@ static const unsigned long long SFMMaxEngineBinarySize = 50 * 1024 * 1024;
     return entitlements;
 }
 
+- (OSStatus)signatureValidityForBinaryAtURL:(NSURL *)url
+{
+    SecStaticCodeRef staticCode = NULL;
+    OSStatus created = SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &staticCode);
+    if (created != errSecSuccess) {
+        return created;
+    }
+
+    OSStatus validity = SecStaticCodeCheckValidity(staticCode, kSecCSDefaultFlags, NULL);
+    CFRelease(staticCode);
+    return validity;
+}
+
 - (NSDictionary *)binariesEntitlements
 {
     NSURL *url = [[NSBundle mainBundle] URLForResource:@"Binaries" withExtension:@"entitlements"];
     return [NSDictionary dictionaryWithContentsOfURL:url error:NULL];
+}
+
+- (void)testEmbeddedEnginesCarryAnIntactCodeSignature
+{
+    NSArray<NSURL *> *engines = [self embeddedEngineURLs];
+    XCTAssertGreaterThan([engines count], 0, @"No engine binaries are embedded in the app");
+
+    for (NSURL *engine in engines) {
+        XCTAssertEqual([self signatureValidityForBinaryAtURL:engine], errSecSuccess,
+                       @"%@ does not carry an intact code signature; macOS refuses to launch a helper whose seal is broken, and the entitlements read back from a broken signature prove nothing",
+                       [engine lastPathComponent]);
+    }
 }
 
 - (void)testEmbeddedEnginesInheritTheAppSandbox
