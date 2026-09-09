@@ -218,8 +218,11 @@
     NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
 
     XCTAssertNotNil(games);
-    XCTAssertEqual([games count], 1, @"Expected the broken game dropped and the valid one kept");
-    XCTAssertEqualObjects([(SFMChessGame *)games[0] tags][@"Event"], @"Complete");
+    XCTAssertEqual([games count], 2, @"An unreadable game must stay in the file so a save cannot delete it");
+    XCTAssertEqualObjects([(SFMChessGame *)games[0] tags][@"Event"], @"Broken");
+    XCTAssertEqualObjects([(SFMChessGame *)games[1] tags][@"Event"], @"Complete");
+    XCTAssertTrue([(SFMChessGame *)games[0] hasUnreadMoveText],
+                  @"The unreadable game must be written back from its original text");
 }
 
 
@@ -243,6 +246,51 @@
     XCTAssertEqual([reimported count], 1, @"Export no longer reads back as one game");
     XCTAssertEqualObjects([(SFMChessGame *)reimported[0] rejectedMove], @"Kd3",
                           @"Round trip lost the truncation");
+}
+
+
+- (void)testIllegalMoveInsideAVariationMarksTheGameIncomplete
+{
+    NSString *pgn = @"[Event \"Var\"]\n[Result \"1-0\"]\n\n1. e4 (1. d4 d5 2. Kd3) e5 1-0\n";
+    NSError *error = nil;
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertEqual([games count], 1);
+
+    SFMChessGame *game = games[0];
+    XCTAssertEqualObjects(game.rejectedMove, @"Kd3",
+                          @"An illegal move inside a variation left the game looking complete");
+    XCTAssertTrue([[game pgnString] containsString:@"Kd3"],
+                  @"Saving dropped the variation move that could not be read");
+}
+
+- (void)testEditingAnIncompleteGameSavesTheEdit
+{
+    NSString *pgn = @"[Event \"Edit\"]\n[Result \"*\"]\n\n1. e4 e5 2. Kd3 *\n";
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:nil];
+    SFMChessGame *game = games[0];
+    XCTAssertEqualObjects(game.rejectedMove, @"Kd3", @"Fixture no longer exercises a rejected move");
+
+    NSError *moveError = nil;
+    XCTAssertTrue([game doMove:[[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3] error:&moveError]);
+    XCTAssertNil(moveError);
+
+    XCTAssertTrue([[game pgnString] containsString:@"Nf3"],
+                  @"Saving an edited game discarded the move just played");
+}
+
+- (void)testAnUnreadableGameSurvivesASaveOfItsNeighbour
+{
+    NSString *pgn = @"[Event \"Broken\"]\n\n1. e4 ({no moves here}) *\n\n"
+                     "[Event \"Fine\"]\n\n1. e4 e5 *\n";
+    NSMutableArray *games = [SFMParser parseGamesFromString:pgn error:nil];
+
+    NSMutableString *exported = [NSMutableString new];
+    for (SFMChessGame *game in games) {
+        [exported appendString:[game pgnString]];
+    }
+
+    XCTAssertTrue([exported containsString:@"Broken"],
+                  @"Saving deleted a game that could not be read");
 }
 
 @end

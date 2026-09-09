@@ -14,7 +14,7 @@
 
 + (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    NSMutableArray *games = [[NSMutableArray alloc] init];
+    NSMutableArray *everyGameTheFileHolds = [[NSMutableArray alloc] init];
     
     NSArray *lines = [str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     
@@ -31,7 +31,7 @@
             if (!readingTags) {
                 readingTags = YES;
                 if (tags && moves) {
-                    [games addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
+                    [everyGameTheFileHolds addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
                 }
                 tags = [NSMutableDictionary new];
                 moves = [NSMutableString new];
@@ -55,17 +55,17 @@
     }
     // Upon reaching the end of the file we need to add the last game
     SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]];
-    [games addObject:game];
+    [everyGameTheFileHolds addObject:game];
 
-    NSMutableArray *readableGames = [[NSMutableArray alloc] init];
-    for (SFMChessGame *game in games) {
+    NSUInteger readableGameCount = 0;
+    for (SFMChessGame *game in everyGameTheFileHolds) {
         NSError *err = nil;
         if ([game parseMoveText:&err]) {
-            [readableGames addObject:game];
+            readableGameCount++;
         }
     }
 
-    BOOL nothingIsReadable = [readableGames count] == 0;
+    BOOL nothingIsReadable = (readableGameCount == 0);
     if (nothingIsReadable) {
         if (error != NULL) {
             *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
@@ -73,7 +73,7 @@
         return nil;
     }
 
-    return readableGames;
+    return everyGameTheFileHolds;
 }
 
 + (SFMNode * _Nullable)parseMoveText:(NSString * _Nullable)moveText position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error {
@@ -106,7 +106,7 @@
     SFMNode *currentNode = node;
     for(NSString *token in tokens){
         NSError *tokenError = nil;
-        SFMNode *parsedNode = [self parseToken:token fromNode:currentNode position:position error:&tokenError];
+        SFMNode *parsedNode = [self parseToken:token fromNode:currentNode position:position rejectedMove:rejectedMove error:&tokenError];
         if (parsedNode == nil) {
             NSString *illegalMove = [self illegalMoveFromError:tokenError];
             BOOL moveTextIsUnreadable = (illegalMove == nil);
@@ -139,7 +139,7 @@
     return [error userInfo][REJECTED_MOVE_KEY];
 }
 
-+ (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
++ (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     SFMNode *currentNode = node;
     if([token characterAtIndex:0] == '{'){ //comment
@@ -148,7 +148,7 @@
     else if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
-        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] rejectedMove:NULL error:error];
+        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] rejectedMove:rejectedMove error:error];
         if (parsedNode == nil) {
             return nil;
         }
