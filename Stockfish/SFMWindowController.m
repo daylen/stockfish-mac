@@ -106,13 +106,15 @@ const CGFloat kMaxWeight = 1;
 - (IBAction)toggleInfiniteAnalysis:(id)sender {
     if (self.engine.isAnalyzing) {
         self.engine.isAnalyzing = NO;
-        self.goStopButton.title = @"Go";
     } else {
         self.lineTextView.string = @"";
         [self syncToViewsAndEngine];
         self.engine.isAnalyzing = YES;
-        self.goStopButton.title = @"Stop";
     }
+    [self syncGoStopButtonTitle];
+}
+- (void)syncGoStopButtonTitle {
+    self.goStopButton.title = self.engine.isAnalyzing ? @"Stop" : @"Go";
 }
 - (IBAction)doBestMove:(id)sender
 {
@@ -393,6 +395,19 @@ const CGFloat kMaxWeight = 1;
 
 - (void)uciEngine:(id)engine didGetInfoString:(NSString *)string {
     // no op
+}
+
+- (void)uciEngineDidStopAnalyzing:(SFMUCIEngine *)engine {
+    [self syncGoStopButtonTitle];
+}
+
+- (void)uciEngineDidQuit:(SFMUCIEngine *)engine {
+    [self syncGoStopButtonTitle];
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"The chess engine quit"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setInformativeText:@"Close and reopen this game to start a new engine."];
+    [alert beginSheetModalForWindow:self.window completionHandler:nil];
 }
 
 - (void)uciEngine:(SFMUCIEngine *)engine didGetNewCurrentMove:(SFMMove *)move number:(NSInteger)moveNumber depth:(NSInteger)depth {
