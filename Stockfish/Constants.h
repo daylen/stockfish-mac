@@ -16,6 +16,8 @@
 #define PARSE_ERROR_CODE 0
 #define ILLEGAL_MOVE_CODE 1
 
+#define REJECTED_MOVE_KEY @"SFMRejectedMove"
+
 #define GAME_ERROR_DOMAIN @"SFMGameErrorDomain"
 #define NOT_AT_END_CODE 0
 #define GAME_PARSE_ERROR_CODE 1

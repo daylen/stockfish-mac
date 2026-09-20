@@ -14,16 +14,24 @@
 
 + (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    NSMutableArray *games = [[NSMutableArray alloc] init];
-    
-    NSArray *lines = [str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    NSMutableArray *everyGameTheFileHolds = [[NSMutableArray alloc] init];
     
     NSMutableDictionary *tags;
     NSMutableString *moves;
     BOOL readingTags = NO;
     
-    for (NSString *line in lines) {
+    NSUInteger offset = 0;
+    while (offset < str.length) {
+        NSUInteger lineEnd;
+        NSUInteger contentsEnd;
+        [str getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(offset, 0)];
+        NSString *line = [str substringWithRange:NSMakeRange(offset, contentsEnd - offset)];
+        NSString *originalLine = [str substringWithRange:NSMakeRange(offset, lineEnd - offset)];
+        offset = lineEnd;
         if ([line length] == 0) {
+            if (!readingTags) {
+                [moves appendString:originalLine];
+            }
             continue;
         }
         if ([line characterAtIndex:0] == '[' && [line characterAtIndex:[line length] - 1] == ']') {
@@ -31,7 +39,7 @@
             if (!readingTags) {
                 readingTags = YES;
                 if (tags && moves) {
-                    [games addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
+                    [everyGameTheFileHolds addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
                 }
                 tags = [NSMutableDictionary new];
                 moves = [NSMutableString new];
@@ -50,40 +58,51 @@
                 moves = [NSMutableString new];
             }
             
-            [moves appendFormat:@"%@ ", line];
+            [moves appendString:originalLine];
         }
     }
     // Upon reaching the end of the file we need to add the last game
     SFMChessGame *game = [[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]];
-    [games addObject:game];
+    [everyGameTheFileHolds addObject:game];
 
-    for (SFMChessGame *game in games) {
+    NSUInteger readableGameCount = 0;
+    for (SFMChessGame *game in everyGameTheFileHolds) {
         NSError *err = nil;
-        BOOL ok = [game parseMoveText:&err];
-        if (!ok) {
-            return nil;
+        if ([game parseMoveText:&err]) {
+            readableGameCount++;
         }
     }
 
-    return games;
+    BOOL nothingIsReadable = (readableGameCount == 0);
+    if (nothingIsReadable) {
+        if (error != NULL) {
+            *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+        }
+        return nil;
+    }
+
+    return everyGameTheFileHolds;
 }
 
-+ (SFMNode * _Nullable)parseMoveText:(NSString * _Nullable)moveText position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error {
++ (SFMNode * _Nullable)parseMoveText:(NSString * _Nullable)moveText position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error {
+    if (rejectedMove != NULL) {
+        *rejectedMove = nil;
+    }
     SFMNode *head = [[SFMNode alloc] init];
     if (moveText == nil) {
         return head;
     }
     NSMutableCharacterSet *charactersToTrim = [[NSMutableCharacterSet alloc] init];
-    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
+    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"*"]];
     NSString *moves = [moveText stringByTrimmingCharactersInSet:charactersToTrim];
     if ([moves length] == 0) {
         return head;
     }
-    return [self parseString:moves fromNode:head position:position error:error];
+    return [self parseString:moves fromNode:head position:position rejectedMove:rejectedMove error:error];
 }
 
-+ (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
++ (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     NSArray *tokens = [self tokenizeString:str];
     if (tokens.count == 0) {
@@ -94,18 +113,38 @@
     }
     SFMNode *currentNode = node;
     for(NSString *token in tokens){
-        currentNode = [self parseToken:token fromNode:currentNode position:position error:error];
-        if (currentNode == nil) {
-            if (error != NULL && *error == nil) {
-                *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+        NSError *tokenError = nil;
+        SFMNode *parsedNode = [self parseToken:token fromNode:currentNode position:position rejectedMove:rejectedMove error:&tokenError];
+        if (parsedNode == nil) {
+            NSString *illegalMove = [self illegalMoveFromError:tokenError];
+            BOOL moveTextIsUnreadable = (illegalMove == nil);
+            if (moveTextIsUnreadable) {
+                if (error != NULL) {
+                    *error = tokenError ?: [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+                }
+                return nil;
             }
-            return nil;
+            if (rejectedMove != NULL && *rejectedMove == nil) {
+                *rejectedMove = illegalMove;
+            }
+            return node;
         }
+        currentNode = parsedNode;
     }
     return node;
 }
 
-+ (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position error:(NSError * _Nullable __autoreleasing * _Nullable)error
++ (NSString * _Nullable)illegalMoveFromError:(NSError * _Nullable)error
+{
+    BOOL reportsAnIllegalMove = [[error domain] isEqualToString:POSITION_ERROR_DOMAIN]
+        && [error code] == ILLEGAL_MOVE_CODE;
+    if (!reportsAnIllegalMove) {
+        return nil;
+    }
+    return [error userInfo][REJECTED_MOVE_KEY];
+}
+
++ (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     SFMNode *currentNode = node;
     if([token characterAtIndex:0] == '{'){ //comment
@@ -114,16 +153,22 @@
     else if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
-        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] error:error];
+        NSString *variationRejectedMove = nil;
+        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] rejectedMove:&variationRejectedMove error:error];
         if (parsedNode == nil) {
             return nil;
         }
         BOOL variationHasNoMoves = dummy.next == nil;
-        if (variationHasNoMoves) {
+        if (variationHasNoMoves && variationRejectedMove == nil) {
             return nil;
         }
-        [dummy.next setParent:currentNode.parent];
-        [currentNode.variations addObject:dummy.next];
+        if (rejectedMove != NULL && *rejectedMove == nil) {
+            *rejectedMove = variationRejectedMove;
+        }
+        if (!variationHasNoMoves) {
+            [dummy.next setParent:currentNode.parent];
+            [currentNode.variations addObject:dummy.next];
+        }
         [position doMove:node.move error:error];
         if (error != NULL && *error != nil) {
             return nil;

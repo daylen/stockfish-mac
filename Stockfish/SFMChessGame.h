@@ -33,6 +33,19 @@
 
 @property (nonatomic, readonly) BOOL isInInitialState;
 
+/*!
+ The first rejected SAN token in the main line or a variation. Nil when the whole
+ game was read, its structure could not be read, or an edit replaced the unread text.
+ */
+@property (nonatomic, readonly) NSString *rejectedMove;
+
+/*!
+ YES while saving preserves original move text that the tree cannot fully represent.
+ A successful move switches saving to the tree. Undoing that edit restores the
+ original text and rejectedMove; failed moves leave both unchanged.
+ */
+@property (nonatomic, readonly) BOOL hasUnreadMoveText;
+
 #pragma mark - Init
 
 /*!

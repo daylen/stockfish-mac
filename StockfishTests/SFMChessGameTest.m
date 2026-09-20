@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "SFMChessGame.h"
+#import "Constants.h"
 
 @interface SFMChessGameTest : XCTestCase
 
@@ -78,6 +79,68 @@
     [game goToEnd];
     NSString *uci = [game uciString];
     XCTAssertEqualObjects(uci, @"position startpos moves e2e4 e7e5 ");
+}
+
+
+- (void)testUndoRestoresUnreadMoveTextAndRedoRestoresTheEdit
+{
+    NSString *moveText = @"1. e4 e5 2. Bh6 Nc6 *";
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"} moveText:moveText];
+    XCTAssertTrue([game parseMoveText:NULL]);
+    XCTAssertTrue(game.hasUnreadMoveText);
+    NSString *originalPGN = game.pgnString;
+    [game goToEnd];
+
+    [game.undoManager beginUndoGrouping];
+    NSError *error = nil;
+    XCTAssertTrue([game doMove:[[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3] error:&error]);
+    [game.undoManager endUndoGrouping];
+    XCTAssertNil(error);
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertNil(game.rejectedMove);
+    NSString *editedPGN = game.pgnString;
+    XCTAssertEqualObjects(game.moveTextString.string, @"1. e4 e5 2. Nf3 ");
+    XCTAssertNotEqualObjects(editedPGN, originalPGN);
+
+    [game.undoManager undo];
+    XCTAssertEqualObjects(game.pgnString, originalPGN);
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.rejectedMove, @"Bh6");
+
+    [game.undoManager redo];
+    XCTAssertEqualObjects(game.pgnString, editedPGN);
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertNil(game.rejectedMove);
+
+    [game.undoManager undo];
+    XCTAssertEqualObjects(game.pgnString, originalPGN);
+    XCTAssertEqualObjects(game.rejectedMove, @"Bh6");
+}
+
+- (void)testUnreadableGameRejectsMovesWithoutChangingItsState
+{
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"}
+                                               moveText:@"1. e4 ({no moves here}) *"];
+    NSError *parseError = nil;
+    XCTAssertFalse([game parseMoveText:&parseError]);
+    XCTAssertNotNil(parseError);
+    XCTAssertNil(game.currentNode);
+    XCTAssertTrue(game.hasUnreadMoveText);
+    NSString *originalPGN = game.pgnString;
+    NSString *originalFEN = game.position.fen;
+    SFMMove *move = [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4];
+
+    NSError *moveError = nil;
+    XCTAssertFalse([game doMove:move error:&moveError]);
+    XCTAssertEqualObjects(moveError.domain, GAME_ERROR_DOMAIN);
+    XCTAssertEqual(moveError.code, GAME_PARSE_ERROR_CODE);
+    XCTAssertEqualObjects(game.position.fen, originalFEN);
+    XCTAssertEqualObjects(game.pgnString, originalPGN);
+    XCTAssertNil(game.currentNode);
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertFalse(game.undoManager.canUndo);
+    XCTAssertFalse([game doMove:move error:NULL]);
+    XCTAssertEqualObjects(game.pgnString, originalPGN);
 }
 
 @end
