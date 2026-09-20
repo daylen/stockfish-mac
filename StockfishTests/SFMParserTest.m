@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "SFMParser.h"
 #import "SFMChessGame.h"
+#import "SFMPGNFile.h"
 
 @interface SFMParserTest : XCTestCase
 
@@ -291,6 +292,134 @@
 
     XCTAssertTrue([exported containsString:@"Broken"],
                   @"Saving deleted a game that could not be read");
+}
+
+
+- (void)testSavingUnreadMoveTextPreservesSemicolonCommentBoundaries
+{
+    NSString *moveText = @"1. e4 e5 2. Kd3 ; rejected move\n3. Nf3 Nc6 *";
+    NSString *pgn = [NSString stringWithFormat:@"[Event \"Unread\"]\n\n%@\n", moveText];
+    NSError *error = nil;
+    NSArray<SFMChessGame *> *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(games.count, 1);
+    SFMChessGame *game = games.firstObject;
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.rejectedMove, @"Kd3");
+    XCTAssertTrue([game.pgnString containsString:moveText]);
+
+    NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:game.pgnString error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(reopened.count, 1);
+    XCTAssertTrue([reopened.firstObject.pgnString containsString:moveText]);
+}
+
+- (void)testIllegalFirstVariationMoveRecoversWithOptionalRejectedMoveOutput
+{
+    NSArray<NSString *> *moveTexts = @[@"1. e4 (1. Kd3) e5 *",
+                                       @"1. e4 (1. d4 (1. Kd3) d5) e5 *"];
+    for (NSString *moveText in moveTexts) {
+        for (NSNumber *requestsRejectedMove in @[@YES, @NO]) {
+            NSError *error = nil;
+            NSString *rejectedMove = nil;
+            SFMNode *root = [SFMParser parseMoveText:moveText
+                                          position:[[SFMPosition alloc] init]
+                                      rejectedMove:requestsRejectedMove.boolValue ? &rejectedMove : NULL
+                                             error:&error];
+            XCTAssertNotNil(root, @"%@ output=%@", moveText, requestsRejectedMove);
+            XCTAssertNil(error);
+            XCTAssertEqualObjects(root.next.move, [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E4]);
+            XCTAssertEqualObjects(root.next.next.move, [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5]);
+            XCTAssertNil(root.next.next.next);
+            if (requestsRejectedMove.boolValue) {
+                XCTAssertEqualObjects(rejectedMove, @"Kd3");
+            }
+        }
+    }
+}
+
+- (void)testEarlierRejectedMoveDoesNotMakeAnEmptyVariationReadable
+{
+    NSString *moveText = @"1. e4 (1. d4 d5 2. Kd3) ({comment}) e5 *";
+    for (NSNumber *requestsRejectedMove in @[@YES, @NO]) {
+        NSError *error = nil;
+        NSString *rejectedMove = nil;
+        SFMNode *root = [SFMParser parseMoveText:moveText
+                                      position:[[SFMPosition alloc] init]
+                                  rejectedMove:requestsRejectedMove.boolValue ? &rejectedMove : NULL
+                                         error:&error];
+        XCTAssertNil(root);
+        XCTAssertNotNil(error);
+    }
+}
+
+- (void)testFirstRejectedMoveSurvivesLaterVariationAndMainlineFailures
+{
+    NSArray<NSString *> *moveTexts = @[
+        @"1. e4 (1. d4 d5 2. Kd3) (1. c4 c5 2. Ke3) (1. Nf3 d5) e5 *",
+        @"1. e4 (1. d4 d5 2. Kd3) (1. c4 c5 2. Ke3) (1. Nf3 d5) e5 2. Ke3 *"
+    ];
+    for (NSString *moveText in moveTexts) {
+        NSError *error = nil;
+        NSString *rejectedMove = nil;
+        SFMNode *root = [SFMParser parseMoveText:moveText
+                                      position:[[SFMPosition alloc] init]
+                                  rejectedMove:&rejectedMove
+                                         error:&error];
+        XCTAssertNotNil(root);
+        XCTAssertNil(error);
+        XCTAssertEqualObjects(rejectedMove, @"Kd3");
+        XCTAssertEqualObjects(root.next.next.move, [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E5]);
+        XCTAssertNil(root.next.next.next);
+        XCTAssertEqual(root.next.variations.count, 3);
+        SFMNode *lastVariation = root.next.variations.lastObject;
+        XCTAssertEqualObjects(lastVariation.move, [[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3]);
+        XCTAssertEqualObjects(lastVariation.next.move, [[SFMMove alloc] initWithFrom:SQ_D7 to:SQ_D5]);
+    }
+}
+
+- (void)testUnreadMoveTextPreservesCRLFAndBlankLinesBetweenGames
+{
+    NSString *moveText = @"1. e4 e5 2. Kd3 ; rejected move\r\n\r\n3. Nf3 Nc6 *\r\n\r\n";
+    NSString *pgn = [NSString stringWithFormat:@"[Event \"Unread\"]\r\n\r\n%@[Event \"Next\"]\r\n\r\n1. d4 *\r\n", moveText];
+    NSError *error = nil;
+    NSArray<SFMChessGame *> *games = [SFMParser parseGamesFromString:pgn error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(games.count, 2);
+    XCTAssertEqualObjects(games.firstObject.rejectedMove, @"Kd3");
+    XCTAssertTrue([games.firstObject.pgnString containsString:moveText]);
+    NSMutableString *exported = [NSMutableString new];
+    for (SFMChessGame *game in games) {
+        [exported appendString:game.pgnString];
+    }
+    NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:exported error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(reopened.count, 2);
+    XCTAssertEqualObjects(reopened.lastObject.tags[@"Event"], @"Next");
+    XCTAssertTrue([reopened.firstObject.pgnString containsString:moveText]);
+}
+
+- (void)testSavingUnreadPGNIsIdempotentAcrossLineEndings
+{
+    for (NSString *lineEnding in @[@"\n", @"\r\n"]) {
+        NSString *moveText = [@"1. e4 e5 2. Kd3 ; rejected move\n\n3. Nf3 Nc6 *\n\n"
+            stringByReplacingOccurrencesOfString:@"\n" withString:lineEnding];
+        NSString *pgn = [NSString stringWithFormat:@"[Event \"Unread\"]%@%@%@[Event \"Next\"]%@%@1. d4 *%@",
+                         lineEnding, lineEnding, moveText, lineEnding, lineEnding, lineEnding];
+        NSError *error = nil;
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 2);
+        NSData *firstSave = file.data;
+        NSString *firstExport = [[NSString alloc] initWithData:firstSave encoding:NSUTF8StringEncoding];
+        XCTAssertTrue([firstExport containsString:moveText]);
+        SFMPGNFile *reopened = [[SFMPGNFile alloc] initWithString:firstExport error:&error];
+        XCTAssertNotNil(reopened);
+        XCTAssertNil(error);
+        XCTAssertEqual(reopened.games.count, 2);
+        XCTAssertEqualObjects(reopened.data, firstSave);
+    }
 }
 
 @end

@@ -16,14 +16,22 @@
 {
     NSMutableArray *everyGameTheFileHolds = [[NSMutableArray alloc] init];
     
-    NSArray *lines = [str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-    
     NSMutableDictionary *tags;
     NSMutableString *moves;
     BOOL readingTags = NO;
     
-    for (NSString *line in lines) {
+    NSUInteger offset = 0;
+    while (offset < str.length) {
+        NSUInteger lineEnd;
+        NSUInteger contentsEnd;
+        [str getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(offset, 0)];
+        NSString *line = [str substringWithRange:NSMakeRange(offset, contentsEnd - offset)];
+        NSString *originalLine = [str substringWithRange:NSMakeRange(offset, lineEnd - offset)];
+        offset = lineEnd;
         if ([line length] == 0) {
+            if (!readingTags) {
+                [moves appendString:originalLine];
+            }
             continue;
         }
         if ([line characterAtIndex:0] == '[' && [line characterAtIndex:[line length] - 1] == ']') {
@@ -50,7 +58,7 @@
                 moves = [NSMutableString new];
             }
             
-            [moves appendFormat:@"%@ ", line];
+            [moves appendString:originalLine];
         }
     }
     // Upon reaching the end of the file we need to add the last game
@@ -85,7 +93,7 @@
         return head;
     }
     NSMutableCharacterSet *charactersToTrim = [[NSMutableCharacterSet alloc] init];
-    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
+    [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [charactersToTrim formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"*"]];
     NSString *moves = [moveText stringByTrimmingCharactersInSet:charactersToTrim];
     if ([moves length] == 0) {
@@ -116,7 +124,7 @@
                 }
                 return nil;
             }
-            if (rejectedMove != NULL) {
+            if (rejectedMove != NULL && *rejectedMove == nil) {
                 *rejectedMove = illegalMove;
             }
             return node;
@@ -126,9 +134,6 @@
     return node;
 }
 
-/*!
- @return The SAN token an error reports as illegal, or nil if it reports anything else.
- */
 + (NSString * _Nullable)illegalMoveFromError:(NSError * _Nullable)error
 {
     BOOL reportsAnIllegalMove = [[error domain] isEqualToString:POSITION_ERROR_DOMAIN]
@@ -148,16 +153,22 @@
     else if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
-        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] rejectedMove:rejectedMove error:error];
+        NSString *variationRejectedMove = nil;
+        SFMNode * parsedNode = [SFMParser parseString:[token substringWithRange:NSMakeRange(1, [token length] - 2)] fromNode:dummy position:[position copy] rejectedMove:&variationRejectedMove error:error];
         if (parsedNode == nil) {
             return nil;
         }
         BOOL variationHasNoMoves = dummy.next == nil;
-        if (variationHasNoMoves) {
+        if (variationHasNoMoves && variationRejectedMove == nil) {
             return nil;
         }
-        [dummy.next setParent:currentNode.parent];
-        [currentNode.variations addObject:dummy.next];
+        if (rejectedMove != NULL && *rejectedMove == nil) {
+            *rejectedMove = variationRejectedMove;
+        }
+        if (!variationHasNoMoves) {
+            [dummy.next setParent:currentNode.parent];
+            [currentNode.variations addObject:dummy.next];
+        }
         [position doMove:node.move error:error];
         if (error != NULL && *error != nil) {
             return nil;

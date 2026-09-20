@@ -14,21 +14,21 @@
 /*!
  Parses chess games from a PGN string.
  @param str The full PGN string as read from disk.
- @return A mutable array of SFMChessGame objects.
+ @return Every game in input order, including unreadable games, or nil if no game
+ can be read. Games with unread move text retain it for saving without data loss.
  */
 + (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Parses the move text for a chess game from a given position and returns the top node.
 
- A move text that names an illegal move yields the moves before it rather than nothing,
- so that one bad move does not cost the whole game. Move text whose structure cannot be
- read at all is still rejected.
+ An illegal move stops its line at the preceding legal move. Other variations and
+ the main line remain readable. Move text with unreadable structure is rejected.
 
  @param moveText The move text
  @param position The position
- @param rejectedMove On return, the SAN token that stopped parsing, or nil if the whole
- move text was read. Pass NULL if not needed.
+ @param rejectedMove On success, the first rejected SAN token in input order, or nil
+ if the whole move text was read. Pass NULL if not needed; recovery is unchanged.
  @param error
  @return The top node of the tree, or nil if nothing could be read
  */

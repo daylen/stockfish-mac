@@ -102,7 +102,14 @@ static NSString * const SFMUnknownResult = @"*";
 
 - (BOOL)doMove:(SFMMove *)move error:(NSError *__autoreleasing *)error {
     NSAssert(move, @"Move is nil");
-    
+
+    if (_currentNode == nil) {
+        if (error != NULL) {
+            *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
+        }
+        return NO;
+    }
+
     NSError *e = nil;
     [self.position doMove:move error:&e];
     if (e) {
@@ -121,7 +128,7 @@ static NSString * const SFMUnknownResult = @"*";
     }
     
     _currentNode = newMove;
-    self.hasUnreadMoveText = NO;
+    [self stopPreservingUnreadMoveText];
     return YES;
 }
 
@@ -169,6 +176,23 @@ static NSString * const SFMUnknownResult = @"*";
 {
     [self removeSubtreeFromNode:node];
     [self.delegate chessGameStateDidChange:self];
+}
+
+- (void)stopPreservingUnreadMoveText
+{
+    if (!self.hasUnreadMoveText) {
+        return;
+    }
+    [[self.undoManager prepareWithInvocationTarget:self] resumePreservingUnreadMoveTextStoppingAt:self.rejectedMove];
+    self.hasUnreadMoveText = NO;
+    self.rejectedMove = nil;
+}
+
+- (void)resumePreservingUnreadMoveTextStoppingAt:(NSString *)rejectedMove
+{
+    [[self.undoManager prepareWithInvocationTarget:self] stopPreservingUnreadMoveText];
+    self.hasUnreadMoveText = YES;
+    self.rejectedMove = rejectedMove;
 }
 
 - (void)removeSubtreeFromNodeId:(NSUUID *)nodeId
@@ -282,7 +306,17 @@ static NSString * const SFMUnknownResult = @"*";
     [str appendString:@"\n"];
     if (self.hasUnreadMoveText) {
         [str appendString:self.moveText];
-        [str appendString:@"\n\n"];
+        NSUInteger lastLineStart = 0;
+        NSUInteger lastLineContentsEnd = self.moveText.length;
+        if (self.moveText.length > 0) {
+            [self.moveText getLineStart:&lastLineStart
+                                   end:NULL
+                           contentsEnd:&lastLineContentsEnd
+                              forRange:NSMakeRange(self.moveText.length - 1, 1)];
+        }
+        if (lastLineStart != lastLineContentsEnd) {
+            [str appendString:@"\n\n"];
+        }
         return str;
     }
     [str appendString:[[self moveTextString] string]];

@@ -158,6 +158,11 @@ const CGFloat kMaxWeight = 1;
     self.engine.gameToAnalyze = [self.currentGame copy];
 
     [self updateNotationView];
+    if (self.currentGameIndex >= 0 && self.currentGameIndex < self.gameListView.numberOfRows) {
+        NSIndexSet *rows = [NSIndexSet indexSetWithIndex:self.currentGameIndex];
+        NSIndexSet *columns = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.gameListView.numberOfColumns)];
+        [self.gameListView reloadDataForRowIndexes:rows columnIndexes:columns];
+    }
 }
 
 /*!
@@ -351,30 +356,37 @@ const CGFloat kMaxWeight = 1;
         [alert addButtonWithTitle:@"OK"];
         [alert setInformativeText:@"Stockfish could not read the moves in this game. The rest of the file is unaffected, and this game is left as it is on disk."];
         [alert runModal];
+        [self syncToViewsAndEngine];
         return;
     }
 
     if (self.currentGame.rejectedMove) {
-        [self warnThatGameStopsAtRejectedMove:self.currentGame];
+        [self warnThatLineStopsAtRejectedMove:self.currentGame];
     }
 
     [self syncToViewsAndEngine];
     
 }
 
-- (void)warnThatGameStopsAtRejectedMove:(SFMChessGame *)game
+- (void)warnThatLineStopsAtRejectedMove:(SFMChessGame *)game
 {
     NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:@"This game is incomplete"];
     [alert addButtonWithTitle:@"OK"];
     [alert setInformativeText:[NSString stringWithFormat:
-        @"The move %@ is not legal in the position it appears in, so the game stops there. "
+        @"The move %@ is not legal in the position it appears in, so that line stops there. "
         @"The moves after it are kept in the file and are written back unchanged unless you edit this game.",
         game.rejectedMove]];
     [alert runModal];
 }
 
 #pragma mark - Menu items
+
+- (BOOL)currentGameHasMoveTree
+{
+    return self.currentGame.currentNode != nil;
+}
+
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
     if ([menuItem action] == @selector(toggleInfiniteAnalysis:)) {
@@ -384,11 +396,11 @@ const CGFloat kMaxWeight = 1;
             [menuItem setTitle:@"Start Infinite Analysis"];
         }
     } else if ([menuItem action] == @selector(doBestMove:) || [menuItem action] == @selector(doBestLine:)) {
-        return self.engine.isAnalyzing;
+        return self.engine.isAnalyzing && [self currentGameHasMoveTree];
     } else if ([menuItem action] == @selector(firstMove:) || [menuItem action] == @selector(previousMove:)) {
-        return ![self.currentGame atBeginning];
+        return [self currentGameHasMoveTree] && ![self.currentGame atBeginning];
     } else if ([menuItem action] == @selector(lastMove:) || [menuItem action] == @selector(nextMove:)) {
-        return ![self.currentGame atEnd];
+        return [self currentGameHasMoveTree] && ![self.currentGame atEnd];
     } else if ([menuItem action] == @selector(decreaseVariations:)) {
         return self.engine.multipv != 1;
     } else if ([menuItem action] == @selector(toggleShowArrows:)) {
@@ -719,8 +731,11 @@ const CGFloat kMaxWeight = 1;
     
     white.stringValue = [NSString stringWithFormat:@"White: %@", game.tags[@"White"]];
     black.stringValue = [NSString stringWithFormat:@"Black: %@", game.tags[@"Black"]];
-    NSString *incompleteSuffix = game.rejectedMove ? @" (incomplete)" : @"";
-    result.stringValue = [NSString stringWithFormat:@"Result: %@%@", game.tags[@"Result"], incompleteSuffix];
+    NSString *unreadMoveTextSuffix = @"";
+    if (game.hasUnreadMoveText) {
+        unreadMoveTextSuffix = game.rejectedMove ? @" (incomplete)" : @" (unreadable)";
+    }
+    result.stringValue = [NSString stringWithFormat:@"Result: %@%@", game.tags[@"Result"], unreadMoveTextSuffix];
     return view;
 }
 - (void)tableViewSelectionDidChange:(NSNotification *)notification

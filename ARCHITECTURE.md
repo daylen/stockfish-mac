@@ -1,53 +1,55 @@
 # Architecture
 
-Architectural decisions for this project, newest first. Each entry records a
-decision about the system's structure and the guarantees that hold at a
-boundary, along with the alternatives weighed and the consequences accepted.
+## PGN parsing and recovery
 
-## 2026-09-09: A PGN file survives the games in it that cannot be read
+`SFMPGNFile` owns the ordered collection of games in a document. `SFMParser`
+builds each game's move tree through `SFMPosition`, which validates moves
+against the current position. A file opens when at least one game can be read.
+Unreadable games remain in their original positions in the collection because
+removing them would delete their text when the document autosaves.
 
-`SFMParser` previously guaranteed all-or-nothing at its boundary: if any game
-in a file failed to parse, `parseGamesFromString:` returned nil and the file
-would not open. Real-world PGN does not earn that guarantee. The FIDE Olympiad
-archives contain 51 games out of 3426 with genuinely illegal moves, and under
-the old contract four such games made a 369-game file unopenable.
+An illegal SAN move stops the affected line at its preceding legal move.
+Readable main-line moves and sibling variations continue. The game records the
+first rejected token in input order as `SFMChessGame.rejectedMove`. An illegal
+first move in a variation leaves that variation empty without discarding the
+rest of the game. A structurally empty or otherwise unreadable variation
+rejects the game instead: an earlier rejection cannot make a later structural
+error recoverable.
 
-The boundary now distinguishes two kinds of failure:
+Recovery requires `POSITION_ERROR_DOMAIN`, `ILLEGAL_MOVE_CODE`, and the
+rejected SAN token in `REJECTED_MOVE_KEY`. Errors without a token do not identify
+a safe truncation point. The optional parser output for that token does not
+change parsing behavior.
 
-- A move text naming an **illegal move** yields the moves before it. The game
-  is returned, carrying the rejected SAN token in `SFMChessGame.rejectedMove`.
-- A move text whose **structure** cannot be read, such as a variation
-  containing no moves, is still rejected in full. The token stream itself is
-  untrustworthy there, so no prefix of it can be trusted either.
+## Saving and editing recovered games
 
-A file is rejected only when nothing in it can be read.
+`SFMDocument` autosaves in place. `SFMChessGame.hasUnreadMoveText` covers both a
+partially recovered game and a structurally unreadable game. While it holds,
+PGN serialization preserves the original move text, including line endings and
+blank lines that determine comment boundaries. Tags are serialized separately.
+Saving and reopening without edits does not accumulate separator lines.
 
-The distinction is carried by the error code `SFMPosition` raises:
-`ILLEGAL_MOVE_CODE`, which already meant exactly this and is what
-`-doMove:error:` has always raised. `REJECTED_MOVE_KEY` in the `userInfo`
-carries the offending token alongside it, so the code says the move was
-illegal and the key says which one. A token is required before a game is
-truncated, because `-doMove:error:` reports an illegal move without naming
-one and truncating there would cut a game at a move its text never held.
+A successful move edit makes the tree authoritative for subsequent saves and
+clears the rejected token. The unread remainder is then omitted. This allows
+the user to continue from the readable position without discarding their edit
+on save. Preservation state participates in the same undo group as the move:
+Undo restores the original text and rejection marker; Redo restores the edited
+tree. Failed moves preserve both states. A game with no readable tree rejects
+move edits.
 
-**Consequence: a game whose move text was not fully read is written back out
-verbatim.** `SFMDocument` autosaves in place. Re-serializing such a game from
-its nodes would emit only the moves that parsed and silently discard the rest,
-turning a file this change made openable into one missing data. `-[SFMChessGame
-pgnString]` therefore returns the original move text while
-`hasUnreadMoveText` holds.
+Fully readable games use the existing tree serializer. It retains one comment
+per node; preserving multiple consecutive comments is outside the recovery
+boundary. Recovery does not make those games' serialization lossless.
 
-That flag covers both a partially read game and one that could not be read at
-all, and the latter stays in `SFMPGNFile.games` rather than being filtered out:
-a game dropped from the list is a game deleted from the file the next time any
-of its neighbours is saved. Such a game cannot be displayed, so selecting it
-reports that its moves could not be read and leaves the window open.
+## Document selection and analysis
 
-The flag is cleared by the first edit. From that point the move tree, not the
-text on disk, is what the game means, and continuing to write the original text
-would discard the user's own moves.
+`SFMWindowController` owns the selected game and synchronizes its position,
+notation, and engine snapshot when selection changes. Selecting an unreadable
+game reports the parse failure, then displays that game's starting position
+and empty notation. Navigation and engine-move actions are disabled until a
+game with a move tree is selected. The board's move path also reaches the
+model's edit guard.
 
-**Alternatives weighed.** Dropping unreadable games entirely was simpler and
-kept every listed game trustworthy, but removed games with no trace. Keeping
-them truncated but unmarked risked a truncated game reading as a complete one.
-Marking them costs a property on `SFMChessGame` and a string in the game list.
+`SFMChessGame` copies used by the engine represent the selected position and
+its move ancestry. They are analysis snapshots; document saving uses the
+original games in `SFMPGNFile`.
