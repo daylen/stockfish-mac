@@ -8,6 +8,19 @@ against the current position. A file opens when at least one game can be read.
 Unreadable games remain in their original positions in the collection because
 removing them would delete their text when the document autosaves.
 
+Game boundaries and movetext tokenization share comment-boundary recognition.
+Brace comments can span lines; semicolon comments and percent escape lines end
+at the line boundary. Apparent headers inside comments remain comment text.
+A valid header must match a complete tag pair before its fields are read.
+Malformed headers remain in unread move text, and an unterminated comment or
+variation reports a structural error rather than reaching substring operations.
+An unclosed brace can consume later apparent headers: the reader preserves that
+remainder instead of guessing where the comment was intended to end.
+
+Tagless move fragments remain valid imports without a final result marker and
+remain separate games when followed by a tagged game. Comment-only preambles
+belong to the following game. Percent escape lines do not create games.
+
 An illegal SAN move stops the affected line at its preceding legal move.
 Readable main-line moves and sibling variations continue. The game records the
 first rejected token in input order as `SFMChessGame.rejectedMove`. An illegal
@@ -15,6 +28,10 @@ first move in a variation leaves that variation empty without discarding the
 rest of the game. A structurally empty or otherwise unreadable variation
 rejects the game instead: an earlier rejection cannot make a later structural
 error recoverable.
+
+SAN tokens must match the supported move spelling in full before they reach
+the board-aware SAN interpreter. Unrecognized tokens use the same rejected-move
+recovery path without sending an empty string into the chess library.
 
 Recovery requires `POSITION_ERROR_DOMAIN`, `ILLEGAL_MOVE_CODE`, and the
 rejected SAN token in `REJECTED_MOVE_KEY`. Errors without a token do not identify
@@ -37,9 +54,15 @@ Undo restores the original text and rejection marker; Redo restores the edited
 tree. Failed moves preserve both states. A game with no readable tree rejects
 move edits.
 
-Fully readable games use the existing tree serializer. It retains one comment
-per node; preserving multiple consecutive comments is outside the recovery
-boundary. Recovery does not make those games' serialization lossless.
+Fully readable games use the tree serializer. Each node stores one comment body;
+consecutive brace-comment bodies are joined with a space, and semicolon-comment
+bodies begin a new line. Content and its order within the node survive saving,
+reopening, and the transition from recovered text to an edited tree. Separate
+original comment blocks and their placement relative to variations are not
+represented. A comment containing a closing brace is exported as semicolon
+lines, with line endings normalized to LF, so its content remains valid PGN.
+This preserves comment content without claiming byte-for-byte serialization of
+fully readable games.
 
 ## Document selection and analysis
 

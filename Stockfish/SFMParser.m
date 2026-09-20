@@ -10,6 +10,38 @@
 #import "Constants.h"
 #import "SFMChessGame.h"
 
+static NSRange SFMCommentRangeAtIndex(NSString *text, NSUInteger index)
+{
+    unichar character = [text characterAtIndex:index];
+    if (character == '{') {
+        NSRange close = [text rangeOfString:@"}" options:0 range:NSMakeRange(index + 1, text.length - index - 1)];
+        NSUInteger end = close.location == NSNotFound ? text.length : NSMaxRange(close);
+        return NSMakeRange(index, end - index);
+    }
+    BOOL startsLine = index == 0 || [text characterAtIndex:index - 1] == '\n'
+        || [text characterAtIndex:index - 1] == '\r';
+    if (character == ';' || (character == '%' && startsLine)) {
+        NSUInteger contentsEnd;
+        [text getLineStart:NULL end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(index, 0)];
+        return NSMakeRange(index, contentsEnd - index);
+    }
+    return NSMakeRange(NSNotFound, 0);
+}
+
+static BOOL SFMContainsMoveText(NSString *text)
+{
+    NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    for (NSUInteger index = 0; index < text.length; index++) {
+        NSRange comment = SFMCommentRangeAtIndex(text, index);
+        if (comment.location != NSNotFound) {
+            index = NSMaxRange(comment) - 1;
+        } else if (![whitespace characterIsMember:[text characterAtIndex:index]]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 @implementation SFMParser
 
 + (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error
@@ -20,37 +52,47 @@
     NSMutableString *moves;
     BOOL readingTags = NO;
     
+    NSRegularExpression *tagPattern = [NSRegularExpression regularExpressionWithPattern:
+        @"^[ \t]*\\[[ \t]*([A-Za-z0-9][A-Za-z0-9_]*)[ \t]*\"((?:[^\"\\\\\\r\\n]|\\\\[\"\\\\])*)\"[ \t]*\\][ \t]*$"
+        options:0 error:NULL];
+    NSUInteger commentEnd = 0;
     NSUInteger offset = 0;
     while (offset < str.length) {
+        NSUInteger lineStart = offset;
         NSUInteger lineEnd;
         NSUInteger contentsEnd;
         [str getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(offset, 0)];
         NSString *line = [str substringWithRange:NSMakeRange(offset, contentsEnd - offset)];
         NSString *originalLine = [str substringWithRange:NSMakeRange(offset, lineEnd - offset)];
         offset = lineEnd;
-        if ([line length] == 0) {
-            if (!readingTags) {
+        if ([[line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0) {
+            if (!readingTags || moves.length > 0) {
                 [moves appendString:originalLine];
             }
             continue;
         }
-        if ([line characterAtIndex:0] == '[' && [line characterAtIndex:[line length] - 1] == ']') {
-            // This is a tag
+        BOOL insideComment = lineStart < commentEnd;
+        NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        BOOL looksLikeTag = !insideComment && [trimmedLine hasPrefix:@"["];
+        NSTextCheckingResult *tag = looksLikeTag
+            ? [tagPattern firstMatchInString:line options:0 range:NSMakeRange(0, line.length)] : nil;
+        if (tag != nil) {
             if (!readingTags) {
                 readingTags = YES;
-                if (tags && moves) {
+                if (moves != nil && (tags != nil || SFMContainsMoveText(moves))) {
                     [everyGameTheFileHolds addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
+                    moves = nil;
                 }
                 tags = [NSMutableDictionary new];
-                moves = [NSMutableString new];
+                if (moves == nil) {
+                    moves = [NSMutableString new];
+                }
             }
             
-            NSArray *tokens = [line componentsSeparatedByString:@"\""];
-            NSString *tagName = [tokens[0] substringWithRange:NSMakeRange(1, [tokens[0] length] - 2)];
-            tags[tagName] = tokens[1];
+            NSString *tagName = [line substringWithRange:[tag rangeAtIndex:1]];
+            tags[tagName] = [line substringWithRange:[tag rangeAtIndex:2]];
         } else {
-            // This must be move text
-            if (readingTags) {
+            if (!looksLikeTag) {
                 readingTags = NO;
             }
 
@@ -59,6 +101,15 @@
             }
             
             [moves appendString:originalLine];
+            if (!looksLikeTag) {
+                for (NSUInteger index = MAX(lineStart, commentEnd); index < contentsEnd; index++) {
+                    NSRange comment = SFMCommentRangeAtIndex(str, index);
+                    if (comment.location != NSNotFound) {
+                        commentEnd = NSMaxRange(comment);
+                        index = commentEnd - 1;
+                    }
+                }
+            }
         }
     }
     // Upon reaching the end of the file we need to add the last game
@@ -99,7 +150,7 @@
     if ([moves length] == 0) {
         return head;
     }
-    return [self parseString:moves fromNode:head position:position rejectedMove:rejectedMove error:error];
+    return [self parseString:moveText fromNode:head position:position rejectedMove:rejectedMove error:error];
 }
 
 + (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
@@ -147,8 +198,12 @@
 + (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     SFMNode *currentNode = node;
-    if([token characterAtIndex:0] == '{'){ //comment
-        [node setComment:[token substringWithRange:NSMakeRange(1, [token length] - 2)]];
+    BOOL braceComment = [token hasPrefix:@"{"];
+    if (braceComment || [token hasPrefix:@";"]) {
+        NSUInteger commentEnd = braceComment ? token.length - 1 : token.length;
+        NSString *comment = [token substringWithRange:NSMakeRange(1, commentEnd - 1)];
+        NSString *separator = braceComment ? @" " : @"\n";
+        node.comment = node.comment == nil ? comment : [node.comment stringByAppendingFormat:@"%@%@", separator, comment];
     }
     else if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
@@ -199,38 +254,54 @@
     }
     
     NSMutableArray *tokens = [NSMutableArray new];
-    NSMutableArray *stack = [NSMutableArray new];
-    char ch;
-    
-    int tokenStartIndex = 0;
-    for (int i = 0; i < [str length]; i++) {
-        ch = [str characterAtIndex:i];
-        bool currentlyInComment = [[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", '}']];
-        
-        if ((ch == '(' || ch == '{') && !currentlyInComment) {
-            if ([stack count] == 0 && i - tokenStartIndex > 0) {
-                [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex)]];
-                tokenStartIndex = i;
+    NSUInteger variationDepth = 0;
+    NSUInteger tokenStartIndex = 0;
+    for (NSUInteger index = 0; index < str.length; index++) {
+        unichar character = [str characterAtIndex:index];
+        NSRange comment = SFMCommentRangeAtIndex(str, index);
+        if (comment.location != NSNotFound) {
+            NSUInteger end = NSMaxRange(comment);
+            if (character == '{' && [str characterAtIndex:end - 1] != '}') {
+                return @[];
             }
-            [stack addObject:[NSString stringWithFormat:@"%c", ch == '(' ? ')' : '}']];
-        } else if (ch == ')' || ch == '}') {
-            if (ch == ')' && currentlyInComment) continue;
-            if ([stack count] == 0 || ![[stack lastObject] isEqualToString:[NSString stringWithFormat:@"%c", ch]]) {
-                // TODO: Should bubble up the specific error.
-                return [NSArray new];
+            if (variationDepth == 0) {
+                if (index > tokenStartIndex) {
+                    [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, index - tokenStartIndex)]];
+                }
+                if (character != '%') {
+                    [tokens addObject:[str substringWithRange:comment]];
+                }
+                tokenStartIndex = end;
             }
-            [stack removeLastObject];
-            if ([stack count] == 0) {
-                [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, i-tokenStartIndex + 1)]];
-                tokenStartIndex = i + 1;
+            index = end - 1;
+        } else if (character == '(') {
+            if (variationDepth == 0) {
+                if (index > tokenStartIndex) {
+                    [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, index - tokenStartIndex)]];
+                }
+                tokenStartIndex = index;
             }
+            variationDepth++;
+        } else if (character == ')') {
+            if (variationDepth == 0) {
+                return @[];
+            }
+            variationDepth--;
+            if (variationDepth == 0) {
+                [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, index - tokenStartIndex + 1)]];
+                tokenStartIndex = index + 1;
+            }
+        } else if (character == '}' || character == '[' || character == ']') {
+            return @[];
         }
     }
-    
-    if (tokenStartIndex < [str length]) {
-        [tokens addObject:[str substringWithRange:NSMakeRange(tokenStartIndex, [str length] - tokenStartIndex)]];
+    if (variationDepth > 0) {
+        return @[];
     }
-    
+    if (tokenStartIndex < str.length) {
+        [tokens addObject:[str substringFromIndex:tokenStartIndex]];
+    }
+
     return [tokens objectsAtIndexes:[tokens indexesOfObjectsPassingTest:^BOOL(id token, NSUInteger idx, BOOL * stop) {
         return [SFMParser isValidToken:token];
     }]];

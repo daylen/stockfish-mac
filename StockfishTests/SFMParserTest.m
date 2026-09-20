@@ -10,6 +10,7 @@
 #import "SFMParser.h"
 #import "SFMChessGame.h"
 #import "SFMPGNFile.h"
+#import "Constants.h"
 
 @interface SFMParserTest : XCTestCase
 
@@ -17,9 +18,176 @@
 
 @implementation SFMParserTest
 
+- (void)testUnterminatedDelimitersReturnParseErrors
+{
+    for (NSString *moveText in @[@"{", @"(", @"1. e4 {", @"1. e4 (",
+                                 @"1. e4 {unfinished", @"1. e4 (1. d4"]) {
+        NSError *error = nil;
+        SFMNode *root = nil;
+        XCTAssertNoThrow(root = [SFMParser parseMoveText:moveText
+                                               position:[[SFMPosition alloc] init]
+                                           rejectedMove:NULL error:&error], @"%@", moveText);
+        XCTAssertNil(root, @"%@", moveText);
+        XCTAssertEqualObjects(error.domain, GAME_ERROR_DOMAIN, @"%@", moveText);
+        XCTAssertEqual(error.code, GAME_PARSE_ERROR_CODE, @"%@", moveText);
+    }
+}
+
+- (void)testUnterminatedGameSurvivesBesideReadableGame
+{
+    for (NSString *suffix in @[@"{", @"(", @"{unfinished", @"(1. d4"]) {
+        NSString *brokenMoves = [@"1. e4 " stringByAppendingString:suffix];
+        NSString *pgn = [NSString stringWithFormat:@"[Event \"Readable\"]\n\n1. d4 *\n\n"
+                         "[Event \"Unterminated\"]\n\n%@", brokenMoves];
+        NSError *error = nil;
+        SFMPGNFile *file = nil;
+        XCTAssertNoThrow(file = [[SFMPGNFile alloc] initWithString:pgn error:&error]);
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 2);
+        SFMChessGame *broken = file.games.lastObject;
+        XCTAssertTrue(broken.hasUnreadMoveText);
+        XCTAssertNil(broken.currentNode);
+        NSString *saved = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+        XCTAssertTrue([saved containsString:brokenMoves]);
+        SFMPGNFile *reopened = nil;
+        XCTAssertNoThrow(reopened = [[SFMPGNFile alloc] initWithString:saved error:&error]);
+        XCTAssertNotNil(reopened);
+        XCTAssertNil(error);
+        XCTAssertEqual(reopened.games.count, 2);
+        XCTAssertTrue([(SFMChessGame *)reopened.games.lastObject hasUnreadMoveText]);
+        XCTAssertEqualObjects([(SFMChessGame *)reopened.games.firstObject tags][@"Event"], @"Readable");
+    }
+}
+
 - (void)setUp
 {
     [super setUp];
+}
+
+- (void)testHeaderTextInsideCommentsDoesNotSplitGames
+{
+    NSArray<NSString *> *comments = @[
+        @"{ [%eval 0.3]\n[%clk 0:03:00]\n}",
+        @"{first line\n[Event \"Inside comment\"]\nlast line}",
+        @"{first\n} {second\n[Event \"Still inside comment\"]\n}",
+        @"{literal { and ( inside\n[%clk 0:03:00]\n}",
+    ];
+    for (NSString *comment in comments) {
+        NSString *pgn = [NSString stringWithFormat:@"[Event \"Actual game\"]\n\n1. e4 %@ e5 *\n", comment];
+        NSError *error = nil;
+        SFMPGNFile *file = nil;
+        XCTAssertNoThrow(file = [[SFMPGNFile alloc] initWithString:pgn error:&error]);
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 1);
+        SFMChessGame *game = file.games.firstObject;
+        XCTAssertEqualObjects(game.tags[@"Event"], @"Actual game");
+        XCTAssertFalse(game.hasUnreadMoveText);
+        XCTAssertNotNil(game.currentNode.next.comment);
+        NSString *parsedComment = game.currentNode.next.comment;
+        [game goToEnd];
+        XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 ");
+        SFMPGNFile *reopened = nil;
+        XCTAssertNoThrow(reopened = [[SFMPGNFile alloc] initWithString:game.pgnString error:&error]);
+        XCTAssertNotNil(reopened);
+        XCTAssertNil(error);
+        XCTAssertEqual(reopened.games.count, 1);
+        SFMChessGame *reopenedGame = reopened.games.firstObject;
+        XCTAssertFalse(reopenedGame.hasUnreadMoveText);
+        XCTAssertEqualObjects(reopenedGame.currentNode.next.comment, parsedComment);
+        [reopenedGame goToEnd];
+        XCTAssertEqualObjects(reopenedGame.uciString, game.uciString);
+    }
+}
+
+- (void)testMalformedHeadersAreRejectedAndPreservedWithTheirNeighbour
+{
+    for (NSString *header in @[@"[Event]", @"[]", @"[Event \"unterminated]", @"[Event \"A\" extra]"]) {
+        NSString *broken = [NSString stringWithFormat:@"%@\n\n1. e4 *\n\n", header];
+        NSError *error = nil;
+        SFMPGNFile *unreadable = nil;
+        XCTAssertNoThrow(unreadable = [[SFMPGNFile alloc] initWithString:broken error:&error]);
+        XCTAssertNil(unreadable);
+        XCTAssertEqualObjects(error.domain, GAME_ERROR_DOMAIN);
+        XCTAssertEqual(error.code, GAME_PARSE_ERROR_CODE);
+
+        NSString *pgn = [broken stringByAppendingString:@"[Event \"Readable\"]\n\n1. d4 *\n"];
+        error = nil;
+        SFMPGNFile *file = nil;
+        XCTAssertNoThrow(file = [[SFMPGNFile alloc] initWithString:pgn error:&error]);
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 2);
+        XCTAssertTrue([(SFMChessGame *)file.games.firstObject hasUnreadMoveText]);
+        XCTAssertEqualObjects([(SFMChessGame *)file.games.lastObject tags][@"Event"], @"Readable");
+        NSString *saved = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+        XCTAssertTrue([saved containsString:broken]);
+        SFMPGNFile *reopened = nil;
+        XCTAssertNoThrow(reopened = [[SFMPGNFile alloc] initWithString:saved error:&error]);
+        XCTAssertNotNil(reopened);
+        XCTAssertNil(error);
+        XCTAssertEqual(reopened.games.count, 2);
+        XCTAssertTrue([(SFMChessGame *)reopened.games.firstObject hasUnreadMoveText]);
+        XCTAssertTrue([[(SFMChessGame *)reopened.games.firstObject pgnString] containsString:broken]);
+    }
+}
+
+- (void)testTaglessFragmentSurvivesBeforeTaggedGame
+{
+    NSString *pgn = @"1.e4 c6 2.d4 d5 3.e5 Bf5 4.h4\n\n[Event \"Next\"]\n\n1. d4 *\n";
+    NSError *error = nil;
+    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+    XCTAssertNotNil(file);
+    XCTAssertNil(error);
+    XCTAssertEqual(file.games.count, 2);
+    SFMChessGame *fragment = file.games.firstObject;
+    XCTAssertFalse(fragment.hasUnreadMoveText);
+    [fragment goToEnd];
+    XCTAssertEqualObjects(fragment.uciString, @"position startpos moves e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 h2h4 ");
+    XCTAssertEqualObjects([(SFMChessGame *)file.games.lastObject tags][@"Event"], @"Next");
+}
+
+- (void)testAdjacentPgnTokensDoNotBecomePartOfSan
+{
+    NSArray<NSDictionary *> *cases = @[
+        @{@"moves": @"1. e4$1 e5 *", @"uci": @"position startpos moves e2e4 e7e5 "},
+        @{@"moves": @"1. e4*", @"uci": @"position startpos moves e2e4 "},
+        @{@"moves": @"1. e4!?$1 e5*", @"uci": @"position startpos moves e2e4 e7e5 "},
+    ];
+    for (NSDictionary *testCase in cases) {
+        NSError *error = nil;
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:testCase[@"moves"] error:&error];
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 1);
+        SFMChessGame *game = file.games.firstObject;
+        XCTAssertFalse(game.hasUnreadMoveText);
+        XCTAssertNil(game.rejectedMove);
+        [game goToEnd];
+        XCTAssertEqualObjects(game.uciString, testCase[@"uci"]);
+    }
+}
+
+- (void)testLineCommentsDoNotOpenBraceCommentsOrVariations
+{
+    for (NSString *lineEnding in @[@"\n", @"\r\n", @"\r"]) {
+        NSString *pgn = [@"[Event \"First\"]\n\n1. e4 ; literal { ( and [Event]\n"
+                         "% { ignored escape line\n"
+                         "e5 *\n[Event \"Next\"]\n\n1. d4 *\n"
+                         stringByReplacingOccurrencesOfString:@"\n" withString:lineEnding];
+        NSError *error = nil;
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 2);
+        SFMChessGame *game = file.games.firstObject;
+        XCTAssertFalse(game.hasUnreadMoveText);
+        XCTAssertEqualObjects(game.currentNode.next.comment, @" literal { ( and [Event]");
+        [game goToEnd];
+        XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 ");
+        XCTAssertEqualObjects([(SFMChessGame *)file.games.lastObject tags][@"Event"], @"Next");
+    }
 }
 
 - (void)testParseGamesFromString
@@ -34,6 +202,53 @@
     SFMChessGame *second = games[1];
     XCTAssertEqual([first.tags count], 2, @"Wrong count for game 1");
     XCTAssertEqual([second.tags count], 1, @"Wrong count for game 2");
+}
+
+- (void)testCommentDelimitersAndTrailingTextSurviveReopening
+{
+    NSArray<NSDictionary *> *cases = @[
+        @{@"moves": @"1. e4 ; keep *", @"comment": @" keep *", @"uci": @"position startpos moves e2e4 "},
+        @{@"moves": @"1. e4 ; keep  \n", @"comment": @" keep  ", @"uci": @"position startpos moves e2e4 "},
+        @{@"moves": @"1. e4 ; text } more\ne5 *", @"comment": @" text } more", @"uci": @"position startpos moves e2e4 e7e5 "},
+        @{@"moves": @"1. e4 {first\nsecond} ; third }\ne5 *", @"comment": @"first\nsecond\n third }", @"uci": @"position startpos moves e2e4 e7e5 "},
+    ];
+    for (NSDictionary *testCase in cases) {
+        NSString *pgn = testCase[@"moves"];
+        for (NSUInteger pass = 0; pass < 2; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file, @"%@ pass %lu", testCase, (unsigned long)pass);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 1);
+            SFMChessGame *game = file.games.firstObject;
+            XCTAssertFalse(game.hasUnreadMoveText);
+            XCTAssertEqualObjects(game.currentNode.next.comment, testCase[@"comment"]);
+            [game goToEnd];
+            XCTAssertEqualObjects(game.uciString, testCase[@"uci"]);
+            pgn = game.pgnString;
+        }
+    }
+}
+
+- (void)testPreambleDoesNotCreateAnExtraGame
+{
+    for (NSString *preamble in @[@"% generated by exporter\n", @"{file preamble}\n"]) {
+        NSError *error = nil;
+        NSString *pgn = [preamble stringByAppendingString:@"[Event \"A\"]\n\n1. e4 *\n"];
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 1);
+        SFMChessGame *game = file.games.firstObject;
+        XCTAssertEqualObjects(game.tags[@"Event"], @"A");
+        XCTAssertFalse(game.hasUnreadMoveText);
+        if ([preamble hasPrefix:@"{"]) {
+            XCTAssertEqualObjects(game.currentNode.comment, @"file preamble");
+            XCTAssertTrue([game.pgnString containsString:@"{file preamble}"]);
+        }
+        [game goToEnd];
+        XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 ");
+    }
 }
 
 - (void)testParseMoveTextPlainMoves

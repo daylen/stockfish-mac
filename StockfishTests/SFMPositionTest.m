@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "SFMPosition.h"
 #import "SFMMove.h"
+#import "SFMNode.h"
 
 #include "Constants.h"
 
@@ -17,6 +18,22 @@
 @end
 
 @implementation SFMPositionTest
+
+- (void)testMalformedSanTokensStopBeforeChangingThePosition
+{
+    for (NSString *token in @[@"hello", @"e4garbage", @"Nf3junk", @"Q", @"O-O-O-O"]) {
+        SFMPosition *position = [[SFMPosition alloc] init];
+        NSString *startingFen = position.fen;
+        SFMNode *root = [[SFMNode alloc] init];
+        NSError *error = nil;
+        XCTAssertNil([position nodeForSan:token parentNode:root error:&error], @"%@", token);
+        XCTAssertEqualObjects(error.domain, POSITION_ERROR_DOMAIN, @"%@", token);
+        XCTAssertEqual(error.code, ILLEGAL_MOVE_CODE, @"%@", token);
+        XCTAssertEqualObjects(error.userInfo[REJECTED_MOVE_KEY], token);
+        XCTAssertNil(root.next);
+        XCTAssertEqualObjects(position.fen, startingFen);
+    }
+}
 
 - (void)setUp {
     [super setUp];
