@@ -51,6 +51,8 @@
  */
 @property NSString* comment;
 
+@property (copy) NSString *commentBeforeMove;
+
 /*!
  Pointer to the main variation
  */
