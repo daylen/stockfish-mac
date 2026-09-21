@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "SFMChessGame.h"
+#import "SFMParser.h"
 #import "Constants.h"
 
 @interface SFMChessGameTest : XCTestCase
@@ -79,6 +80,127 @@
     [game goToEnd];
     NSString *uci = [game uciString];
     XCTAssertEqualObjects(uci, @"position startpos moves e2e4 e7e5 ");
+}
+
+- (void)testConsecutiveCommentsSurviveExportAndReopening
+{
+    NSArray<NSDictionary *> *cases = @[
+        @{@"moves": @"1. e4 {[%clk 01:30:15]} {[%emt 00:00:44]} (1. d4 {first} {second} d5) e5 *",
+          @"main": @"[%clk 01:30:15] [%emt 00:00:44]", @"variation": @"first second"},
+        @{@"moves": @"1. e4 {first} {second} (1. d4 {[%clk 01:30:15]} {[%emt 00:00:44]} d5) e5 *",
+          @"main": @"first second", @"variation": @"[%clk 01:30:15] [%emt 00:00:44]"},
+        @{@"moves": @"1. e4 {} {second} {} (1. d4 {first} {} {third} d5) e5 *",
+          @"main": @" second ", @"variation": @"first  third"},
+    ];
+    for (NSDictionary *testCase in cases) {
+        SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"}
+                                                   moveText:testCase[@"moves"]];
+        NSError *error = nil;
+        XCTAssertTrue([game parseMoveText:&error], @"%@", testCase[@"moves"]);
+        XCTAssertNil(error);
+        XCTAssertFalse(game.hasUnreadMoveText);
+        NSString *exported = game.pgnString;
+        NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:exported error:&error];
+        XCTAssertNil(error);
+        XCTAssertEqual(reopened.count, 1u);
+        if (reopened.count != 1) {
+            continue;
+        }
+        for (SFMChessGame *candidate in @[game, reopened.firstObject]) {
+            XCTAssertFalse(candidate.hasUnreadMoveText);
+            XCTAssertNil(candidate.rejectedMove);
+            [candidate goToBeginning];
+            [candidate goForwardOneMove];
+            XCTAssertEqualObjects(candidate.currentNode.comment, testCase[@"main"]);
+            XCTAssertEqual(candidate.currentNode.variations.count, 1u);
+            SFMNode *variation = candidate.currentNode.variations.firstObject;
+            XCTAssertEqualObjects(variation.comment, testCase[@"variation"]);
+            XCTAssertNotNil(variation.next.move);
+            [candidate goToEnd];
+            XCTAssertEqualObjects(candidate.uciString, @"position startpos moves e2e4 e7e5 ");
+            XCTAssertEqualObjects(candidate.pgnString, exported);
+        }
+    }
+}
+
+- (void)testSemicolonCommentExportPreservesEveryLineBoundary
+{
+    NSArray<NSString *> *lineSeparators = @[@"\n", @"\r", @"\r\n",
+        [NSString stringWithFormat:@"%C", (unichar)0x0085], @"\u2028", @"\u2029"];
+    for (NSString *separator in lineSeparators) {
+        for (NSString *commentText in @[@"e5", @"notSAN"]) {
+            NSString *moveText = [NSString stringWithFormat:@"1. e4 {%@%@%@%@tail} ;closing }\n;\ne5 *",
+                                  separator, commentText, separator, separator];
+            SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"} moveText:moveText];
+            NSError *error = nil;
+            XCTAssertTrue([game parseMoveText:&error]);
+            XCTAssertNil(error);
+            XCTAssertFalse(game.hasUnreadMoveText);
+            [game goToEnd];
+            NSString *expectedMoves = @"position startpos moves e2e4 e7e5 ";
+            XCTAssertEqualObjects(game.uciString, expectedMoves);
+
+            NSString *exported = game.pgnString;
+            NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:exported error:&error];
+            XCTAssertNil(error);
+            XCTAssertEqual(reopened.count, 1u);
+            SFMChessGame *roundTrip = reopened.firstObject;
+            XCTAssertFalse(roundTrip.hasUnreadMoveText);
+            XCTAssertNil(roundTrip.rejectedMove);
+            [roundTrip goToEnd];
+            XCTAssertEqualObjects(roundTrip.uciString, expectedMoves);
+            [roundTrip goToBeginning];
+            [roundTrip goForwardOneMove];
+            NSString *expectedComment = [NSString stringWithFormat:@"\n%@\n\ntail\nclosing }\n", commentText];
+            XCTAssertEqualObjects(roundTrip.currentNode.comment, expectedComment);
+            XCTAssertEqualObjects(roundTrip.pgnString, exported);
+        }
+    }
+}
+
+- (void)testConsecutiveCommentsSurviveEditingRecoveredGameAndUndoRedo
+{
+    NSString *moveText = @"1. e4 {[%clk 01:30:15]} {[%emt 00:00:44]} e5 2. Bh6 Nc6 *";
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"} moveText:moveText];
+    NSError *error = nil;
+    XCTAssertTrue([game parseMoveText:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.rejectedMove, @"Bh6");
+    NSString *originalPGN = game.pgnString;
+    XCTAssertTrue([originalPGN containsString:moveText]);
+    [game goToEnd];
+
+    [game.undoManager beginUndoGrouping];
+    XCTAssertTrue([game doMove:[[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3] error:&error]);
+    [game.undoManager endUndoGrouping];
+    XCTAssertNil(error);
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertNil(game.rejectedMove);
+    NSString *editedPGN = game.pgnString;
+    XCTAssertTrue([editedPGN containsString:@"{[%clk 01:30:15] [%emt 00:00:44]}"]);
+    XCTAssertFalse([editedPGN containsString:@"Bh6"]);
+    XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 g1f3 ");
+
+    NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:editedPGN error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(reopened.count, 1u);
+    XCTAssertFalse(reopened.firstObject.hasUnreadMoveText);
+    [reopened.firstObject goToEnd];
+    XCTAssertEqualObjects(reopened.firstObject.uciString, game.uciString);
+    XCTAssertEqualObjects(reopened.firstObject.pgnString, editedPGN);
+
+    [game.undoManager undo];
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.rejectedMove, @"Bh6");
+    XCTAssertEqualObjects(game.pgnString, originalPGN);
+    XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 ");
+
+    [game.undoManager redo];
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertNil(game.rejectedMove);
+    XCTAssertEqualObjects(game.pgnString, editedPGN);
+    XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 g1f3 ");
 }
 
 

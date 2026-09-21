@@ -29,7 +29,7 @@ using namespace Chess;
 @end
 
 NSString* const moveRegex =
-@"("
+@"^("
 "[BRQNK][a-h][1-8]|" // Piece moves (Ba8)
 "[BRQNK]x[a-h][1-8]|" // Captures (Qxe6)
 "[BRQN][a-h][a-h][1-8]|" // Ambiguous column moves (Rae1)
@@ -41,10 +41,10 @@ NSString* const moveRegex =
 "[a-h][18]=[BRQN]|" // Promotions (c8=Q)
 "[a-h]x[a-h][18]=[BRQN]|" // Capture and promotion (bxa8=Q)
 "O-O-O|" // Long castle
-"O-O|" // Short castle
+"O-O" // Short castle
 ")"
 "[\\+#]?" // Check / mate
-"([!?]{0,2})" // Move annotation (!?, ??, ?)
+"([!?]{0,2})$" // Move annotation (!?, ??, ?)
 ;
 
 @implementation SFMPosition
@@ -168,18 +168,25 @@ NSString* const moveRegex =
 - (SFMNode *)nodeForSan:(NSString *)san parentNode:(SFMNode *)parent error:(NSError * __autoreleasing *)error
 {
     SFMNode *currentNode = parent;
-    // Strip the period, space, and new line characters
     NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
     [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+    [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@".$*"]];
     NSArray *tokens = [san componentsSeparatedByCharactersInSet:cSet];
+    static NSRegularExpression *regex;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        regex = [NSRegularExpression regularExpressionWithPattern:moveRegex options:0 error:nil];
+    });
     for(NSString *tok in tokens){
         if([tok length] > 0 && [SFMParser isLetter:[tok characterAtIndex:0]]){
-            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:moveRegex options:0 error:nil];
             NSTextCheckingResult *match = [regex firstMatchInString:tok options:0 range:NSMakeRange(0, tok.length)];
-            NSString *moveString = [tok substringWithRange:[match rangeAtIndex:1]];
-            NSString *moveAnnotation = [tok substringWithRange:[match rangeAtIndex:2]];
-            Move m = move_from_san(*self.position, [moveString UTF8String]);
+            Move m = MOVE_NONE;
+            NSString *moveAnnotation = nil;
+            if (match != nil) {
+                NSString *moveString = [tok substringWithRange:[match rangeAtIndex:1]];
+                moveAnnotation = [tok substringWithRange:[match rangeAtIndex:2]];
+                m = move_from_san(*self.position, [moveString UTF8String]);
+            }
             if (m == MOVE_NONE) {
                 // Error
                 if (error != NULL) *error = [NSError errorWithDomain:POSITION_ERROR_DOMAIN
@@ -294,6 +301,22 @@ NSString* const moveRegex =
     [self setMoveAttributes:attributedString nodes:nodes];
     if(node.comment != nil){
         NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", node.comment];
+        if ([node.comment containsString:@"}"]) {
+            NSMutableString *lines = [NSMutableString new];
+            NSUInteger lineStart = 0;
+            while (YES) {
+                NSUInteger lineEnd;
+                NSUInteger contentsEnd;
+                [node.comment getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineStart, 0)];
+                NSString *line = [node.comment substringWithRange:NSMakeRange(lineStart, contentsEnd - lineStart)];
+                [lines appendFormat:@";%@\n", line];
+                if (contentsEnd == lineEnd) {
+                    break;
+                }
+                lineStart = lineEnd;
+            }
+            pgnComment = lines;
+        }
         [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
     }
     

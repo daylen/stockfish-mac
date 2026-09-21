@@ -456,6 +456,7 @@ Move MovePicker::pick_move_from_list() {
 
 void MovePicker::init_phase_table() {
   int i = 0;
+  PhaseTable[i++] = PH_STOP;
 
   // Main search
   MainSearchPhaseIndex = i - 1;
