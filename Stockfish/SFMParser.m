@@ -10,6 +10,8 @@
 #import "Constants.h"
 #import "SFMChessGame.h"
 
+static NSString *const SFMTagWhitespace = @" \t";
+
 static NSRange SFMCommentRangeAtIndex(NSString *text, NSUInteger index)
 {
     unichar character = [text characterAtIndex:index];
@@ -49,6 +51,70 @@ static BOOL SFMContainsMoveText(NSString *text)
     return NO;
 }
 
+static NSMutableDictionary *SFMTagsInLine(NSString *line, NSRegularExpression *tagPrefixPattern)
+{
+    NSMutableDictionary *tags = [NSMutableDictionary new];
+    NSCharacterSet *horizontalWhitespace = [NSCharacterSet characterSetWithCharactersInString:SFMTagWhitespace];
+    NSUInteger cursor = line.length;
+    while (cursor > 0) {
+        while (cursor > 0 && [horizontalWhitespace characterIsMember:[line characterAtIndex:cursor - 1]]) {
+            cursor--;
+        }
+        if (cursor == 0) {
+            break;
+        }
+        if ([line characterAtIndex:--cursor] != ']') {
+            return nil;
+        }
+        while (cursor > 0 && [horizontalWhitespace characterIsMember:[line characterAtIndex:cursor - 1]]) {
+            cursor--;
+        }
+        if (cursor == 0 || [line characterAtIndex:--cursor] != '"') {
+            return nil;
+        }
+        NSUInteger valueEnd = cursor;
+        BOOL foundOpeningQuote = NO;
+        while (cursor > 0) {
+            if ([line characterAtIndex:--cursor] != '"') {
+                continue;
+            }
+            NSUInteger quoteIndex = cursor;
+            BOOL escapedQuote = NO;
+            while (cursor > 0 && [line characterAtIndex:cursor - 1] == '\\') {
+                cursor--;
+                escapedQuote = !escapedQuote;
+            }
+            if (!escapedQuote) {
+                cursor = quoteIndex;
+                foundOpeningQuote = YES;
+                break;
+            }
+        }
+        if (!foundOpeningQuote) {
+            return nil;
+        }
+        NSUInteger valueStart = cursor + 1;
+        while (cursor > 0 && [line characterAtIndex:cursor - 1] != '[') {
+            cursor--;
+        }
+        if (cursor == 0) {
+            return nil;
+        }
+        NSUInteger pairStart = cursor - 1;
+        NSRange prefixRange = NSMakeRange(pairStart, valueStart - pairStart);
+        NSTextCheckingResult *prefix = [tagPrefixPattern firstMatchInString:line options:NSMatchingAnchored range:prefixRange];
+        if (prefix == nil || NSMaxRange(prefix.range) != valueStart) {
+            return nil;
+        }
+        NSString *tagName = [line substringWithRange:[prefix rangeAtIndex:1]];
+        if (tags[tagName] == nil) {
+            tags[tagName] = [line substringWithRange:NSMakeRange(valueStart, valueEnd - valueStart)];
+        }
+        cursor = pairStart;
+    }
+    return tags;
+}
+
 @implementation SFMParser
 
 + (NSMutableArray * _Nullable)parseGamesFromString:(NSString * _Nonnull)str error:(NSError * _Nullable __autoreleasing * _Nullable)error
@@ -59,9 +125,9 @@ static BOOL SFMContainsMoveText(NSString *text)
     NSMutableString *moves;
     BOOL readingTags = NO;
     
-    NSRegularExpression *tagPattern = [NSRegularExpression regularExpressionWithPattern:
-        @"^[ \t]*\\[[ \t]*([A-Za-z0-9][A-Za-z0-9_]*)[ \t]*\"((?:\\\\.|[^\"\\\\\\r\\n])*\\\\?)\"[ \t]*\\][ \t]*$"
-        options:0 error:NULL];
+    NSString *tagPrefix = [NSString stringWithFormat:@"\\[[%@]*([A-Za-z0-9][A-Za-z0-9_]*)[%@]*\"",
+                           SFMTagWhitespace, SFMTagWhitespace];
+    NSRegularExpression *tagPrefixPattern = [NSRegularExpression regularExpressionWithPattern:tagPrefix options:0 error:NULL];
     NSUInteger commentEnd = 0;
     NSUInteger offset = 0;
     while (offset < str.length) {
@@ -81,8 +147,7 @@ static BOOL SFMContainsMoveText(NSString *text)
         }
         BOOL insideComment = lineStart < commentEnd;
         BOOL looksLikeTag = !insideComment && [trimmedLine hasPrefix:@"["];
-        NSTextCheckingResult *tag = looksLikeTag
-            ? [tagPattern firstMatchInString:line options:0 range:NSMakeRange(0, line.length)] : nil;
+        NSMutableDictionary *lineTags = looksLikeTag ? SFMTagsInLine(line, tagPrefixPattern) : nil;
         if (looksLikeTag && !readingTags) {
             readingTags = YES;
             if (moves != nil && (tags != nil || SFMContainsMoveText(moves))) {
@@ -94,9 +159,8 @@ static BOOL SFMContainsMoveText(NSString *text)
                 moves = [NSMutableString new];
             }
         }
-        if (tag != nil) {
-            NSString *tagName = [line substringWithRange:[tag rangeAtIndex:1]];
-            tags[tagName] = [line substringWithRange:[tag rangeAtIndex:2]];
+        if (lineTags != nil) {
+            [tags addEntriesFromDictionary:lineTags];
         } else {
             if (!looksLikeTag) {
                 readingTags = NO;

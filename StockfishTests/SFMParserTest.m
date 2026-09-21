@@ -18,6 +18,76 @@
 
 @implementation SFMParserTest
 
+- (void)testAdjacentTagPairsPreserveEveryFieldAndGameOnReopening
+{
+    NSDictionary *expectedTags = @{
+        @"Event": @"Club [Site \\\"Quoted\\\"]",
+        @"Site": @"C:\\Games\\club.pgn",
+        @"Round": @"1"
+    };
+    const NSUInteger roundTripCount = 2;
+    for (NSString *separator in @[@"", @" ", @"\t"]) {
+        NSString *headers = [[@[
+            [NSString stringWithFormat:@"[Event \"%@\"]", expectedTags[@"Event"]],
+            [NSString stringWithFormat:@"[Site \"%@\"]", expectedTags[@"Site"]],
+            [NSString stringWithFormat:@"[Round \"%@\"]", expectedTags[@"Round"]]
+        ] componentsJoinedByString:separator] stringByAppendingString:@" \t"];
+        NSString *pgn = [NSString stringWithFormat:@"%@\n\n1. e4 {kept} e5 *\n\n"
+                         "[Event \"Second\"][Site \"Home\"]\n\n1. d4 *", headers];
+        NSData *firstSave = nil;
+        for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 2u);
+            if (file.games.count != 2) {
+                break;
+            }
+            SFMChessGame *first = file.games.firstObject;
+            XCTAssertEqualObjects(first.tags, expectedTags);
+            XCTAssertFalse(first.hasUnreadMoveText);
+            XCTAssertEqualObjects(first.currentNode.next.comment, @"kept");
+            [first goToEnd];
+            XCTAssertEqualObjects(first.uciString, @"position startpos moves e2e4 e7e5 ");
+            SFMChessGame *second = file.games.lastObject;
+            XCTAssertEqualObjects(second.tags, (@{@"Event": @"Second", @"Site": @"Home"}));
+            XCTAssertFalse(second.hasUnreadMoveText);
+            [second goToEnd];
+            XCTAssertEqualObjects(second.uciString, @"position startpos moves d2d4 ");
+            if (pass == 0) {
+                firstSave = file.data;
+            } else {
+                XCTAssertEqualObjects(file.data, firstSave);
+            }
+            pgn = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+        }
+    }
+}
+
+- (void)testTerminalBackslashDoesNotConsumeAnAdjacentTag
+{
+    for (NSString *site in @[@"]", @"][Next"]) {
+        NSString *pgn = [NSString stringWithFormat:@"[Event \"C:\\\"][Site \"%@\"]\n\n1. e4 *", site];
+        NSError *error = nil;
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+        XCTAssertNotNil(file);
+        XCTAssertNil(error);
+        XCTAssertEqual(file.games.count, 1u);
+        SFMChessGame *game = file.games.firstObject;
+        XCTAssertEqualObjects(game.tags[@"Event"], @"C:\\");
+        XCTAssertEqualObjects(game.tags[@"Site"], site);
+        XCTAssertFalse(game.hasUnreadMoveText);
+        [game goToEnd];
+        XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 ");
+        SFMPGNFile *reopened = [[SFMPGNFile alloc] initWithString:game.pgnString error:&error];
+        XCTAssertNotNil(reopened);
+        XCTAssertNil(error);
+        XCTAssertEqualObjects([(SFMChessGame *)reopened.games.firstObject tags], game.tags);
+        XCTAssertEqualObjects(reopened.data, file.data);
+    }
+}
+
 - (void)testLiteralBackslashesInTagValuesSurviveSavingAndReopening
 {
     const NSUInteger roundTripCount = 2;
@@ -227,7 +297,9 @@
 
 - (void)testMalformedHeadersAreRejectedAndPreservedWithTheirNeighbour
 {
-    for (NSString *header in @[@"[Event]", @"[]", @"[Event \"unterminated]", @"[Event \"A\" extra]"]) {
+    for (NSString *header in @[@"[Event]", @"[]", @"[Event \"unterminated]", @"[Event \"A\" extra]",
+                               @"[Event \"A\"][Site]", @"[Event \"A\"] trailing",
+                               @"[Event \"A\"] junk [Site \"Home\"]"]) {
         NSString *broken = [NSString stringWithFormat:@"%@\n\n1. e4 *\n\n", header];
         NSError *error = nil;
         SFMPGNFile *unreadable = nil;

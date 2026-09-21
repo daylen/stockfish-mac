@@ -168,12 +168,15 @@ NSString* const moveRegex =
 - (SFMNode *)nodeForSan:(NSString *)san parentNode:(SFMNode *)parent error:(NSError * __autoreleasing *)error
 {
     SFMNode *currentNode = parent;
-    // Strip the period, space, and new line characters
     NSMutableCharacterSet *cSet = [[NSMutableCharacterSet alloc] init];
     [cSet formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     [cSet formUnionWithCharacterSet:[NSCharacterSet characterSetWithCharactersInString:@".$*"]];
     NSArray *tokens = [san componentsSeparatedByCharactersInSet:cSet];
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:moveRegex options:0 error:nil];
+    static NSRegularExpression *regex;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        regex = [NSRegularExpression regularExpressionWithPattern:moveRegex options:0 error:nil];
+    });
     for(NSString *tok in tokens){
         if([tok length] > 0 && [SFMParser isLetter:[tok characterAtIndex:0]]){
             NSTextCheckingResult *match = [regex firstMatchInString:tok options:0 range:NSMakeRange(0, tok.length)];
