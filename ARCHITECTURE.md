@@ -15,7 +15,12 @@ including Unicode separators. Apparent headers inside comments remain comment te
 Percent-marker boundary checks inspect only the preceding character through
 Foundation; rescanning the whole line for every marker would make long lines
 quadratic to parse.
-A valid header must match a complete tag pair before its fields are read.
+A header line can contain adjacent tag pairs, with or without horizontal
+whitespace between them. The entire line must consist of complete tag pairs
+before any of its fields are read; otherwise the whole line remains unread text.
+Pairs are read from the end of the line so a literal trailing backslash in one
+value cannot consume an adjacent pair's opening quote. Escaped quotes within a
+value are identified by the parity of their preceding backslashes.
 Tag values retain their original escape spelling, including literal backslashes
 from nonconforming exporters, without relaxing the surrounding header structure.
 After movetext begins, a header-like line outside comments starts the next game
@@ -52,6 +57,8 @@ error recoverable.
 SAN tokens must match the supported move spelling in full before they reach
 the board-aware SAN interpreter. Unrecognized tokens use the same rejected-move
 recovery path without sending an empty string into the chess library.
+The immutable SAN matcher is compiled once and shared across positions, so
+comment-heavy imports do not repeatedly compile it for whitespace fragments.
 
 Recovery requires `POSITION_ERROR_DOMAIN`, `ILLEGAL_MOVE_CODE`, and the
 rejected SAN token in `REJECTED_MOVE_KEY`. Errors without a token do not identify
