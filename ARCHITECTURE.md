@@ -12,14 +12,21 @@ Game boundaries and movetext tokenization share comment-boundary recognition.
 Brace comments can span lines; semicolon comments and percent escape lines end
 at the line boundary. Apparent headers inside comments remain comment text.
 A valid header must match a complete tag pair before its fields are read.
-Malformed headers remain in unread move text, and an unterminated comment or
-variation reports a structural error rather than reaching substring operations.
+After movetext begins, a header-like line outside comments starts the next game
+even if it is malformed. Later valid tag fields belong to that same game, and
+malformed header lines remain in its unread move text. Their failure cannot
+invalidate the preceding game. Saving writes valid tags separately before the
+preserved text, so original interleaving of valid and malformed headers is not
+represented. An unterminated comment or variation reports a structural error
+rather than reaching substring operations.
 An unclosed brace can consume later apparent headers: the reader preserves that
 remainder instead of guessing where the comment was intended to end.
 
 Tagless move fragments remain valid imports without a final result marker and
 remain separate games when followed by a tagged game. Comment-only preambles
-belong to the following game. Percent escape lines do not create games.
+belong to the following game. Percent escape preambles do not create games.
+Within a tag section, a percent escape line currently ends that section, so a
+later tag starts another game.
 
 An illegal SAN move stops the affected line at its preceding legal move.
 Readable main-line moves and sibling variations continue. The game records the
@@ -56,11 +63,16 @@ move edits.
 
 Fully readable games use the tree serializer. Each node stores one comment body;
 consecutive brace-comment bodies are joined with a space, and semicolon-comment
-bodies begin a new line. Content and its order within the node survive saving,
+bodies begin a new line. The parser builds each node's comment in one mutable
+buffer, including across variations and whitespace that leave the current node
+unchanged. The buffer stops changing when parsing leaves that node; retaining
+intermediate copies of every prefix would make memory use grow quadratically.
+Content and its order within the node survive saving,
 reopening, and the transition from recovered text to an edited tree. Separate
 original comment blocks and their placement relative to variations are not
 represented. A comment containing a closing brace is exported as semicolon
-lines, with line endings normalized to LF, so its content remains valid PGN.
+lines, using the same Foundation line-boundary rules as the parser and
+normalizing those endings to LF, so its content remains valid PGN.
 This preserves comment content without claiming byte-for-byte serialization of
 fully readable games.
 

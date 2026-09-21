@@ -76,19 +76,18 @@ static BOOL SFMContainsMoveText(NSString *text)
         BOOL looksLikeTag = !insideComment && [trimmedLine hasPrefix:@"["];
         NSTextCheckingResult *tag = looksLikeTag
             ? [tagPattern firstMatchInString:line options:0 range:NSMakeRange(0, line.length)] : nil;
-        if (tag != nil) {
-            if (!readingTags) {
-                readingTags = YES;
-                if (moves != nil && (tags != nil || SFMContainsMoveText(moves))) {
-                    [everyGameTheFileHolds addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
-                    moves = nil;
-                }
-                tags = [NSMutableDictionary new];
-                if (moves == nil) {
-                    moves = [NSMutableString new];
-                }
+        if (looksLikeTag && !readingTags) {
+            readingTags = YES;
+            if (moves != nil && (tags != nil || SFMContainsMoveText(moves))) {
+                [everyGameTheFileHolds addObject:[[SFMChessGame alloc] initWithTags:[tags copy] moveText:[moves copy]]];
+                moves = nil;
             }
-            
+            tags = [NSMutableDictionary new];
+            if (moves == nil) {
+                moves = [NSMutableString new];
+            }
+        }
+        if (tag != nil) {
             NSString *tagName = [line substringWithRange:[tag rangeAtIndex:1]];
             tags[tagName] = [line substringWithRange:[tag rangeAtIndex:2]];
         } else {
@@ -163,7 +162,21 @@ static BOOL SFMContainsMoveText(NSString *text)
         return nil;
     }
     SFMNode *currentNode = node;
+    NSMutableString *comment = nil;
     for(NSString *token in tokens){
+        BOOL braceComment = [token hasPrefix:@"{"];
+        if (braceComment || [token hasPrefix:@";"]) {
+            NSUInteger commentEnd = braceComment ? token.length - 1 : token.length;
+            NSString *body = [token substringWithRange:NSMakeRange(1, commentEnd - 1)];
+            if (comment == nil) {
+                comment = [body mutableCopy];
+                currentNode.comment = comment;
+            } else {
+                [comment appendString:braceComment ? @" " : @"\n"];
+                [comment appendString:body];
+            }
+            continue;
+        }
         NSError *tokenError = nil;
         SFMNode *parsedNode = [self parseToken:token fromNode:currentNode position:position rejectedMove:rejectedMove error:&tokenError];
         if (parsedNode == nil) {
@@ -179,6 +192,9 @@ static BOOL SFMContainsMoveText(NSString *text)
                 *rejectedMove = illegalMove;
             }
             return node;
+        }
+        if (parsedNode != currentNode) {
+            comment = nil;
         }
         currentNode = parsedNode;
     }
@@ -198,14 +214,7 @@ static BOOL SFMContainsMoveText(NSString *text)
 + (SFMNode * _Nullable)parseToken:(NSString * _Nonnull)token fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     SFMNode *currentNode = node;
-    BOOL braceComment = [token hasPrefix:@"{"];
-    if (braceComment || [token hasPrefix:@";"]) {
-        NSUInteger commentEnd = braceComment ? token.length - 1 : token.length;
-        NSString *comment = [token substringWithRange:NSMakeRange(1, commentEnd - 1)];
-        NSString *separator = braceComment ? @" " : @"\n";
-        node.comment = node.comment == nil ? comment : [node.comment stringByAppendingFormat:@"%@%@", separator, comment];
-    }
-    else if([token characterAtIndex:0] == '('){ //variation
+    if([token characterAtIndex:0] == '('){ //variation
         [position undoMoves:1];
         SFMNode *dummy = [[SFMNode alloc] initWithPly:currentNode.ply - 1];
         NSString *variationRejectedMove = nil;

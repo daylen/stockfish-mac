@@ -133,6 +133,58 @@
     }
 }
 
+- (void)testMalformedLaterHeadersPreserveReadableNeighboursAndFollowingTags
+{
+    NSString *firstGame = @"[Event \"First\"]\n\n1. d4 *\n\n";
+    NSString *lastGame = @"[Event \"Last\"]\n\n1. c4 *\n";
+    NSUInteger roundTripCount = 2;
+    for (NSString *header in @[@"[Event]", @"[]", @"[Event \"unterminated]", @"[Event \"A\" extra]"]) {
+        for (NSString *followingTag in @[@"", @"[Site \"Preserved\"]\n"]) {
+            for (NSString *followingGame in @[@"", lastGame]) {
+                NSString *pgn = [NSString stringWithFormat:@"%@%@\n%@\n1. e4 *\n\n%@",
+                                 firstGame, header, followingTag, followingGame];
+                NSUInteger expectedGameCount = followingGame.length == 0 ? 2 : 3;
+                for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+                    NSError *error = nil;
+                    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+                    XCTAssertNotNil(file, @"%@ pass %lu", header, (unsigned long)pass);
+                    XCTAssertNil(error);
+                    XCTAssertEqual(file.games.count, expectedGameCount);
+                    if (file.games.count != expectedGameCount) {
+                        break;
+                    }
+                    SFMChessGame *first = file.games.firstObject;
+                    XCTAssertFalse(first.hasUnreadMoveText);
+                    XCTAssertEqualObjects(first.tags[@"Event"], @"First");
+                    [first goToEnd];
+                    XCTAssertEqualObjects(first.uciString, @"position startpos moves d2d4 ");
+
+                    SFMChessGame *broken = file.games[1];
+                    XCTAssertTrue(broken.hasUnreadMoveText);
+                    XCTAssertNil(broken.currentNode);
+                    XCTAssertTrue([broken.pgnString containsString:header]);
+                    XCTAssertTrue([broken.pgnString containsString:@"1. e4 *"]);
+                    if (followingTag.length > 0) {
+                        XCTAssertEqualObjects(broken.tags[@"Site"], @"Preserved");
+                    }
+                    if (followingGame.length > 0) {
+                        SFMChessGame *last = file.games.lastObject;
+                        XCTAssertFalse(last.hasUnreadMoveText);
+                        XCTAssertEqualObjects(last.tags[@"Event"], @"Last");
+                        [last goToEnd];
+                        XCTAssertEqualObjects(last.uciString, @"position startpos moves c2c4 ");
+                    }
+                    NSString *saved = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+                    if (pass > 0) {
+                        XCTAssertEqualObjects(saved, pgn);
+                    }
+                    pgn = saved;
+                }
+            }
+        }
+    }
+}
+
 - (void)testTaglessFragmentSurvivesBeforeTaggedGame
 {
     NSString *pgn = @"1.e4 c6 2.d4 d5 3.e5 Bf5 4.h4\n\n[Event \"Next\"]\n\n1. d4 *\n";

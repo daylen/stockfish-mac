@@ -123,6 +123,41 @@
     }
 }
 
+- (void)testSemicolonCommentExportPreservesEveryLineBoundary
+{
+    NSArray<NSString *> *lineSeparators = @[@"\n", @"\r", @"\r\n",
+        [NSString stringWithFormat:@"%C", (unichar)0x0085], @"\u2028", @"\u2029"];
+    for (NSString *separator in lineSeparators) {
+        for (NSString *commentText in @[@"e5", @"notSAN"]) {
+            NSString *moveText = [NSString stringWithFormat:@"1. e4 {%@%@%@%@tail} ;closing }\n;\ne5 *",
+                                  separator, commentText, separator, separator];
+            SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"} moveText:moveText];
+            NSError *error = nil;
+            XCTAssertTrue([game parseMoveText:&error]);
+            XCTAssertNil(error);
+            XCTAssertFalse(game.hasUnreadMoveText);
+            [game goToEnd];
+            NSString *expectedMoves = @"position startpos moves e2e4 e7e5 ";
+            XCTAssertEqualObjects(game.uciString, expectedMoves);
+
+            NSString *exported = game.pgnString;
+            NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:exported error:&error];
+            XCTAssertNil(error);
+            XCTAssertEqual(reopened.count, 1u);
+            SFMChessGame *roundTrip = reopened.firstObject;
+            XCTAssertFalse(roundTrip.hasUnreadMoveText);
+            XCTAssertNil(roundTrip.rejectedMove);
+            [roundTrip goToEnd];
+            XCTAssertEqualObjects(roundTrip.uciString, expectedMoves);
+            [roundTrip goToBeginning];
+            [roundTrip goForwardOneMove];
+            NSString *expectedComment = [NSString stringWithFormat:@"\n%@\n\ntail\nclosing }\n", commentText];
+            XCTAssertEqualObjects(roundTrip.currentNode.comment, expectedComment);
+            XCTAssertEqualObjects(roundTrip.pgnString, exported);
+        }
+    }
+}
+
 - (void)testConsecutiveCommentsSurviveEditingRecoveredGameAndUndoRedo
 {
     NSString *moveText = @"1. e4 {[%clk 01:30:15]} {[%emt 00:00:44]} e5 2. Bh6 Nc6 *";

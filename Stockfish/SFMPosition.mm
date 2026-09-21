@@ -299,9 +299,20 @@ NSString* const moveRegex =
     if(node.comment != nil){
         NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", node.comment];
         if ([node.comment containsString:@"}"]) {
-            NSString *lines = [[node.comment stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"]
-                               stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
-            pgnComment = [NSString stringWithFormat:@";%@\n", [lines stringByReplacingOccurrencesOfString:@"\n" withString:@"\n;"]];
+            NSMutableString *lines = [NSMutableString new];
+            NSUInteger lineStart = 0;
+            while (YES) {
+                NSUInteger lineEnd;
+                NSUInteger contentsEnd;
+                [node.comment getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineStart, 0)];
+                NSString *line = [node.comment substringWithRange:NSMakeRange(lineStart, contentsEnd - lineStart)];
+                [lines appendFormat:@";%@\n", line];
+                if (contentsEnd == lineEnd) {
+                    break;
+                }
+                lineStart = lineEnd;
+            }
+            pgnComment = lines;
         }
         [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
     }
