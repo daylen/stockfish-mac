@@ -109,6 +109,26 @@ model's edit guard.
 its move ancestry. They are analysis snapshots; document saving uses the
 original games in `SFMPGNFile`.
 
+## Engine preferences and search transitions
+
+The preferences window remains editable during analysis and discovers supported
+options through its separate engine probe.
+
+`SFMUCIEngine` owns the requested analysis state and the UCI subprocess.
+`isAnalyzing` stays true during an internal restart, keeping the user's Stop
+control effective. One outstanding search remains counted until `bestmove`
+or engine termination; requesting a stop does not retire it early.
+
+Position, MultiPV, WDL, and preference changes share one transition path.
+Changes during a search send one `stop`, discard subsequent analysis output
+from that search, and wait for `bestmove` before sending options or a new
+position. Pending changes read the latest property values and preferences,
+so rapid changes produce one restart with the latest state. Preferences include
+Threads, Hash, Skill Level, and the existing Syzygy bookmark resolution.
+A user stop during that wait still applies pending preferences but prevents
+restarting. A later user start waits for the old search to finish as well.
+Engine termination retires outstanding analysis and prevents further starts.
+
 ## Native position history and move serialization
 
 `SFMPosition` owns a native `Chess::Position` and the move/undo records needed

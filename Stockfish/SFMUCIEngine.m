@@ -37,9 +37,10 @@ typedef NS_ENUM(NSInteger, SFMCPURating) {
 @property (readwrite, nonatomic) NSString *nnueInfo;
 @property (nonatomic) NSMutableArray /* of SFMUCIOption */ *options;
 
-@property dispatch_group_t analysisGroup;
-@property (nonatomic) NSUInteger outstandingAnalysisGroupEntries;
+@property (nonatomic) NSUInteger outstandingSearches;
 @property (nonatomic) BOOL engineDidTerminate;
+@property (nonatomic) BOOL stopRequested;
+@property (nonatomic) BOOL preferencesNeedApplying;
 @property (nonatomic) NSMutableData *pendingOutput;
 
 @end
@@ -52,39 +53,21 @@ static _Atomic(int) instancesAnalyzing = 0;
 
 - (void)setIsAnalyzing:(BOOL)isAnalyzing {
     @synchronized (self) {
-        if (_isAnalyzing == isAnalyzing) {
-            return;
-        }
-        if (isAnalyzing && ![self enterAnalysisGroup]) {
+        if (_isAnalyzing == isAnalyzing || self.engineDidTerminate) {
             return;
         }
         _isAnalyzing = isAnalyzing;
-    }
-    self.lines = nil;
-
-    if (isAnalyzing) {
-        NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
-        [self setUciOption:@"MultiPV" integerValue:self.multipv];
-        [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
-        [self sendCommandToEngine:[self.gameToAnalyze uciString]];
-        [self.bookmarkUrl startAccessingSecurityScopedResource];
-        [self sendCommandToEngine:@"go infinite"];
-    } else {
-        [self sendCommandToEngine:@"stop"];
-        [self.bookmarkUrl stopAccessingSecurityScopedResource];
+        self.lines = nil;
+        [self synchronizeAnalysis];
     }
 }
 
 - (void)setGameToAnalyze:(SFMChessGame *)gameToAnalyze {
-    if (self.isAnalyzing) {
-        self.isAnalyzing = NO;
-        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            self->_gameToAnalyze = gameToAnalyze;
-            self.isAnalyzing = YES;
-        });
-
-    } else {
+    @synchronized (self) {
         _gameToAnalyze = gameToAnalyze;
+        if (_isAnalyzing) {
+            [self synchronizeAnalysis];
+        }
     }
 }
 
@@ -92,72 +75,91 @@ static _Atomic(int) instancesAnalyzing = 0;
     if (multipv < 1) {
         return;
     }
-    if (self.isAnalyzing) {
-        self.isAnalyzing = NO;
-        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            self->_multipv = multipv;
-            self.isAnalyzing = YES;
-        });
-    } else {
+    @synchronized (self) {
         _multipv = multipv;
+        if (_isAnalyzing) {
+            [self synchronizeAnalysis];
+        }
     }
 }
 
 - (void)setUseNnue:(BOOL)useNnue {
-    if (self.isAnalyzing) {
-        self.isAnalyzing = NO;
-        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            self->_useNnue = useNnue;
-            self.isAnalyzing = YES;
-        });
-    } else {
+    @synchronized (self) {
         _useNnue = useNnue;
+        if (_isAnalyzing) {
+            [self synchronizeAnalysis];
+        }
     }
 }
 
 - (void)setShowWdl:(BOOL)showWdl {
-    if (self.isAnalyzing) {
-        self.isAnalyzing = NO;
-        dispatch_group_notify(_analysisGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            self->_showWdl = showWdl;
-            self.isAnalyzing = YES;
-        });
-    } else {
+    @synchronized (self) {
         _showWdl = showWdl;
+        if (_isAnalyzing) {
+            [self synchronizeAnalysis];
+        }
     }
 }
-#pragma mark - Analysis group
 
-- (BOOL)enterAnalysisGroup
+- (void)synchronizeAnalysis
+{
+    if (self.engineDidTerminate) {
+        return;
+    }
+    if (self.outstandingSearches > 0) {
+        if (!self.stopRequested) {
+            self.stopRequested = YES;
+            self.lines = nil;
+            [self sendCommandToEngine:@"stop"];
+        }
+        return;
+    }
+    if (self.preferencesNeedApplying) {
+        self.preferencesNeedApplying = NO;
+        [self writePreferencesToEngine];
+    }
+    if (!_isAnalyzing || ![self beginSearch]) {
+        return;
+    }
+    NSAssert(self.gameToAnalyze != nil, @"Trying to analyze but no game set");
+    self.lines = nil;
+    [self setUciOption:@"MultiPV" integerValue:self.multipv];
+    [self setUciOption:@"UCI_ShowWDL" stringValue:self.showWdl ? @"true" : @"false"];
+    [self sendCommandToEngine:[self.gameToAnalyze uciString]];
+    [self.bookmarkUrl startAccessingSecurityScopedResource];
+    [self sendCommandToEngine:@"go infinite"];
+}
+
+#pragma mark - Search accounting
+
+- (BOOL)beginSearch
 {
     @synchronized (self) {
         if (self.engineDidTerminate) {
             return NO;
         }
-        self.outstandingAnalysisGroupEntries += 1;
-        dispatch_group_enter(_analysisGroup);
+        self.outstandingSearches += 1;
         atomic_fetch_add(&instancesAnalyzing, 1);
         return YES;
     }
 }
 
-- (void)leaveAnalysisGroupOnce
+- (void)finishSearchOnce
 {
     @synchronized (self) {
-        if (self.outstandingAnalysisGroupEntries == 0) {
+        if (self.outstandingSearches == 0) {
             return;
         }
-        self.outstandingAnalysisGroupEntries -= 1;
-        dispatch_group_leave(_analysisGroup);
+        self.outstandingSearches -= 1;
         atomic_fetch_sub(&instancesAnalyzing, 1);
     }
 }
 
-- (void)leaveAllAnalysisGroupEntries
+- (void)finishAllSearches
 {
     @synchronized (self) {
-        while (self.outstandingAnalysisGroupEntries > 0) {
-            [self leaveAnalysisGroupOnce];
+        while (self.outstandingSearches > 0) {
+            [self finishSearchOnce];
         }
     }
 }
@@ -232,7 +234,9 @@ static _Atomic(int) instancesAnalyzing = 0;
             return;
         }
         self.engineDidTerminate = YES;
-        [self leaveAllAnalysisGroupEntries];
+        self.stopRequested = NO;
+        self.preferencesNeedApplying = NO;
+        [self finishAllSearches];
         _isAnalyzing = NO;
     }
 
@@ -249,28 +253,19 @@ static _Atomic(int) instancesAnalyzing = 0;
     });
 }
 
-/*!
- Retires the oldest outstanding "go" now that the engine has answered it with
- "bestmove", and clears isAnalyzing if that answer ended the current search.
-
- A search normally ends because we sent "stop", in which case isAnalyzing is
- already NO. It can also end on its own: in a position with no legal moves
- Stockfish answers "go infinite" with an immediate "bestmove (none)" instead of
- waiting to be stopped. See Search::Worker::start_searching in
- https://github.com/official-stockfish/Stockfish/blob/sf_19/src/search.cpp
-
- The engine answers each "go" in order, so this "bestmove" belongs to the
- current search only when no newer "go" is still outstanding. Stopping one
- search and starting another leaves two outstanding, and the first answer must
- not be mistaken for the end of the second search.
- */
 - (void)noteSearchDidEnd
 {
     BOOL didEndCurrentSearch = NO;
     @synchronized (self) {
-        [self leaveAnalysisGroupOnce];
-        BOOL answersAnOlderSearch = self.outstandingAnalysisGroupEntries > 0;
-        if (_isAnalyzing && !answersAnOlderSearch) {
+        if (self.outstandingSearches == 0) {
+            return;
+        }
+        [self finishSearchOnce];
+        [self.bookmarkUrl stopAccessingSecurityScopedResource];
+        if (self.stopRequested) {
+            self.stopRequested = NO;
+            [self synchronizeAnalysis];
+        } else if (_isAnalyzing) {
             _isAnalyzing = NO;
             didEndCurrentSearch = YES;
         }
@@ -278,8 +273,6 @@ static _Atomic(int) instancesAnalyzing = 0;
     if (!didEndCurrentSearch) {
         return;
     }
-    [self.bookmarkUrl stopAccessingSecurityScopedResource];
-
     dispatch_async(dispatch_get_main_queue(), ^{
         id<SFMUCIEngineDelegate> delegate = self.delegate;
         if ([delegate respondsToSelector:@selector(uciEngineDidStopAnalyzing:)]) {
@@ -307,6 +300,9 @@ static _Atomic(int) instancesAnalyzing = 0;
     BOOL isInfoLine = [messageType isEqualToString:@"info"];
     BOOL isFreeFormInfoString = isInfoLine && [tokens count] > 1 && [tokens[1] isEqualToString:@"string"];
     BOOL isAnalysisInfoLine = isInfoLine && !isFreeFormInfoString;
+    if (isAnalysisInfoLine && (self.stopRequested || !self.isAnalyzing)) {
+        return;
+    }
 
     if (isAnalysisInfoLine && [tokens containsObject:@"currmove"]) {
         // Current move update
@@ -422,7 +418,6 @@ static _Atomic(int) instancesAnalyzing = 0;
         _isAnalyzing = NO;
         _gameToAnalyze = nil;
         _pendingOutput = [[NSMutableData alloc] init];
-        _analysisGroup = dispatch_group_create();
         _options = [[NSMutableArray alloc] init];
         _multipv = 1;
 
@@ -487,10 +482,14 @@ static _Atomic(int) instancesAnalyzing = 0;
 
 - (void)applyPreferencesToEngine:(NSNotification *)notification
 {
-    if (self.isAnalyzing) {
-        NSLog(@"Could not apply preferences because engine is analyzing");
-        return;
-    };
+    @synchronized (self) {
+        self.preferencesNeedApplying = YES;
+        [self synchronizeAnalysis];
+    }
+}
+
+- (void)writePreferencesToEngine
+{
     [self setUciOption:@"Threads" integerValue:[SFMUserDefaults threadsValue]];
     [self setUciOption:@"Hash" integerValue:[SFMUserDefaults hashValue]];
     [self setUciOption:@"Skill Level" integerValue:[SFMUserDefaults skillLevelValue]];
@@ -525,7 +524,7 @@ static _Atomic(int) instancesAnalyzing = 0;
 - (void)dealloc
 {
     self.engineTask.terminationHandler = nil;
-    [self leaveAllAnalysisGroupEntries];
+    [self finishAllSearches];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.engineTask interrupt];
     [self.engineTask terminate]; // Just for good measure

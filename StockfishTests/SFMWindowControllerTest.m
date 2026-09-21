@@ -1,6 +1,9 @@
 #import <Cocoa/Cocoa.h>
 #import <XCTest/XCTest.h>
+#import <objc/runtime.h>
 #import "SFMWindowController.h"
+#import "SFMPreferencesWindowController.h"
+#import "SFMPreferenceCellView.h"
 
 static const NSTimeInterval SFMModalDismissInterval = 0.01;
 static const NSInteger SFMGameListColumn = 0;
@@ -16,10 +19,76 @@ static const NSUInteger SFMGameResultSubviewIndex = 2;
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem;
 @end
 
+@interface SFMPreferencesWindowController (SFMWindowControllerTestAccess)
+@property (readonly) SFMPreferenceCellView *threadsCell;
+@property (readonly) SFMPreferenceCellView *hashCell;
+@property (readonly) SFMPreferenceCellView *skillCell;
+@property (readonly) NSButton *chooseButton;
+@property (readonly) NSButton *recommendedSettingsButton;
+@property (readonly) SFMUCIEngine *optionsProbe;
+@end
+
 @interface SFMWindowControllerTest : XCTestCase
 @end
 
 @implementation SFMWindowControllerTest
+
+- (void)testPreferencesRemainAvailableDuringActiveAnalysis
+{
+    const NSTimeInterval engineResponseTimeout = 10;
+    NSString *fixturePath = [NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];
+    NSString *fixture = @"#!/bin/sh\n"
+        "while IFS= read -r command; do\n"
+        "  case \"$command\" in\n"
+        "    uci) printf 'option name Threads type spin default 1 min 1 max 1024\\noption name Hash type spin default 16 min 1 max 33554432\\noption name Skill Level type spin default 20 min 0 max 20\\nuciok\\n' ;;\n"
+        "    stop) printf 'bestmove e2e4\\n' ;;\n"
+        "  esac\n"
+        "done\n";
+    NSError *error = nil;
+    XCTAssertTrue([fixture writeToFile:fixturePath atomically:YES encoding:NSUTF8StringEncoding error:&error], @"%@", error);
+    XCTAssertTrue([[NSFileManager defaultManager] setAttributes:@{NSFilePosixPermissions: @0700} ofItemAtPath:fixturePath error:&error], @"%@", error);
+    Method enginePathMethod = class_getClassMethod([SFMUCIEngine class], NSSelectorFromString(@"bestEnginePath"));
+    IMP fixturePathImplementation = imp_implementationWithBlock(^NSString *(id engineClass) { return fixturePath; });
+    IMP originalPathImplementation = method_setImplementation(enginePathMethod, fixturePathImplementation);
+    SFMUCIEngine *engine = nil;
+    SFMPreferencesWindowController *controller = nil;
+    @try {
+        engine = [[SFMUCIEngine alloc] initStockfish];
+        engine.gameToAnalyze = [[SFMChessGame alloc] init];
+        engine.isAnalyzing = YES;
+        XCTAssertTrue(engine.isAnalyzing);
+        XCTAssertGreaterThan([SFMUCIEngine instancesAnalyzing], 0);
+
+        controller = [[SFMPreferencesWindowController alloc] initWithWindowNibName:@"Preferences"];
+        [controller showWindow:nil];
+        XCTAssertNotNil(controller.optionsProbe);
+        NSPredicate *optionsLoaded = [NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+            return !controller.chooseButton.hidden && !controller.threadsCell.hidden &&
+                !controller.hashCell.hidden && !controller.skillCell.hidden;
+        }];
+        [self expectationForPredicate:optionsLoaded evaluatedWithObject:controller handler:nil];
+        [self waitForExpectationsWithTimeout:engineResponseTimeout handler:nil];
+        [controller.window displayIfNeeded];
+        XCTAssertNil(controller.window.attachedSheet);
+        for (SFMPreferenceCellView *cell in @[controller.threadsCell, controller.hashCell, controller.skillCell]) {
+            XCTAssertTrue(cell.slider.enabled);
+            XCTAssertTrue(cell.textField.enabled);
+            XCTAssertGreaterThanOrEqual(cell.max, cell.min);
+        }
+        XCTAssertTrue(controller.chooseButton.enabled);
+        XCTAssertTrue(controller.recommendedSettingsButton.enabled);
+        XCTAssertFalse(controller.recommendedSettingsButton.hidden);
+        XCTAssertTrue(engine.isAnalyzing);
+    } @finally {
+        method_setImplementation(enginePathMethod, originalPathImplementation);
+        imp_removeBlock(fixturePathImplementation);
+        engine.isAnalyzing = NO;
+        if (controller.window.attachedSheet != nil) {
+            [controller.window endSheet:controller.window.attachedSheet];
+        }
+        [controller close];
+    }
+}
 
 - (void)testSelectingUnreadableGameSynchronizesViewsAndEngineSnapshotAndRecoversOnNextGame {
     NSError *error = nil;
