@@ -12,6 +12,9 @@ Game boundaries and movetext tokenization share comment-boundary recognition.
 Brace comments can span lines; semicolon comments and percent escape lines end
 at the line boundary. Foundation defines both line starts and line endings,
 including Unicode separators. Apparent headers inside comments remain comment text.
+Percent-marker boundary checks inspect only the preceding character through
+Foundation; rescanning the whole line for every marker would make long lines
+quadratic to parse.
 A valid header must match a complete tag pair before its fields are read.
 Tag values retain their original escape spelling, including literal backslashes
 from nonconforming exporters, without relaxing the surrounding header structure.

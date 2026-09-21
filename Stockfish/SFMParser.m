@@ -18,13 +18,19 @@ static NSRange SFMCommentRangeAtIndex(NSString *text, NSUInteger index)
         NSUInteger end = close.location == NSNotFound ? text.length : NSMaxRange(close);
         return NSMakeRange(index, end - index);
     }
-    if (character == ';' || character == '%') {
-        NSUInteger lineStart;
-        NSUInteger contentsEnd;
-        [text getLineStart:&lineStart end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(index, 0)];
-        if (character == ';' || index == lineStart) {
-            return NSMakeRange(index, contentsEnd - index);
+    if (character == '%' && index > 0) {
+        NSString *precedingCharacter = [text substringWithRange:NSMakeRange(index - 1, 1)];
+        NSUInteger precedingContentsEnd;
+        [precedingCharacter getLineStart:NULL end:NULL contentsEnd:&precedingContentsEnd
+                               forRange:NSMakeRange(0, precedingCharacter.length)];
+        if (precedingContentsEnd != 0) {
+            return NSMakeRange(NSNotFound, 0);
         }
+    }
+    if (character == ';' || character == '%') {
+        NSUInteger contentsEnd;
+        [text getLineStart:NULL end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(index, 0)];
+        return NSMakeRange(index, contentsEnd - index);
     }
     return NSMakeRange(NSNotFound, 0);
 }
