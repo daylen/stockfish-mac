@@ -291,7 +291,7 @@ void Position::print() const {
 /// Position::copy() creates a copy of the input position.
 
 void Position::copy(const Position &pos) {
-  memcpy(this, &pos, sizeof(Position));
+  *this = pos;
 }
 
 
@@ -744,9 +744,7 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
   // captured piece, which is taken care of later:
   this->backup(u);
 
-  // Save the current key to the history[] array, in order to be able to
-  // detect repetition draws:
-  history[gamePly] = key;
+  history.push_back(key);
 
   // Increment the 50 moves rule draw counter.  Resetting it to zero in the
   // case of non-reversible moves is taken care of later.
@@ -933,7 +931,6 @@ void Position::do_move(Move m, UndoInfo &u, Bitboard dcCandidates) {
   // Finish
   key ^= zobSideToMove;
   sideToMove = opposite_color(sideToMove);
-  gamePly++;
 
   mgValue += (sideToMove == WHITE)? TempoValueMidgame : -TempoValueMidgame;
   egValue += (sideToMove == WHITE)? TempoValueEndgame : -TempoValueEndgame;
@@ -1258,7 +1255,7 @@ void Position::undo_move(Move m, const UndoInfo &u) {
   assert(this->is_ok());
   assert(move_is_ok(m));
 
-  gamePly--;
+  history.pop_back();
   sideToMove = opposite_color(sideToMove);
 
   // Restore information from our UndoInfo object (except the captured piece,
@@ -1552,9 +1549,7 @@ void Position::do_null_move(UndoInfo &u) {
   u.lastMove = lastMove;
   u.epSquare = epSquare;
 
-  // Save the current key to the history[] array, in order to be able to
-  // detect repetition draws:
-  history[gamePly] = key;
+  history.push_back(key);
 
   // Update the necessary information.
   sideToMove = opposite_color(sideToMove);
@@ -1562,7 +1557,6 @@ void Position::do_null_move(UndoInfo &u) {
     key ^= zobEp[epSquare];
   epSquare = SQ_NONE;
   rule50++;
-  gamePly++;
   key ^= zobSideToMove;
 
   mgValue += (sideToMove == WHITE)? TempoValueMidgame : -TempoValueMidgame;
@@ -1587,7 +1581,7 @@ void Position::undo_null_move(const UndoInfo &u) {
   // Update the necessary information.
   sideToMove = opposite_color(sideToMove);
   rule50--;
-  gamePly--;
+  history.pop_back();
   key ^= zobSideToMove;
 
   mgValue += (sideToMove == WHITE)? TempoValueMidgame : -TempoValueMidgame;
@@ -1733,18 +1727,12 @@ void Position::clear() {
   initialQRFile = FILE_A;
   epSquare = SQ_NONE;
   rule50 = 0;
-  gamePly = 0;
+  history.clear();
 }
 
 
-/// Position::reset_game_ply() simply sets gamePly to 0.  It is used from the
-/// UCI interface code, whenever a non-reversible move is made in a
-/// 'position fen <fen> moves m1 m2 ...' command.  This makes it possible
-/// for the program to handle games of arbitrary length, as long as the GUI
-/// handles draws by the 50 move rule correctly.
-
 void Position::reset_game_ply() {
-  gamePly = 0;
+  history.clear();
 }
 
 
@@ -1945,8 +1933,8 @@ bool Position::is_draw() const {
     return true;
 
   // Draw by repetition?
-  for(int i = 2; i < Min(gamePly, rule50); i += 2)
-    if(history[gamePly - i] == key)
+  for(int i = 2; i < rule50 && static_cast<std::size_t>(i) < history.size(); i += 2)
+    if(history[history.size() - i] == key)
       return true;
 
   return false;
@@ -1973,8 +1961,8 @@ DrawReason Position::is_immediate_draw() const {
 
   // Draw by repetition?
   int repetitionCount = 0;
-  for(int i = 2; i < Min(gamePly, rule50); i += 2)
-    if(history[gamePly - i] == key) {
+  for(int i = 2; i < rule50 && static_cast<std::size_t>(i) < history.size(); i += 2)
+    if(history[history.size() - i] == key) {
       repetitionCount++;
       if(repetitionCount == 2)
         return DRAW_REPETITION;

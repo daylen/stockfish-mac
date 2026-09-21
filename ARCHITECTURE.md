@@ -108,3 +108,21 @@ model's edit guard.
 `SFMChessGame` copies used by the engine represent the selected position and
 its move ancestry. They are analysis snapshots; document saving uses the
 original games in `SFMPGNFile`.
+
+## Native position history and move serialization
+
+`SFMPosition` owns a native `Chess::Position` and the move/undo records needed
+to navigate it. Native positions retain prior position keys in a dynamically
+sized history. Its length is the current history ply; making a move, including
+a null move, appends one key and undo removes it. Loading a FEN or resetting
+the history clears those keys without imposing a maximum game length.
+
+Position copies use value semantics and own independent histories.
+`SFMPosition` copies retain the full native state alongside their copied undo
+records: reconstructing only a FEN would lose history that those records still
+refer to. The legacy `MaxGameLength` constant remains available for source
+compatibility but no longer controls storage.
+
+SAN and HTML conversion allocate move arrays from the actual move count plus
+the native serializer's terminating sentinel. Both history and serialization
+storage grow with the input. Available memory remains the practical bound.

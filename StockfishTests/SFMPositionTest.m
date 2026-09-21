@@ -19,6 +19,110 @@
 
 @implementation SFMPositionTest
 
+- (NSArray<SFMMove *> *)repeatedKnightMovesWithPlyCount:(NSUInteger)plyCount
+{
+    NSArray<SFMMove *> *cycle = @[
+        [[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3],
+        [[SFMMove alloc] initWithFrom:SQ_G8 to:SQ_F6],
+        [[SFMMove alloc] initWithFrom:SQ_F3 to:SQ_G1],
+        [[SFMMove alloc] initWithFrom:SQ_F6 to:SQ_G8]
+    ];
+    NSMutableArray<SFMMove *> *moves = [NSMutableArray new];
+    for (NSUInteger ply = 0; ply < plyCount; ply++) {
+        [moves addObject:cycle[ply % cycle.count]];
+    }
+    return moves;
+}
+
+- (void)assertLongSANConversionWithHTML:(BOOL)html
+{
+    const NSUInteger cycleCount = 201;
+    const NSUInteger pliesPerCycle = 4;
+    NSUInteger plyCount = cycleCount * pliesPerCycle;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSString *initialFen = position.fen;
+    NSMutableString *expected = [NSMutableString new];
+    for (NSUInteger cycle = 0; cycle < cycleCount; cycle++) {
+        [expected appendFormat:@"%lu. Nf3 Nf6 %lu. Ng1 Ng8 ",
+         (unsigned long)(cycle * 2 + 1), (unsigned long)(cycle * 2 + 2)];
+    }
+    NSString *converted = [position sanForMovesArray:[self repeatedKnightMovesWithPlyCount:plyCount]
+                                               html:html breakLines:NO num:html ? (int)plyCount : 1];
+    XCTAssertNotNil(converted);
+    if (html) {
+        NSString *lastPlyAnchor = [NSString stringWithFormat:@"id=\"ply%lu\"", (unsigned long)(plyCount - 1)];
+        XCTAssertTrue([converted containsString:lastPlyAnchor]);
+        XCTAssertTrue([converted containsString:@"<strong>Ng8</strong>"]);
+        NSRegularExpression *tags = [NSRegularExpression regularExpressionWithPattern:@"<[^>]*>" options:0 error:NULL];
+        converted = [tags stringByReplacingMatchesInString:converted options:0 range:NSMakeRange(0, converted.length) withTemplate:@""];
+    }
+    XCTAssertEqualObjects(converted, expected);
+    XCTAssertEqualObjects(position.fen, initialFen);
+}
+
+- (void)testPlainSANConversionBeyondFormerMoveArrayLimit
+{
+    [self assertLongSANConversionWithHTML:NO];
+}
+
+- (void)testHTMLSANConversionBeyondFormerMoveArrayLimit
+{
+    [self assertLongSANConversionWithHTML:YES];
+}
+
+- (void)testCopiedPositionPreservesRepetitionHistoryIndependently
+{
+    const int repeatedKnightPlies = 12;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSError *error = nil;
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:repeatedKnightPlies] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(position.isImmediateDraw);
+
+    SFMPosition *copy = [position copy];
+    XCTAssertTrue(copy.isImmediateDraw);
+    XCTAssertTrue([position undoMoves:repeatedKnightPlies]);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue(copy.isImmediateDraw);
+
+    XCTAssertTrue([copy undoMoves:repeatedKnightPlies]);
+    XCTAssertFalse(copy.isImmediateDraw);
+    XCTAssertEqualObjects(copy.fen, position.fen);
+}
+
+- (void)testCopiedPositionCanUndoAndBranchAcrossFormerHistoryLimit
+{
+    const NSUInteger pliesBeforeCopy = 599;
+    const int undoToCycleBoundary = 3;
+    const int branchPlies = 8;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSString *initialFen = position.fen;
+    NSError *error = nil;
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:pliesBeforeCopy] error:&error]);
+    XCTAssertNil(error);
+    NSString *originalFen = position.fen;
+    SFMPosition *copy = [position copy];
+    XCTAssertEqualObjects(copy.fen, originalFen);
+    XCTAssertTrue([copy undoMoves:undoToCycleBoundary]);
+    XCTAssertEqualObjects(copy.fen, initialFen);
+    NSArray<SFMMove *> *branch = @[
+        [[SFMMove alloc] initWithFrom:SQ_B1 to:SQ_C3],
+        [[SFMMove alloc] initWithFrom:SQ_B8 to:SQ_C6],
+        [[SFMMove alloc] initWithFrom:SQ_C3 to:SQ_B1],
+        [[SFMMove alloc] initWithFrom:SQ_C6 to:SQ_B8]
+    ];
+    for (int ply = 0; ply < branchPlies; ply++) {
+        XCTAssertTrue([copy doMove:branch[ply % branch.count] error:&error]);
+        XCTAssertNil(error);
+    }
+    XCTAssertEqualObjects(copy.fen, initialFen);
+    XCTAssertEqualObjects(position.fen, originalFen);
+    XCTAssertTrue([copy undoMoves:branchPlies + (int)pliesBeforeCopy - undoToCycleBoundary]);
+    XCTAssertEqualObjects(copy.fen, initialFen);
+    XCTAssertFalse([copy undoMoves:1]);
+    XCTAssertEqualObjects(position.fen, originalFen);
+}
+
 - (void)testMalformedSanTokensStopBeforeChangingThePosition
 {
     for (NSString *token in @[@"hello", @"e4garbage", @"Nf3junk", @"Q", @"O-O-O-O"]) {
