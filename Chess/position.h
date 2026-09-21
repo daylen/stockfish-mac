@@ -314,6 +314,8 @@ public:
   static bool is_valid_fen(const std::string &str);
 
 private:
+  bool has_repetition(int requiredPriorOccurrences) const;
+
   // Initialization helper functions (used while setting up a position)
   void clear();
   void put_piece(Piece p, Square s);

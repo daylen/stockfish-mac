@@ -70,6 +70,48 @@
     [self assertLongSANConversionWithHTML:YES];
 }
 
+- (void)testThreefoldRepetitionIncludesEarliestRecordedPosition
+{
+    const NSUInteger pliesPerCycle = 4;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSError *error = nil;
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:pliesPerCycle] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:pliesPerCycle] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(position.isImmediateDraw);
+    SFMPosition *copy = [position copy];
+    XCTAssertTrue(copy.isImmediateDraw);
+    XCTAssertTrue([position undoMoves:1]);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue(copy.isImmediateDraw);
+    XCTAssertTrue([position doMove:[self repeatedKnightMovesWithPlyCount:pliesPerCycle].lastObject error:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(position.isImmediateDraw);
+}
+
+- (void)testThreefoldRepetitionIncludesPositionAfterPawnMoves
+{
+    const NSUInteger pliesPerCycle = 4;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSError *error = nil;
+    NSArray<SFMMove *> *pawnMoves = @[
+        [[SFMMove alloc] initWithFrom:SQ_E2 to:SQ_E3],
+        [[SFMMove alloc] initWithFrom:SQ_E7 to:SQ_E6]
+    ];
+    XCTAssertTrue([position doMoves:pawnMoves error:&error]);
+    XCTAssertNil(error);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:pliesPerCycle] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:pliesPerCycle] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(position.isImmediateDraw);
+}
+
 - (void)testCopiedPositionPreservesRepetitionHistoryIndependently
 {
     const int repeatedKnightPlies = 12;

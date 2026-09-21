@@ -117,6 +117,14 @@ sized history. Its length is the current history ply; making a move, including
 a null move, appends one key and undo removes it. Loading a FEN or resetting
 the history clears those keys without imposing a maximum game length.
 
+Repetition detection compares same-side position keys through the earliest
+recorded position within the reversible-move count, including that boundary.
+A single private scan owns that boundary for both draw queries: the search
+query needs one prior occurrence, while the immediate-draw query needs two.
+Resetting history limits the scan to the remaining recorded keys even when the
+reversible-move count is larger. Null moves retain the native history behavior:
+they append keys and advance that count, and undo restores both.
+
 Position copies use value semantics and own independent histories.
 `SFMPosition` copies retain the full native state alongside their copied undo
 records: reconstructing only a FEN would lose history that those records still
