@@ -18,6 +18,130 @@
 
 @implementation SFMParserTest
 
+- (void)testLiteralBackslashesInTagValuesSurviveSavingAndReopening
+{
+    const NSUInteger roundTripCount = 2;
+    for (NSString *value in @[@"C:\\Games\\club.pgn", @"O\\x27Kelly", @"C:\\",
+                              @"quoted \\\"name\\\"", @"two\\\\slashes"]) {
+        NSString *pgn = [NSString stringWithFormat:@"[Site \"%@\"]\n\n1. e4 {kept} e5 *\n", value];
+        NSData *firstSave = nil;
+        for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file, @"%@ pass %lu", value, (unsigned long)pass);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 1u);
+            SFMChessGame *game = file.games.firstObject;
+            XCTAssertEqualObjects(game.tags[@"Site"], value);
+            XCTAssertFalse(game.hasUnreadMoveText);
+            XCTAssertNil(game.rejectedMove);
+            XCTAssertEqualObjects(game.currentNode.next.comment, @"kept");
+            [game goToEnd];
+            XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 ");
+            if (pass == 0) {
+                firstSave = file.data;
+            } else {
+                XCTAssertEqualObjects(file.data, firstSave);
+            }
+            pgn = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+            NSString *expectedHeader = [NSString stringWithFormat:@"[Site \"%@\"]", value];
+            XCTAssertTrue([pgn containsString:expectedHeader]);
+            if (file == nil) {
+                break;
+            }
+        }
+    }
+}
+
+- (void)testPercentEscapesRecognizeEveryFoundationLineBoundary
+{
+    const NSUInteger roundTripCount = 2;
+    for (NSString *lineEnding in @[@"\n", @"\r", @"\r\n", [NSString stringWithFormat:@"%C", (unichar)0x0085], @"\u2028", @"\u2029"]) {
+        NSString *pgn = [@"[Event \"A\"]\n\n1. e4 {kept}\n% [Event \"ignored\"] { (\ne5 *\n"
+                         stringByReplacingOccurrencesOfString:@"\n" withString:lineEnding];
+        NSData *firstSave = nil;
+        for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file, @"separator U+%04X pass %lu", [lineEnding characterAtIndex:0], (unsigned long)pass);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 1u);
+            SFMChessGame *game = file.games.firstObject;
+            XCTAssertEqualObjects(game.tags[@"Event"], @"A");
+            XCTAssertFalse(game.hasUnreadMoveText);
+            XCTAssertNil(game.rejectedMove);
+            XCTAssertEqualObjects(game.currentNode.next.comment, @"kept");
+            [game goToEnd];
+            XCTAssertEqualObjects(game.uciString, @"position startpos moves e2e4 e7e5 ");
+            if (pass == 0) {
+                firstSave = file.data;
+            } else {
+                XCTAssertEqualObjects(file.data, firstSave);
+            }
+            pgn = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+            if (file == nil) {
+                break;
+            }
+        }
+    }
+}
+
+- (void)testEscapeOnlyMoveTextIsReadableWithOrWithoutFinalNewline
+{
+    const NSUInteger roundTripCount = 2;
+    for (NSString *moves in @[@"%", @"% note", @"% note\n", @"% one\n% two"]) {
+        NSString *pgn = [@"[Event \"A\"]\n\n" stringByAppendingString:moves];
+        NSString *expectedExport = @"[Event \"A\"]\n\n*\n\n";
+        for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file, @"%@ pass %lu", moves, (unsigned long)pass);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 1u);
+            SFMChessGame *game = file.games.firstObject;
+            XCTAssertEqualObjects(game.tags[@"Event"], @"A");
+            XCTAssertFalse(game.hasUnreadMoveText);
+            XCTAssertNotNil(game.currentNode);
+            XCTAssertNil(game.currentNode.next);
+            XCTAssertEqualObjects(game.uciString, @"position startpos");
+            pgn = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+            XCTAssertEqualObjects(pgn, expectedExport);
+            if (file == nil) {
+                break;
+            }
+        }
+    }
+}
+
+- (void)testLenientHeadersAndEmptyEscapesDoNotHideStructuralErrors
+{
+    for (NSString *pgn in @[@"[Site \"C:\\Games]\n\n1. e4 *",
+                            @"[Site \"C:\\Games\" extra]\n\n1. e4 *",
+                            @"[Event \"A\"]\n\n% ignored\n{unfinished",
+                            @"[Event \"A\"]\n\n% ignored\n1. e4 () *",
+                            @"[Event \"A\"]\n\n% ignored\n1. e4 (\n% note\n) *",
+                            @"[Event \"A\"]\n\n(null)"]) {
+        NSError *error = nil;
+        SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+        XCTAssertNil(file, @"%@", pgn);
+        XCTAssertEqualObjects(error.domain, GAME_ERROR_DOMAIN);
+        XCTAssertEqual(error.code, GAME_PARSE_ERROR_CODE);
+    }
+    NSError *error = nil;
+    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:@"[Event \"A\"]\n\n% ignored\n{kept}" error:&error];
+    XCTAssertNotNil(file);
+    XCTAssertNil(error);
+    SFMChessGame *game = file.games.firstObject;
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.currentNode.comment, @"kept");
+    NSString *saved = [[NSString alloc] initWithData:file.data encoding:NSUTF8StringEncoding];
+    SFMPGNFile *reopened = [[SFMPGNFile alloc] initWithString:saved error:&error];
+    XCTAssertNotNil(reopened);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects([(SFMChessGame *)reopened.games.firstObject currentNode].comment, @"kept");
+    XCTAssertEqualObjects(reopened.data, file.data);
+}
+
 - (void)testUnterminatedDelimitersReturnParseErrors
 {
     for (NSString *moveText in @[@"{", @"(", @"1. e4 {", @"1. e4 (",

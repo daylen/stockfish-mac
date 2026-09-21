@@ -10,8 +10,11 @@ removing them would delete their text when the document autosaves.
 
 Game boundaries and movetext tokenization share comment-boundary recognition.
 Brace comments can span lines; semicolon comments and percent escape lines end
-at the line boundary. Apparent headers inside comments remain comment text.
+at the line boundary. Foundation defines both line starts and line endings,
+including Unicode separators. Apparent headers inside comments remain comment text.
 A valid header must match a complete tag pair before its fields are read.
+Tag values retain their original escape spelling, including literal backslashes
+from nonconforming exporters, without relaxing the surrounding header structure.
 After movetext begins, a header-like line outside comments starts the next game
 even if it is malformed. Later valid tag fields belong to that same game, and
 malformed header lines remain in its unread move text. Their failure cannot
@@ -20,11 +23,18 @@ preserved text, so original interleaving of valid and malformed headers is not
 represented. An unterminated comment or variation reports a structural error
 rather than reaching substring operations.
 An unclosed brace can consume later apparent headers: the reader preserves that
-remainder instead of guessing where the comment was intended to end.
+remainder instead of guessing where the comment was intended to end. If no
+earlier game is readable, the file cannot open. Recovering apparent headers only
+when no closing brace exists is not stable: saving a later game's comment can
+introduce a closing brace and merge those games on reopening. Explicit salvage
+into a separate document requires a separate recovery workflow.
 
 Tagless move fragments remain valid imports without a final result marker and
 remain separate games when followed by a tagged game. Comment-only preambles
 belong to the following game. Percent escape preambles do not create games.
+Escape-only movetext is an empty readable game with or without a final newline.
+The tokenizer distinguishes successful empty input from malformed structure;
+variations still require a move or an identified illegal-move recovery point.
 Within a tag section, a percent escape line currently ends that section, so a
 later tag starts another game.
 

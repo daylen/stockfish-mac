@@ -18,12 +18,13 @@ static NSRange SFMCommentRangeAtIndex(NSString *text, NSUInteger index)
         NSUInteger end = close.location == NSNotFound ? text.length : NSMaxRange(close);
         return NSMakeRange(index, end - index);
     }
-    BOOL startsLine = index == 0 || [text characterAtIndex:index - 1] == '\n'
-        || [text characterAtIndex:index - 1] == '\r';
-    if (character == ';' || (character == '%' && startsLine)) {
+    if (character == ';' || character == '%') {
+        NSUInteger lineStart;
         NSUInteger contentsEnd;
-        [text getLineStart:NULL end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(index, 0)];
-        return NSMakeRange(index, contentsEnd - index);
+        [text getLineStart:&lineStart end:NULL contentsEnd:&contentsEnd forRange:NSMakeRange(index, 0)];
+        if (character == ';' || index == lineStart) {
+            return NSMakeRange(index, contentsEnd - index);
+        }
     }
     return NSMakeRange(NSNotFound, 0);
 }
@@ -53,7 +54,7 @@ static BOOL SFMContainsMoveText(NSString *text)
     BOOL readingTags = NO;
     
     NSRegularExpression *tagPattern = [NSRegularExpression regularExpressionWithPattern:
-        @"^[ \t]*\\[[ \t]*([A-Za-z0-9][A-Za-z0-9_]*)[ \t]*\"((?:[^\"\\\\\\r\\n]|\\\\[\"\\\\])*)\"[ \t]*\\][ \t]*$"
+        @"^[ \t]*\\[[ \t]*([A-Za-z0-9][A-Za-z0-9_]*)[ \t]*\"((?:\\\\.|[^\"\\\\\\r\\n])*\\\\?)\"[ \t]*\\][ \t]*$"
         options:0 error:NULL];
     NSUInteger commentEnd = 0;
     NSUInteger offset = 0;
@@ -65,14 +66,14 @@ static BOOL SFMContainsMoveText(NSString *text)
         NSString *line = [str substringWithRange:NSMakeRange(offset, contentsEnd - offset)];
         NSString *originalLine = [str substringWithRange:NSMakeRange(offset, lineEnd - offset)];
         offset = lineEnd;
-        if ([[line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0) {
+        NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if (trimmedLine.length == 0) {
             if (!readingTags || moves.length > 0) {
                 [moves appendString:originalLine];
             }
             continue;
         }
         BOOL insideComment = lineStart < commentEnd;
-        NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         BOOL looksLikeTag = !insideComment && [trimmedLine hasPrefix:@"["];
         NSTextCheckingResult *tag = looksLikeTag
             ? [tagPattern firstMatchInString:line options:0 range:NSMakeRange(0, line.length)] : nil;
@@ -155,7 +156,7 @@ static BOOL SFMContainsMoveText(NSString *text)
 + (SFMNode * _Nullable)parseString:(NSString * _Nonnull)str fromNode:(SFMNode * _Nonnull)node position:(SFMPosition * _Nonnull)position rejectedMove:(NSString * _Nullable __autoreleasing * _Nullable)rejectedMove error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     NSArray *tokens = [self tokenizeString:str];
-    if (tokens.count == 0) {
+    if (tokens == nil) {
         if (error != NULL) {
             *error = [NSError errorWithDomain:GAME_ERROR_DOMAIN code:GAME_PARSE_ERROR_CODE userInfo:nil];
         }
@@ -255,7 +256,7 @@ static BOOL SFMContainsMoveText(NSString *text)
 /*!
  Splits the string into tokens at the same depth. A token can be: move sequence, variation or comment
  */
-+ (NSArray *)tokenizeString:(NSString*)str
++ (NSArray * _Nullable)tokenizeString:(NSString*)str
 {
     if ([[str stringByTrimmingCharactersInSet: [NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
     {
@@ -271,7 +272,7 @@ static BOOL SFMContainsMoveText(NSString *text)
         if (comment.location != NSNotFound) {
             NSUInteger end = NSMaxRange(comment);
             if (character == '{' && [str characterAtIndex:end - 1] != '}') {
-                return @[];
+                return nil;
             }
             if (variationDepth == 0) {
                 if (index > tokenStartIndex) {
@@ -293,7 +294,7 @@ static BOOL SFMContainsMoveText(NSString *text)
             variationDepth++;
         } else if (character == ')') {
             if (variationDepth == 0) {
-                return @[];
+                return nil;
             }
             variationDepth--;
             if (variationDepth == 0) {
@@ -301,19 +302,20 @@ static BOOL SFMContainsMoveText(NSString *text)
                 tokenStartIndex = index + 1;
             }
         } else if (character == '}' || character == '[' || character == ']') {
-            return @[];
+            return nil;
         }
     }
     if (variationDepth > 0) {
-        return @[];
+        return nil;
     }
     if (tokenStartIndex < str.length) {
         [tokens addObject:[str substringFromIndex:tokenStartIndex]];
     }
 
-    return [tokens objectsAtIndexes:[tokens indexesOfObjectsPassingTest:^BOOL(id token, NSUInteger idx, BOOL * stop) {
+    NSArray *validTokens = [tokens objectsAtIndexes:[tokens indexesOfObjectsPassingTest:^BOOL(id token, NSUInteger idx, BOOL * stop) {
         return [SFMParser isValidToken:token];
     }]];
+    return tokens.count > 0 && validTokens.count == 0 ? nil : validTokens;
 }
 
 + (BOOL)isLetter:(char)c
