@@ -24,6 +24,8 @@
 //// Includes
 ////
 
+#include <vector>
+
 #include "bitboard.h"
 #include "color.h"
 #include "direction.h"
@@ -43,13 +45,7 @@ namespace Chess {
 const std::string StartPosition =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-/// Maximum number of plies per game (220 should be enough, because the
-/// maximum search depth is 100, and during position setup we reset the
-/// move counter for every non-reversible move):
-///
-/// Unfortunately, we must increase this in the iPhone version, because
-/// the GUI part cannot reset GamePly properly. FIXME.
-
+/// Legacy capacity retained for source compatibility; it no longer limits games.
 const int MaxGameLength = 600;
 
 
@@ -301,7 +297,6 @@ public:
   bool has_pawn_on_7th(Color c) const;
   Move last_move() const;
 
-  // Reset the gamePly variable to 0
   void reset_game_ply();
 
   // Methods used by the iPhone GUI:
@@ -367,8 +362,9 @@ private:
   Square epSquare;
   Square kingSquare[2];
   Move lastMove;
-  Key key, pawnKey, materialKey, history[MaxGameLength];
-  int rule50, gamePly;
+  Key key, pawnKey, materialKey;
+  std::vector<Key> history;
+  int rule50;
   Value mgValue, egValue;
   Value npMaterial[2];
 
@@ -686,7 +682,7 @@ inline Key Position::get_key() const {
 }
 
 inline Key Position::get_key(int ply) const {
-   return (ply == gamePly)? this->get_key() : history[ply];
+   return (static_cast<std::size_t>(ply) == history.size())? this->get_key() : history[ply];
 }
 
 inline Key Position::get_pawn_key() const {

@@ -17,6 +17,7 @@
 #include "../Chess/mersenne.h"
 #include "../Chess/movepick.h"
 #include "../Chess/san.h"
+#include <vector>
 
 using namespace Chess;
 
@@ -65,7 +66,9 @@ NSString* const moveRegex =
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone {
-    return [[SFMPosition alloc] initWithFen:[self fen] moves:[_moves copy] undoInfos:[_undoInfos copy]];
+    SFMPosition *copy = [[SFMPosition alloc] initWithFen:[self fen] moves:_moves undoInfos:_undoInfos];
+    copy.position->copy(*self.position);
+    return copy;
 }
 
 - (void)dealloc {
@@ -283,16 +286,14 @@ NSString* const moveRegex =
         [moves addObject:node.move];
         [nodes addObject:node];
     }
-    Move line[800];
-    int i = 0;
+    std::vector<Move> line(moves.count + 1, MOVE_NONE);
+    NSUInteger i = 0;
     
     for (SFMMove *move in moves) {
         line[i++] = [[self class] libMoveFromMoveObj:move];
     }
     
-    line[i] = MOVE_NONE;
-    
-    NSString *lineSan = @(line_to_san(*position.position, line, 0, NO, ply / 2 + 1).c_str());
+    NSString *lineSan = @(line_to_san(*position.position, line.data(), 0, NO, ply / 2 + 1).c_str());
     
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan attributes:@{NSForegroundColorAttributeName: [NSColor labelColor]}];
     [self setMoveAttributes:attributedString nodes:nodes];
@@ -472,20 +473,19 @@ NSString* const moveRegex =
                           html:(BOOL)html
                     breakLines:(BOOL)breakLines
                            num:(int)num {
-    Move line[800];
-    int i = 0;
+    std::vector<Move> line(movesArray.count + 1, MOVE_NONE);
+    NSUInteger i = 0;
     
     for (SFMMove *move in movesArray) {
         line[i++] = [[self class] libMoveFromMoveObj:move];
     }
-    line[i] = MOVE_NONE;
     
     SFMPosition *copy = [self copy];
     
     if (html) {
-        return @(line_to_html(*copy.position, line, num, false).c_str());
+        return @(line_to_html(*copy.position, line.data(), num, false).c_str());
     } else {
-        return @(line_to_san(*copy.position, line, 0, breakLines, num).c_str());
+        return @(line_to_san(*copy.position, line.data(), 0, breakLines, num).c_str());
     }
     
 }

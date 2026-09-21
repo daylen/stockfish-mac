@@ -17,6 +17,48 @@
 
 @implementation SFMChessGameTest
 
+- (void)assertLongGameRoundTripWithPlyCount:(NSUInteger)plyCount
+{
+    NSArray<NSString *> *sanCycle = @[@"Nf3", @"Nf6", @"Ng1", @"Ng8"];
+    NSArray<NSString *> *uciCycle = @[@"g1f3", @"g8f6", @"f3g1", @"f6g8"];
+    NSMutableString *moves = [NSMutableString new];
+    NSMutableString *expectedUCI = [@"position startpos moves " mutableCopy];
+    for (NSUInteger ply = 0; ply < plyCount; ply++) {
+        [moves appendFormat:@"%@ ", sanCycle[ply % sanCycle.count]];
+        [expectedUCI appendFormat:@"%@ ", uciCycle[ply % uciCycle.count]];
+    }
+    SFMChessGame *game = [[SFMChessGame alloc] initWithTags:@{@"Result": @"*"} moveText:moves];
+    NSError *error = nil;
+    XCTAssertTrue([game parseMoveText:&error]);
+    XCTAssertNil(error);
+    XCTAssertFalse(game.hasUnreadMoveText);
+    [game goToEnd];
+    XCTAssertEqual(game.currentNode.ply, plyCount);
+    XCTAssertEqualObjects(game.uciString, expectedUCI);
+    NSString *saved = game.pgnString;
+    NSArray<SFMChessGame *> *reopened = [SFMParser parseGamesFromString:saved error:&error];
+    XCTAssertNil(error);
+    XCTAssertEqual(reopened.count, 1u);
+    SFMChessGame *restored = reopened.firstObject;
+    XCTAssertFalse(restored.hasUnreadMoveText);
+    [restored goToEnd];
+    XCTAssertEqual(restored.currentNode.ply, plyCount);
+    XCTAssertEqualObjects(restored.uciString, expectedUCI);
+    XCTAssertEqualObjects(restored.pgnString, saved);
+}
+
+- (void)testGameRoundTripBeyondFormerHistoryLimit
+{
+    const NSUInteger firstPlyBeyondFormerHistoryLimit = 601;
+    [self assertLongGameRoundTripWithPlyCount:firstPlyBeyondFormerHistoryLimit];
+}
+
+- (void)testGameRoundTripBeyondFormerSerializationLimit
+{
+    const NSUInteger pliesBeyondFormerSerializationLimit = 804;
+    [self assertLongGameRoundTripWithPlyCount:pliesBeyondFormerSerializationLimit];
+}
+
 - (void)setUp
 {
     [super setUp];
