@@ -70,6 +70,26 @@
     [self assertLongSANConversionWithHTML:YES];
 }
 
+- (void)testCopiedPositionPreservesRepetitionHistoryIndependently
+{
+    const int repeatedKnightPlies = 12;
+    SFMPosition *position = [[SFMPosition alloc] init];
+    NSError *error = nil;
+    XCTAssertTrue([position doMoves:[self repeatedKnightMovesWithPlyCount:repeatedKnightPlies] error:&error]);
+    XCTAssertNil(error);
+    XCTAssertTrue(position.isImmediateDraw);
+
+    SFMPosition *copy = [position copy];
+    XCTAssertTrue(copy.isImmediateDraw);
+    XCTAssertTrue([position undoMoves:repeatedKnightPlies]);
+    XCTAssertFalse(position.isImmediateDraw);
+    XCTAssertTrue(copy.isImmediateDraw);
+
+    XCTAssertTrue([copy undoMoves:repeatedKnightPlies]);
+    XCTAssertFalse(copy.isImmediateDraw);
+    XCTAssertEqualObjects(copy.fen, position.fen);
+}
+
 - (void)testCopiedPositionCanUndoAndBranchAcrossFormerHistoryLimit
 {
     const NSUInteger pliesBeforeCopy = 599;
