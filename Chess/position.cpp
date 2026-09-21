@@ -1917,6 +1917,20 @@ bool Position::is_mate() {
 }
 
 
+bool Position::has_repetition(int requiredPriorOccurrences) const {
+  const std::size_t pliesPerFullMove = 2;
+  const std::size_t reversibleHistoryPlies =
+    std::min(history.size(), static_cast<std::size_t>(rule50));
+  int priorOccurrences = 0;
+  for(std::size_t distance = pliesPerFullMove;
+      distance <= reversibleHistoryPlies; distance += pliesPerFullMove)
+    if(history[history.size() - distance] == key &&
+       ++priorOccurrences == requiredPriorOccurrences)
+      return true;
+  return false;
+}
+
+
 /// Position::is_draw() tests whether the position is drawn by material,
 /// repetition, or the 50 moves rule.  It does not detect stalemates, this
 /// must be done by the search.
@@ -1932,12 +1946,8 @@ bool Position::is_draw() const {
   if(rule50 > 100 || (rule50 == 100 && !this->is_check()))
     return true;
 
-  // Draw by repetition?
-  for(int i = 2; i < rule50 && static_cast<std::size_t>(i) < history.size(); i += 2)
-    if(history[history.size() - i] == key)
-      return true;
-
-  return false;
+  const int priorOccurrencesForSearchDraw = 1;
+  return has_repetition(priorOccurrencesForSearchDraw);
 }
 
 
@@ -1959,14 +1969,9 @@ DrawReason Position::is_immediate_draw() const {
   if(rule50 > 100 || (rule50 == 100 && !this->is_check()))
     return DRAW_50_MOVES;
 
-  // Draw by repetition?
-  int repetitionCount = 0;
-  for(int i = 2; i < rule50 && static_cast<std::size_t>(i) < history.size(); i += 2)
-    if(history[history.size() - i] == key) {
-      repetitionCount++;
-      if(repetitionCount == 2)
-        return DRAW_REPETITION;
-    }
+  const int priorOccurrencesForThreefoldDraw = 2;
+  if(has_repetition(priorOccurrencesForThreefoldDraw))
+    return DRAW_REPETITION;
 
   // Stalemate?
   Move moves[256];
