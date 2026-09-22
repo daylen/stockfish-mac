@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "SFMChessGame.h"
 #import "SFMParser.h"
+#import "SFMPGNFile.h"
 #import "Constants.h"
 
 @interface SFMChessGameTest : XCTestCase
@@ -16,6 +17,118 @@
 @end
 
 @implementation SFMChessGameTest
+
+- (void)testCopiedVariationRetainsComments
+{
+    NSError *error = nil;
+    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:@"1. e4 ({before d4} 1. d4 {after d4} d5) e5 *" error:&error];
+    XCTAssertNotNil(file);
+    XCTAssertNil(error);
+    SFMChessGame *game = file.games.firstObject;
+    SFMNode *variation = game.currentNode.next.variations.firstObject;
+    XCTAssertNotNil(variation);
+    XCTAssertEqualObjects(variation.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(variation.comment, @"after d4");
+    NSMutableString *beforeMove = [variation.commentBeforeMove mutableCopy];
+    NSMutableString *afterMove = [variation.comment mutableCopy];
+    variation.commentBeforeMove = beforeMove;
+    variation.comment = afterMove;
+    SFMNode *copy = [variation copy];
+    XCTAssertEqualObjects(copy.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(copy.comment, @"after d4");
+    [beforeMove appendString:@" changed"];
+    [afterMove appendString:@" changed"];
+    XCTAssertEqualObjects(variation.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(copy.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(copy.comment, @"after d4");
+}
+
+
+- (void)testVariationLeadingCommentsSurviveSavingAndReopening
+{
+    NSArray<NSDictionary *> *cases = @[
+        @{@"moves": @"{game introduction} 1. e4 {main} ({outer} {first} 1. d4 {after d4} ({inner} 1. c4 e5) d5) e5 *",
+          @"variationPly": @1,
+          @"fragments": @[@"{game introduction}", @"e4 {main}", @"( {outer first} 1. d4 {after d4}", @"( {inner} 1. c4 e5"]},
+        @{@"moves": @"1. e4 e5 ({black alternative} 1... c5 {after c5}) 2. Nf3 *",
+          @"variationPly": @2,
+          @"fragments": @[@"( {black alternative} 1... c5 {after c5}"]},
+        @{@"moves": @"1. e4 (;literal }\u2028;second line\n1. d4 d5) e5 *",
+          @"variationPly": @1,
+          @"fragments": @[@"( ;literal }\n;second line\n1. d4 d5"]}
+    ];
+    const NSUInteger roundTripCount = 3;
+    for (NSDictionary *testCase in cases) {
+        NSString *pgn = testCase[@"moves"];
+        NSData *firstSave = nil;
+        for (NSUInteger pass = 0; pass < roundTripCount; pass++) {
+            NSError *error = nil;
+            SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:pgn error:&error];
+            XCTAssertNotNil(file);
+            XCTAssertNil(error);
+            XCTAssertEqual(file.games.count, 1u);
+            SFMChessGame *game = file.games.firstObject;
+            XCTAssertFalse(game.hasUnreadMoveText);
+            XCTAssertNil(game.rejectedMove);
+            SFMNode *mainLineNode = game.currentNode;
+            NSUInteger variationPly = [testCase[@"variationPly"] unsignedIntegerValue];
+            for (NSUInteger ply = 0; ply < variationPly; ply++) {
+                mainLineNode = mainLineNode.next;
+            }
+            XCTAssertEqual(mainLineNode.variations.count, 1u);
+            SFMNode *variation = mainLineNode.variations.firstObject;
+            XCTAssertNotNil(variation);
+            XCTAssertEqual(variation.ply, variationPly);
+            NSData *saved = file.data;
+            NSString *serialized = [[NSString alloc] initWithData:saved encoding:NSUTF8StringEncoding];
+            for (NSString *fragment in testCase[@"fragments"]) {
+                XCTAssertTrue([serialized containsString:fragment], @"Missing %@ in %@ on pass %lu", fragment, serialized, (unsigned long)pass);
+            }
+            if (pass == 0) {
+                firstSave = saved;
+            } else {
+                XCTAssertEqualObjects(saved, firstSave);
+            }
+            pgn = serialized;
+        }
+    }
+}
+
+- (void)testVariationLeadingCommentSurvivesRecoveredGameEditAndUndoRedo
+{
+    NSString *moves = @"1. e4 ({before d4} 1. d4 {after d4} d5) e5 2. Bh6 *";
+    NSError *error = nil;
+    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:moves error:&error];
+    XCTAssertNotNil(file);
+    XCTAssertNil(error);
+    SFMChessGame *game = file.games.firstObject;
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.rejectedMove, @"Bh6");
+    NSString *original = game.pgnString;
+    [game goToEnd];
+    [game.undoManager beginUndoGrouping];
+    XCTAssertTrue([game doMove:[[SFMMove alloc] initWithFrom:SQ_G1 to:SQ_F3] error:&error]);
+    [game.undoManager endUndoGrouping];
+    XCTAssertNil(error);
+    XCTAssertFalse(game.hasUnreadMoveText);
+    NSString *edited = game.pgnString;
+    NSString *variation = @"( {before d4} 1. d4 {after d4} 1... d5";
+    XCTAssertTrue([edited containsString:variation], @"%@", edited);
+    [game.undoManager undo];
+    XCTAssertTrue(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.pgnString, original);
+    [game.undoManager redo];
+    XCTAssertFalse(game.hasUnreadMoveText);
+    XCTAssertEqualObjects(game.pgnString, edited);
+    SFMPGNFile *reopened = [[SFMPGNFile alloc] initWithString:edited error:&error];
+    XCTAssertNotNil(reopened);
+    XCTAssertNil(error);
+    XCTAssertTrue([[[NSString alloc] initWithData:reopened.data encoding:NSUTF8StringEncoding] containsString:variation]);
+    SFMChessGame *savedGame = reopened.games.firstObject;
+    [savedGame goToEnd];
+    XCTAssertEqualObjects(savedGame.uciString, @"position startpos moves e2e4 e7e5 g1f3 ");
+}
+
 
 - (void)assertLongGameRoundTripWithPlyCount:(NSUInteger)plyCount
 {

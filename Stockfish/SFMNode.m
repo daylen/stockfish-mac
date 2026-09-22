@@ -70,7 +70,10 @@
 }
 
 - (id)copyWithZone:(NSZone *)zone{
-    return [[SFMNode alloc] initWithMove:_move annotation:_annotation parent:_parent topNode:_isTopNode ply:_ply];
+    SFMNode *copy = [[SFMNode alloc] initWithMove:_move annotation:_annotation parent:_parent topNode:_isTopNode ply:_ply];
+    copy.comment = [_comment copy];
+    copy.commentBeforeMove = _commentBeforeMove;
+    return copy;
 }
 
 @end

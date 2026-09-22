@@ -52,6 +52,12 @@
 @property NSString* comment;
 
 /*!
+ An optional comment populated only on the first move of a variation and emitted
+ before that move
+ */
+@property (copy) NSString* commentBeforeMove;
+
+/*!
  Pointer to the main variation
  */
 @property SFMNode* next;

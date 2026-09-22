@@ -301,6 +301,7 @@ static NSMutableDictionary *SFMTagsInLine(NSString *line, NSRegularExpression *t
             *rejectedMove = variationRejectedMove;
         }
         if (!variationHasNoMoves) {
+            dummy.next.commentBeforeMove = dummy.comment;
             [dummy.next setParent:currentNode.parent];
             [currentNode.variations addObject:dummy.next];
         }

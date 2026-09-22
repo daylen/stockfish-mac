@@ -226,6 +226,9 @@ NSString* const moveRegex =
 - (NSMutableAttributedString *)moveTextForNode:(SFMNode *)node andPosition:(SFMPosition *)position depth:(int)depth
 {
     NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
+    if (node.commentBeforeMove != nil) {
+        [result appendAttributedString:[self attributedStringForComment:node.commentBeforeMove]];
+    }
     SFMNode *currentNode = node;
     NSAttributedString *flatLine = [self longestFlatLineFrom:node position:position];
     [result appendAttributedString:flatLine];
@@ -301,27 +304,33 @@ NSString* const moveRegex =
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:lineSan attributes:@{NSForegroundColorAttributeName: [NSColor labelColor]}];
     [self setMoveAttributes:attributedString nodes:nodes];
     if(node.comment != nil){
-        NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", node.comment];
-        if ([node.comment containsString:@"}"]) {
-            NSMutableString *lines = [NSMutableString new];
-            NSUInteger lineStart = 0;
-            while (YES) {
-                NSUInteger lineEnd;
-                NSUInteger contentsEnd;
-                [node.comment getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineStart, 0)];
-                NSString *line = [node.comment substringWithRange:NSMakeRange(lineStart, contentsEnd - lineStart)];
-                [lines appendFormat:@";%@\n", line];
-                if (contentsEnd == lineEnd) {
-                    break;
-                }
-                lineStart = lineEnd;
-            }
-            pgnComment = lines;
-        }
-        [attributedString appendAttributedString:[[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}]];
+        [attributedString appendAttributedString:[self attributedStringForComment:node.comment]];
     }
     
     return attributedString;
+}
+
+
+- (NSAttributedString *)attributedStringForComment:(NSString *)comment
+{
+    NSString *pgnComment = [NSString stringWithFormat:@"{%@} ", comment];
+    if ([comment containsString:@"}"]) {
+        NSMutableString *lines = [NSMutableString new];
+        NSUInteger lineStart = 0;
+        while (YES) {
+            NSUInteger lineEnd;
+            NSUInteger contentsEnd;
+            [comment getLineStart:NULL end:&lineEnd contentsEnd:&contentsEnd forRange:NSMakeRange(lineStart, 0)];
+            NSString *line = [comment substringWithRange:NSMakeRange(lineStart, contentsEnd - lineStart)];
+            [lines appendFormat:@";%@\n", line];
+            if (contentsEnd == lineEnd) {
+                break;
+            }
+            lineStart = lineEnd;
+        }
+        pgnComment = lines;
+    }
+    return [[NSAttributedString alloc] initWithString:pgnComment attributes:@{NSLinkAttributeName: self.commentIdentifier}];
 }
 
 /*!
