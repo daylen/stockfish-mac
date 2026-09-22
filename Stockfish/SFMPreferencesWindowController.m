@@ -45,20 +45,6 @@
     [super windowDidLoad];
     self.window.delegate = self;
     
-    // Check if infinite analysis is on
-    if ([SFMUCIEngine instancesAnalyzing] != 0) {
-        self.threadsCell.enabled = NO;
-        self.hashCell.enabled = NO;
-        self.skillCell.enabled = NO;
-        self.chooseButton.enabled = NO;
-        self.recommendedSettingsButton.enabled = NO;
-        NSAlert *alert = [[NSAlert alloc] init];
-        [alert setMessageText:@"Cannot change preferences"];
-        [alert addButtonWithTitle:@"OK"];
-        [alert setInformativeText:@"Preferences cannot be changed while the engine is analyzing. Stop infinite analysis and try again."];
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
-    }
-    
     self.optionsProbe = [[SFMUCIEngine alloc] initOptionsProbe];
     self.optionsProbe.delegate = self;
 }
