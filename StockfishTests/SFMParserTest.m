@@ -522,7 +522,7 @@
 - (void)testParseMoveTextWithVariationAndCommentary
 {
     SFMPosition *initialPosition = [[SFMPosition alloc] init];
-    NSString *moveText = @"1.e4 (1.c4 c5 {Wow} 2.g3) e5 2.Nf3 Nc6 3. Bb5";
+    NSString *moveText = @"1.e4 ({Before c4} 1.c4 c5 {Wow} 2.g3) e5 2.Nf3 Nc6 3. Bb5";
     
     NSError *err = nil;
     SFMNode *parsed = [SFMParser parseMoveText:moveText position:initialPosition rejectedMove:NULL error:&err];
@@ -544,6 +544,7 @@
     SFMNode *expected = [[SFMNode alloc] init];
     expected.next = [self buildNodeFromMoveArray:mainMoves parent:expected];
     SFMNode *variation = [self buildNodeFromMoveArray:variationMoves parent:expected];
+    variation.commentBeforeMove = @"Before c4";
     [variation.next setComment:@"Wow"];
     [expected.next.variations addObject:variation];
 
@@ -615,12 +616,17 @@
     while(actual != nil && expected != nil){
         XCTAssertEqualObjects(actual.move, expected.move, @"Move mismatch.");
         XCTAssertEqualObjects(actual.comment, expected.comment, @"Comment mismatch.");
-        for(int i = 0; i < [actual.variations count]; i++){
+        XCTAssertEqualObjects(actual.commentBeforeMove, expected.commentBeforeMove, @"Leading comment mismatch.");
+        XCTAssertEqual(actual.variations.count, expected.variations.count, @"Variation count mismatch.");
+        NSUInteger variationCount = MIN(actual.variations.count, expected.variations.count);
+        for (NSUInteger i = 0; i < variationCount; i++) {
             [self verifyNodeSubtree:[actual.variations objectAtIndex:i] against:[expected.variations objectAtIndex:i]];
         }
         actual = actual.next;
         expected = expected.next;
     }
+    XCTAssertNil(actual, @"Unexpected moves.");
+    XCTAssertNil(expected, @"Missing moves.");
 }
 
 

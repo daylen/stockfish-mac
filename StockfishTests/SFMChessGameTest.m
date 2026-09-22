@@ -18,20 +18,29 @@
 
 @implementation SFMChessGameTest
 
-- (void)testCopiedVariationRetainsCommentBeforeMove
+- (void)testCopiedVariationRetainsComments
 {
     NSError *error = nil;
-    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:@"1. e4 ({before d4} 1. d4 d5) e5 *" error:&error];
+    SFMPGNFile *file = [[SFMPGNFile alloc] initWithString:@"1. e4 ({before d4} 1. d4 {after d4} d5) e5 *" error:&error];
     XCTAssertNotNil(file);
     XCTAssertNil(error);
     SFMChessGame *game = file.games.firstObject;
     SFMNode *variation = game.currentNode.next.variations.firstObject;
     XCTAssertNotNil(variation);
     XCTAssertEqualObjects(variation.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(variation.comment, @"after d4");
+    NSMutableString *beforeMove = [variation.commentBeforeMove mutableCopy];
+    NSMutableString *afterMove = [variation.comment mutableCopy];
+    variation.commentBeforeMove = beforeMove;
+    variation.comment = afterMove;
     SFMNode *copy = [variation copy];
     XCTAssertEqualObjects(copy.commentBeforeMove, @"before d4");
-    variation.commentBeforeMove = @"changed original";
+    XCTAssertEqualObjects(copy.comment, @"after d4");
+    [beforeMove appendString:@" changed"];
+    [afterMove appendString:@" changed"];
+    XCTAssertEqualObjects(variation.commentBeforeMove, @"before d4");
     XCTAssertEqualObjects(copy.commentBeforeMove, @"before d4");
+    XCTAssertEqualObjects(copy.comment, @"after d4");
 }
 
 
@@ -39,10 +48,13 @@
 {
     NSArray<NSDictionary *> *cases = @[
         @{@"moves": @"{game introduction} 1. e4 {main} ({outer} {first} 1. d4 {after d4} ({inner} 1. c4 e5) d5) e5 *",
+          @"variationPly": @1,
           @"fragments": @[@"{game introduction}", @"e4 {main}", @"( {outer first} 1. d4 {after d4}", @"( {inner} 1. c4 e5"]},
         @{@"moves": @"1. e4 e5 ({black alternative} 1... c5 {after c5}) 2. Nf3 *",
+          @"variationPly": @2,
           @"fragments": @[@"( {black alternative} 1... c5 {after c5}"]},
         @{@"moves": @"1. e4 (;literal }\u2028;second line\n1. d4 d5) e5 *",
+          @"variationPly": @1,
           @"fragments": @[@"( ;literal }\n;second line\n1. d4 d5"]}
     ];
     const NSUInteger roundTripCount = 3;
@@ -58,7 +70,15 @@
             SFMChessGame *game = file.games.firstObject;
             XCTAssertFalse(game.hasUnreadMoveText);
             XCTAssertNil(game.rejectedMove);
-            XCTAssertNotNil(game.currentNode.next.variations.firstObject ?: game.currentNode.next.next.variations.firstObject);
+            SFMNode *mainLineNode = game.currentNode;
+            NSUInteger variationPly = [testCase[@"variationPly"] unsignedIntegerValue];
+            for (NSUInteger ply = 0; ply < variationPly; ply++) {
+                mainLineNode = mainLineNode.next;
+            }
+            XCTAssertEqual(mainLineNode.variations.count, 1u);
+            SFMNode *variation = mainLineNode.variations.firstObject;
+            XCTAssertNotNil(variation);
+            XCTAssertEqual(variation.ply, variationPly);
             NSData *saved = file.data;
             NSString *serialized = [[NSString alloc] initWithData:saved encoding:NSUTF8StringEncoding];
             for (NSString *fragment in testCase[@"fragments"]) {

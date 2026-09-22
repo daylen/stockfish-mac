@@ -84,9 +84,9 @@ move edits.
 Fully readable games use the tree serializer. A node stores the comment after
 its move in `comment`. The first move of a variation additionally owns its
 leading comment in `commentBeforeMove`; discarding the temporary variation root
-must not discard that text. This optional string survives node copies and is
-serialized before the variation's first move, independently of any comment after
-that move. Game-leading comments remain on the game root.
+must not discard that text. This optional string is serialized before the
+variation's first move, independently of any comment after that move. Game-leading
+comments remain on the game root.
 Consecutive brace-comment bodies are joined with a space, and semicolon-comment
 bodies begin a new line. The parser builds each node's comment in one mutable
 buffer, including across variations and whitespace that leave the current node
@@ -94,8 +94,10 @@ unchanged. The buffer stops changing when parsing leaves that node; retaining
 intermediate copies of every prefix would make memory use grow quadratically.
 Content and its order within the node survive saving,
 reopening, and the transition from recovered text to an edited tree. Separate
-original comment blocks and their placement relative to variations are not
-represented. Both comment locations share one serializer. A comment containing
+original comment blocks are merged. Post-move comments do not preserve their
+placement relative to following variation parentheses; comments before a
+variation's first move preserve that placement. Both comment locations share one
+serializer. A comment containing
 a closing brace is exported as semicolon lines, using the same Foundation
 line-boundary rules as the parser and normalizing those endings to LF, so its
 content remains valid PGN.
@@ -113,7 +115,10 @@ model's edit guard.
 
 `SFMChessGame` copies used by the engine represent the selected position and
 its move ancestry. They are analysis snapshots; document saving uses the
-original games in `SFMPGNFile`.
+original games in `SFMPGNFile`. Node copies snapshot both comment strings while
+retaining the existing shallow references to the move and parent ancestry and
+omitting child nodes. Subtree undo reattaches the original nodes rather than
+copying them.
 
 ## Native position history and move serialization
 
