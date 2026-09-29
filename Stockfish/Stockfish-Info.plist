@@ -16,6 +16,7 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.apple.chess.pgn</string>
+				<string>public.pgn</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>SFMDocument</string>

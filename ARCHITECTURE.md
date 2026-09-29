@@ -1,5 +1,15 @@
 # Architecture
 
+## PGN document types
+
+`SFMDocument` handles both `public.pgn`, which macOS can use to identify PGN
+files, and the legacy `com.apple.chess.pgn` identifier. Both belong to the same
+document type in `Stockfish-Info.plist`. Keep the legacy identifier first for
+the default save type on older systems; the existing imported declaration
+provides its `.pgn` extension.
+Opening and save/reopen tests use `NSDocumentController` so file-type routing is
+covered as well as parsing.
+
 ## PGN parsing and recovery
 
 `SFMPGNFile` owns the ordered collection of games in a document. `SFMParser`
